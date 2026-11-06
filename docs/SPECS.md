@@ -372,6 +372,8 @@ not implement yet shows `UNSUPPORTED`.
 | `seal_key` | keys | owner (`keys set`) | Read the key from stdin, seal it under the master key with the provider id as associated data, write `keys.json` atomically. |
 | `forget_key` | keys | owner | Remove a sealed key. |
 | `list_keys` | keys | owner | List providers that have a sealed key, with the date set; never the key. |
+| `initialize_keys` | keys | owner (`init`) | Create the master key and hand it to its first unlocker; refuse when `keys.json` exists. |
+| `list_unlockers` | keys | owner, `doctor` | List the unlockers that hold the master key, in the order they are tried. |
 | `unseal_key` | keys | collector, through the `KeyRing` port | Unlock the master key with the first available unlocker and open one key. |
 | `add_unlocker` / `remove_unlocker` | keys | owner | Wrap the master key for a new unlocker / drop one; at least one must remain. |
 | `raise_threshold_alerts` | alerts | collector | Compare new meters with thresholds; raise each crossed threshold once per window; forget alert state when the window is reborn. |
@@ -399,6 +401,29 @@ not implement yet shows `UNSUPPORTED`.
     `LoadCredentialEncrypted=`. For headless collectors.
 - `doctor` reports which process owns the Secret Service name, which unlockers
   exist and whether file permissions are correct.
+- The `passphrase` record in `keys.json` is
+  `{ "kdf": "pbkdf2-sha256", "iterations": 600000, "salt": <base64>,
+  "nonce": <base64>, "sealed": <base64> }`; the master key is sealed with
+  AES-256-GCM under the derived key with `ataecina:v1:master-key:passphrase`
+  as associated data. A passphrase has at least 8 characters; on a terminal
+  it is asked twice when set. Without a terminal (a systemd service, a pipe)
+  the passphrase unlocker is unavailable rather than failing the command,
+  unless `--passphrase-fd <n>` gives a file descriptor to read one
+  passphrase per line from (scripts and tests; never argv or environment).
+- Unlockers are tried in the order `secret-service`, `systemd-creds`,
+  `passphrase`, among those the process can use; the master key is opened
+  at most once per process, however many keys a collection unseals.
+- `ataecina init` creates `~/.config/ataecina` (`0700`), a minimal
+  `config.json` when there is none, and `keys.json` held by
+  `--unlocker` (default: `secret-service` when the session's keyring is
+  reachable, else `passphrase`). Run twice, it changes nothing.
+- `ataecina keys set <name>` reads the key from the terminal without echo,
+  or from a pipe: 1 to 4096 printable ASCII characters without spaces, one
+  trailing newline removed. It prints only `sealed key <name>`. `keys list`
+  prints names and dates; `keys forget` needs no unlocking.
+- `ataecina unlockers add <kind>` opens the master key with an existing
+  unlocker and wraps it for the new one; `remove` refuses to drop the last
+  one and asks the removed unlocker to forget its copy when it can.
 
 ## 7. Alerts
 

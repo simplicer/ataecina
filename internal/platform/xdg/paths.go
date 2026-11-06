@@ -56,6 +56,9 @@ func (p Paths) ConfigDir() string { return p.config }
 // ConfigFile is config.json.
 func (p Paths) ConfigFile() string { return filepath.Join(p.config, "config.json") }
 
+// KeysFile is keys.json, the sealed keys.
+func (p Paths) KeysFile() string { return filepath.Join(p.config, "keys.json") }
+
 // StateDir holds alert state, declared balances, log offsets and the log.
 func (p Paths) StateDir() string { return p.state }
 

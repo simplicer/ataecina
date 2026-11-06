@@ -17,13 +17,14 @@ func main() {
 	// Every file Ataecina creates is private (AGENTS.md, security rules).
 	syscall.Umask(0o077)
 	os.Exit(run(context.Background(), os.Args[1:], environment{
-		getenv:   os.Getenv,
-		stdin:    os.Stdin,
-		stdout:   os.Stdout,
-		stderr:   os.Stderr,
-		terminal: isTerminal(os.Stdout),
-		clock:    clock.System{},
-		sources:  buildSources(),
+		getenv:          os.Getenv,
+		stdin:           os.Stdin,
+		stdout:          os.Stdout,
+		stderr:          os.Stderr,
+		terminal:        isTerminal(os.Stdout),
+		stdinIsTerminal: isTerminal(os.Stdin),
+		clock:           clock.System{},
+		sources:         buildSources(),
 	}))
 }
 

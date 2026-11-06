@@ -8,6 +8,19 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.6.0-unstable] - 2026-11-06
+
+### Added
+
+- `keys` context: `ataecina init`, `ataecina keys set|list|forget` and
+  `ataecina unlockers list|add|remove`. Provider keys are sealed with
+  AES-256-GCM under a random master key, bound to their name, in a private
+  `keys.json`; the master key is held by a passphrase (PBKDF2-HMAC-SHA256,
+  600 000 iterations) and opened at most once per process. Keys are read
+  from the terminal without echo or from a pipe, never from argv; scripts
+  can pass passphrases with `--passphrase-fd`.
+- ADR 0012: one redacting secret type shared by the contexts.
+
 ## [0.5.1-unstable] - 2026-11-06
 
 ### Fixed

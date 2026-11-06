@@ -13,6 +13,7 @@
 | [0009](0009-minimal-dependencies.md) | Minimal dependencies |
 | [0010](0010-json-contract-and-no-http-surface.md) | JSON output contract and no HTTP surface |
 | [0011](0011-source-fidelity-and-isolated-adapters.md) | Source fidelity and isolated adapters |
+| [0012](0012-one-redacting-secret-type.md) | One redacting secret type shared by the contexts |
 
 Each ADR has Context, Decision, Consequences and Alternatives. A superseded
 ADR stays, marked `superseded by NNNN`.

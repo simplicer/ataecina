@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.5.1-unstable` — early development: the core, the
+**Current version:** `0.6.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -171,6 +171,9 @@ ataecina [status] [--json]          show the snapshot (no network, no keys)
 ataecina collect                    read every subscription now (what the timer runs)
 ataecina hook claude-statusline     record Claude limits from the Claude Code status line
 ataecina balance declare            record a top-up or the balance of OpenCode Zen
+ataecina init                       create ~/.config/ataecina and the master key
+ataecina keys set|list|forget       manage sealed keys (set reads stdin without echo)
+ataecina unlockers add|list|remove  manage how the master key is held
 ataecina version
 ataecina help
 ```
@@ -178,21 +181,19 @@ ataecina help
 Planned:
 
 ```text
-ataecina keys set|list|forget       manage sealed keys (set reads stdin)
-ataecina unlockers add|list|remove  manage how the master key is held
 ataecina tray                       tray icon for non-Plasma desktops
 ataecina doctor                     check permissions, keyring, units and sources
 ```
 
 ### Configuration today
 
-Until `ataecina init` exists (milestone 3), create the configuration by hand.
-Ataecina refuses to run if the directory is not `0700` or the file not `0600`:
+`ataecina init` creates `~/.config/ataecina` (`0700`) with a minimal
+`config.json` and `keys.json` (`0600`). Ataecina refuses to run if the
+directory is not `0700` or the files not `0600`:
 
 ```sh
-install -d -m 700 ~/.config/ataecina
-install -m 600 etc/ataecina.example.json ~/.config/ataecina/config.json
-$EDITOR ~/.config/ataecina/config.json   # keep only your subscriptions
+ataecina init                            # or: ataecina init --unlocker passphrase
+$EDITOR ~/.config/ataecina/config.json   # see etc/ataecina.example.json
 ataecina collect && ataecina
 ```
 

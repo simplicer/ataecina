@@ -17,6 +17,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/snapshotfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/statusjson"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/terminal"
+	keysdomain "codeberg.org/simplicer/ataecina/internal/keys/domain"
 	"codeberg.org/simplicer/ataecina/internal/platform/logging"
 	"codeberg.org/simplicer/ataecina/internal/platform/privatefs"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
@@ -32,13 +33,19 @@ const (
 
 // environment is everything a command may touch, so tests can replace it.
 type environment struct {
-	getenv   func(string) string
-	stdin    io.Reader
-	stdout   io.Writer
-	stderr   io.Writer
-	terminal bool
-	clock    domain.Clock
-	sources  sourceRegistry
+	getenv          func(string) string
+	stdin           io.Reader
+	stdout          io.Writer
+	stderr          io.Writer
+	terminal        bool
+	stdinIsTerminal bool
+	clock           domain.Clock
+	sources         sourceRegistry
+	// desktopUnlockers adds the unlockers that need the session (the
+	// Secret Service) or systemd; nil in tests that do not use them.
+	desktopUnlockers func(paths xdg.Paths) keysdomain.Unlockers
+	// kdfIterations lowers the PBKDF2 cost in tests; 0 means production.
+	kdfIterations int
 }
 
 const usage = `Usage: ataecina [command] [options]
@@ -51,8 +58,17 @@ Commands:
                     status line; --print writes a one-line summary
   balance declare <subscription> (--top-up <amount> | --balance <amount>) [--currency USD]
                     record a top-up or the current balance of OpenCode Zen
+  init [--unlocker secret-service|passphrase]
+                    create ~/.config/ataecina with safe permissions and the master key
+  keys set <name> | list | forget <name>
+                    seal a provider key read from stdin without echo, list or forget keys
+  unlockers list | add <kind> | remove <kind>
+                    manage how the master key is held (secret-service, passphrase, systemd-creds)
   version           print the version
   help              show this help
+
+Commands that unlock the master key accept --passphrase-fd <n> to read the
+passphrase from a file descriptor instead of the terminal.
 
 Configuration: $XDG_CONFIG_HOME/ataecina/config.json (see etc/ataecina.example.json).
 `
@@ -78,6 +94,12 @@ func run(ctx context.Context, args []string, env environment) int {
 		return hook(rest, env)
 	case "balance":
 		return balance(ctx, rest, env)
+	case "init":
+		return initialise(ctx, rest, env)
+	case "keys":
+		return keysCommand(ctx, rest, env)
+	case "unlockers":
+		return unlockersCommand(ctx, rest, env)
 	case "version":
 		return printVersion(env)
 	case "help":
