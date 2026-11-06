@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.16.0-unstable] - 2026-11-06
+
+### Added
+
+- Heimdall (`heimdall`): the windows Heimdall observes for the plans of one
+  provider, from `GET /v1/plans` on its admin API on `127.0.0.1` (port
+  configurable, default 4001) with a sealed admin token; one bucket per
+  plan, an exhausted plan at 100 %, unavailable reasons in the hint, and
+  `UNAVAILABLE` with the next resets while Heimdall reports no usage.
+- ADR 0013: Heimdall is read on loopback, the only plain-HTTP traffic.
+
 ## [0.15.0-unstable] - 2026-11-06
 
 ### Added

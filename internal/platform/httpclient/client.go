@@ -92,6 +92,17 @@ func (c Client) For(origin string) (Endpoint, error) {
 	return Endpoint{client: c, origin: &url.URL{Scheme: parsed.Scheme, Host: parsed.Host}}, nil
 }
 
+// ForLoopback binds the client to a local service on 127.0.0.1 (ADR 0013):
+// plain HTTP is allowed there because the traffic never leaves the
+// machine; the host is fixed and only the port is configurable.
+func (c Client) ForLoopback(port int) (Endpoint, error) {
+	if port < 1 || port > 65535 {
+		return Endpoint{}, fmt.Errorf("%w: loopback port %d", ErrBadOrigin, port)
+	}
+	host := net.JoinHostPort("127.0.0.1", fmt.Sprint(port))
+	return Endpoint{client: c, origin: &url.URL{Scheme: "http", Host: host}}, nil
+}
+
 // Host is the endpoint's host, for messages.
 func (e Endpoint) Host() string { return e.origin.Host }
 

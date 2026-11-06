@@ -144,7 +144,9 @@ feature (ADRs 0003–0006).
 - **Snapshot** holds only non-secret figures (percentages, amounts, dates,
   states) in `$XDG_RUNTIME_DIR/ataecina/snapshot.json` (`0600`, tmpfs).
 - **Outbound network** (ADR 0006): each adapter has a fixed HTTPS host
-  compiled in; production builds cannot override it; redirects are refused;
+  compiled in (the only exception: Heimdall on `127.0.0.1` over plain HTTP,
+  where the owner chooses the port, ADR 0013); production builds cannot
+  override it; redirects are refused;
   proxy environment variables are ignored unless the owner enables them in
   `config.json`; every response body is capped (64 KiB after
   decompression); timeouts are explicit; one attempt per refresh, no

@@ -29,6 +29,8 @@ a key anywhere else.
 
 - A key can only ever reach its own provider's host.
 - Corporate proxies need an explicit opt-in.
+- The one exception to "fixed HTTPS host" is the owner's Heimdall on
+  `127.0.0.1` over plain HTTP, port configurable (ADR 0013).
 
 ## Alternatives
 

@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "id": "google-free-a",
+      "provider": "google",
+      "spend_class": "free",
+      "owners": ["member-a"],
+      "interactive_only": false,
+      "available": true,
+      "unavailable_reason": null,
+      "next_reset_at": "2026-11-07T08:00:00Z",
+      "window_used_ratio": 0.62
+    },
+    {
+      "id": "google-free-b",
+      "provider": "google",
+      "spend_class": "free",
+      "owners": ["member-a"],
+      "interactive_only": false,
+      "available": false,
+      "unavailable_reason": "quota_exhausted",
+      "next_reset_at": "2026-11-07T08:00:00Z",
+      "window_used_ratio": null
+    },
+    {
+      "id": "groq-free",
+      "provider": "groq",
+      "spend_class": "free",
+      "owners": ["member-a"],
+      "interactive_only": false,
+      "available": true,
+      "unavailable_reason": null,
+      "next_reset_at": "2026-11-07T00:00:00Z",
+      "window_used_ratio": 0.1
+    }
+  ],
+  "meta": { "page": 1, "page_size": 3, "total": 3 },
+  "links": { "self": "/v1/plans" }
+}

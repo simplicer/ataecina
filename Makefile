@@ -43,7 +43,8 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/orcarouterapi:FuzzDecodeSubscription \
 	./internal/allowances/infrastructure/cloudflareapi:FuzzDecodeNeurons \
 	./internal/allowances/infrastructure/copilotgh:FuzzDecodeReport \
-	./internal/allowances/infrastructure/alibabacli:FuzzDecodeUsage
+	./internal/allowances/infrastructure/alibabacli:FuzzDecodeUsage \
+	./internal/allowances/infrastructure/heimdallplans:FuzzDecodePlans
 FUZZ_TIME ?= 30s
 
 .PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz package install-user uninstall-user clean

@@ -72,7 +72,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
 | `cloudflare-api` | Cloudflare Workers AI | provider API | `https://api.cloudflare.com/client/v4/graphql` (GraphQL Analytics, one fixed query) (§3.3) | API token with *Account Analytics: Read* only, plus the account id | `aiInferenceAdaptiveGroups` → `sum.totalNeurons` for the current UTC day, against the published 10 000 neurons/day allocation | yes (GraphQL Analytics API; dataset fields to verify) | REPORTED | docs and third-party 2026-11-06; live to verify |
-| `heimdall` | any plan Heimdall serves | local service | Heimdall admin API on loopback | Heimdall admin token | plan cooldowns, announced resets, usage ledger | yes (Heimdall OpenAPI) | OBSERVED | to verify |
+| `heimdall` | any plan Heimdall serves | local service | `http://127.0.0.1:<port>/v1/plans`, Heimdall's admin API on loopback, port 4001 by default (§3.6, ADR 0013) | Heimdall admin token (`Bearer`) | `data[]`: `id`, `provider`, `available`, `unavailable_reason`, `next_reset_at`, `window_used_ratio` | yes (Heimdall OpenAPI `admin.yaml` 0.23.1) | OBSERVED | local 2026-11-06 (contract); Heimdall 0.23.1 does not serve `available`, `unavailable_reason` or `window_used_ratio` yet |
 
 ### Providers without a readable allowance
 
@@ -370,6 +370,32 @@ wiped.
   `currentPeriodEnd`) are optional: with both, a `BILLING_CYCLE` meter shows
   `spent / (spent + remaining)` until the period end; without them the
   reading is `PARTIAL`.
+
+### 3.6 Heimdall (local, milestone 9)
+
+Heimdall, the owner's model relay, publishes the plans it serves on its
+admin API: `GET /v1/plans` returns `{ "data": [ plan… ], "meta", "links" }`
+where a plan has `id`, `provider`, `available`, `unavailable_reason`
+(`peak_window`, `quota_exhausted`, `insufficient_balance`,
+`unauthorized_account` or null), `next_reset_at` (RFC 3339 or null) and
+`window_used_ratio` (0–1 or null). A `heimdall` subscription names the
+`provider` whose plans it follows (`google` for Gemini API keys, `nvidia`,
+`groq`, `llm7`, `kilo`…):
+
+- one plan → one meter in the main bucket; several → one bucket per plan id;
+- the meter is the plan's current window (`BILLING_CYCLE`, since Heimdall
+  gives the next reset but not the window's length), used =
+  `window_used_ratio` × 100, reborn at `next_reset_at`;
+- a plan unavailable with `quota_exhausted` and no ratio is 100 %; every
+  unavailable plan adds its reason to the hint (unknown reasons read as
+  "unavailable", never echoed);
+- no plan of the provider, or no plan with usage, is `UNAVAILABLE` with the
+  known next resets in the hint: nothing is estimated.
+
+Heimdall 0.23.1 implements `GET /v1/plans` with `next_reset_at` but not yet
+the availability and usage fields of its own contract; until it does, these
+subscriptions read `UNAVAILABLE`. The adapter talks to `127.0.0.1` only, over
+plain HTTP, on the configured `port` (ADR 0013).
 
 ### 3.4 OpenCode Zen and declared balances
 

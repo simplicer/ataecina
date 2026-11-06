@@ -7,8 +7,10 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -117,5 +119,29 @@ func TestOriginsArePinned(t *testing.T) {
 	}
 	if _, err := e.Do(context.Background(), "BAD METHOD", "/x", nil, strings.NewReader("")); err == nil {
 		t.Fatal("an invalid method must fail")
+	}
+}
+
+func TestOnlyLoopbackMaySpeakPlainHTTPInProduction(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(`{"data":[]}`))
+	}))
+	t.Cleanup(server.Close)
+	production := httpclient.New(httpclient.Options{Version: "test"})
+	if _, err := production.For(server.URL); !errors.Is(err, httpclient.ErrBadOrigin) {
+		t.Fatalf("plain HTTP elsewhere = %v", err)
+	}
+	port := server.Listener.Addr().(*net.TCPAddr).Port
+	e, err := production.ForLoopback(port)
+	if err != nil || e.Host() != "127.0.0.1:"+strconv.Itoa(port) {
+		t.Fatalf("ForLoopback = %v, %v", e.Host(), err)
+	}
+	if response, err := e.Get(context.Background(), "/v1/plans", nil); err != nil || response.Status != 200 {
+		t.Fatalf("Get = %+v, %v", response, err)
+	}
+	for _, port := range []int{0, 70000} {
+		if _, err := production.ForLoopback(port); !errors.Is(err, httpclient.ErrBadOrigin) {
+			t.Fatalf("port %d = %v", port, err)
+		}
 	}
 }

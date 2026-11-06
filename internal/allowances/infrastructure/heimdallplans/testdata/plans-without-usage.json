@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "id": "google-free-a",
+      "provider": "google",
+      "spend_class": "free",
+      "owners": ["member-a"],
+      "interactive_only": false,
+      "clients": [],
+      "in_peak": false,
+      "next_reset_at": "2026-11-07T08:00:00Z"
+    }
+  ],
+  "meta": { "page": 1, "page_size": 1, "total": 1 },
+  "links": { "self": "/v1/plans" }
+}

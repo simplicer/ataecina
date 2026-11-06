@@ -16,6 +16,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/commandcodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/ollamaapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
@@ -116,6 +117,14 @@ func standardSources() sourceRegistry {
 		},
 		copilotgh.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
 			return copilotgh.New(pathlookup.Find("gh", c.env.getenv("PATH")), settings.Login, settings.MonthlyAllowance, c.env.clock.Now)
+		},
+		heimdallplans.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
+			// Heimdall is a local service: loopback only, the owner chooses the port (ADR 0013).
+			endpoint, err := c.http.ForLoopback(settings.Port)
+			if err != nil {
+				return failing{domain.Failure(domain.ErrorContractChanged, "the Heimdall port is invalid", err)}
+			}
+			return heimdallplans.New(endpoint, c.keys, domain.KeyName(settings.Key), c.env.clock.Now)
 		},
 		alibabacli.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			return alibabacli.New(pathlookup.Find("bl", c.env.getenv("PATH")), c.env.clock.Now)
