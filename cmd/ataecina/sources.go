@@ -5,6 +5,7 @@ import (
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/claudestatusline"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexappserver"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
@@ -60,6 +61,11 @@ func standardSources() sourceRegistry {
 		},
 		codexappserver.SourceID: func(_ configfile.SubscriptionSettings, _ xdg.Paths, env environment) domain.Source {
 			return appServer(env)
+		},
+		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, _ environment) domain.Source {
+			// collect has already required the runtime directory.
+			runtimeDir, _ := paths.RuntimeDir()
+			return claudestatusline.NewSource(filepath.Join(runtimeDir, "signals"))
 		},
 	}}
 }

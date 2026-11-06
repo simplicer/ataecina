@@ -119,6 +119,30 @@ documentation) or `third-party` (issues or write-ups of other clients);
   because it holds the OAuth token.
 - Several Claude accounts (`CLAUDE_CONFIG_DIR`) map to several
   subscriptions: `ataecina hook claude-statusline --subscription claude-work`.
+- Mapping: `five_hour` → `FIVE_HOURS`, `seven_day` → `WEEKLY`, both in the
+  main bucket; `spend_limit` → bucket `spend_limit`, window `BILLING_CYCLE`
+  (to verify against a gateway). `resets_at` must be Unix seconds between
+  2020 and 2100; anything else, or a missing `used_percentage`, makes the
+  whole input malformed. Malformed or oversized input records nothing.
+- **Replays never rewind.** Every Claude Code session re-draws its status
+  line, and an idle one keeps passing the figures of its last API response.
+  The hook therefore merges each input with the signal already kept: per
+  window, a later `resets_at` (by more than a minute) is a newer window and
+  wins; within the same window usage never decreases, so the higher
+  percentage wins; an earlier `resets_at` is a replay and loses. Windows
+  the input lacks are kept while still open. The signal (and its
+  `observed_at`) is rewritten only when the input brought something newer,
+  so freshness means "the last time Claude Code reported a change".
+- The signal is `{"version": 1, "reading": {…}}` with the reading fields of
+  §8.2; nothing else from the status line input (session, paths, cost,
+  model) is kept. `--print` shows every window with its whole percentage
+  and the time to the nearest rebirth, or `5h – · 7d –` before the first
+  figures.
+- The hook reads no configuration and writes nothing else; every failure
+  (no `XDG_RUNTIME_DIR`, bad flags, an invalid `--subscription`) goes to
+  stderr and the exit code is still 0.
+- The collector reads the signal like any source; without one the
+  subscription is `UNAVAILABLE` (`UNREADABLE`) with a hint to add the hook.
 
 ### 3.2 Codex in detail (verified 2026-11-06, codex-cli 0.166.0)
 
@@ -303,7 +327,7 @@ not implement yet shows `UNSUPPORTED`.
 |---|---|---|---|
 | `collect_readings` | allowances | collector (timer or `ataecina collect`) | For each enabled subscription, ask its source through the `Source` port (keys via the `KeyRing` port), classify failures, merge with the previous snapshot (keep last good reading on transient errors), write the snapshot atomically. One attempt per source; sources run concurrently with a global deadline (20 s); a source that asked to wait (`retry_not_before`) is not asked. Logs one line per subscription. |
 | `report_snapshot` | allowances | display | Read the snapshot, apply freshness and rebirth rules at the current time, return the view model. Never touches keys or the network. |
-| `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, write the Claude signal file (§3.1); print nothing, or a summary line with `--print`. Must finish in a few milliseconds and never fail the status line. |
+| `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, merge them with the kept signal so replays never rewind it, write the Claude signal file only when something is newer (§3.1); print nothing, or a summary line with `--print`. Must finish in a few milliseconds and never fail the status line. |
 | `declare_balance` | allowances | owner | Record a top-up or current balance for a balance-only subscription. |
 | `seal_key` | keys | owner (`keys set`) | Read the key from stdin, seal it under the master key with the provider id as associated data, write `keys.json` atomically. |
 | `forget_key` | keys | owner | Remove a sealed key. |

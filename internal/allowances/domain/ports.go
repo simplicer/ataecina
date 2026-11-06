@@ -43,6 +43,16 @@ type CollectionJournal interface {
 	Record(record CollectionRecord)
 }
 
+// ErrNoSignal reports that no hook has recorded a signal yet.
+var ErrNoSignal = errors.New("no signal recorded yet")
+
+// LimitSignals keeps what a hook observed (Claude Code's status line) for
+// the collector to read later.
+type LimitSignals interface {
+	LatestSignal(subscription SubscriptionID) (Reading, error)
+	KeepSignal(reading Reading) error
+}
+
 // Clock tells the time; the domain itself never reads it.
 type Clock interface {
 	Now() time.Time

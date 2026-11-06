@@ -1,0 +1,16 @@
+{
+  "hook_event_name": "Status",
+  "session_id": "00000000-0000-0000-0000-000000000000",
+  "transcript_path": "/home/someone/.claude/projects/synthetic/00000000.jsonl",
+  "cwd": "/home/someone/project",
+  "model": { "id": "claude-synthetic", "display_name": "Synthetic" },
+  "workspace": { "current_dir": "/home/someone/project", "project_dir": "/home/someone/project" },
+  "version": "2.1.319",
+  "output_style": { "name": "default" },
+  "cost": { "total_cost_usd": 0.01, "total_duration_ms": 1000, "total_api_duration_ms": 500, "total_lines_added": 1, "total_lines_removed": 0 },
+  "context_window": { "total_input_tokens": 1000, "total_output_tokens": 100 },
+  "rate_limits": {
+    "five_hour": { "used_percentage": 23.5, "resets_at": 1794002400 },
+    "seven_day": { "used_percentage": 41.2, "resets_at": 1794297600 }
+  }
+}

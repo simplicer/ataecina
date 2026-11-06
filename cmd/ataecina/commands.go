@@ -46,6 +46,9 @@ const usage = `Usage: ataecina [command] [options]
 Commands:
   status [--json]   show the snapshot (the default; no network, no keys)
   collect           read every configured subscription now and keep the snapshot
+  hook claude-statusline [--print] [--subscription <id>]
+                    record the Claude limits Claude Code passes on stdin to its
+                    status line; --print writes a one-line summary
   version           print the version
   help              show this help
 
@@ -69,6 +72,8 @@ func run(ctx context.Context, args []string, env environment) int {
 		return status(rest, env)
 	case "collect":
 		return collect(ctx, rest, env)
+	case "hook":
+		return hook(rest, env)
 	case "version":
 		return printVersion(env)
 	case "help":

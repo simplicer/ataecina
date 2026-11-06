@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.4.0-unstable] - 2026-11-06
+
+### Added
+
+- `ataecina hook claude-statusline [--print] [--subscription <id>]` and the
+  `claude-statusline` source: the hook keeps only the `rate_limits` Claude
+  Code passes to its status line, merges them so an idle session replaying
+  old figures never rewinds them, writes a private signal file in
+  `$XDG_RUNTIME_DIR` only when something is newer, always exits 0 and runs
+  in about 2 ms; `--print` writes `5h 23% · 7d 41% · ↻ 2h10m`.
+
 ## [0.3.0-unstable] - 2026-11-06
 
 ### Added
