@@ -37,8 +37,9 @@ func TestTheUserInstallationPlacesEverythingUnderThePrefixAndRemovesIt(t *testin
 		prefix + "/share/plasma/plasmoids/org.simplicer.ataecina/metadata.json":        0o644,
 		prefix + "/share/plasma/plasmoids/org.simplicer.ataecina/contents/ui/main.qml": 0o644,
 		prefix + "/share/plasma/plasmoids/org.simplicer.ataecina/contents/locale/es/LC_MESSAGES/plasma_applet_org.simplicer.ataecina.mo": 0o644,
-		prefix + "/share/doc/ataecina/README.md":             0o644,
-		prefix + "/share/doc/ataecina/ataecina.example.json": 0o644,
+		prefix + "/share/applications/org.simplicer.ataecina.desktop":                                                                    0o644,
+		prefix + "/share/doc/ataecina/README.md":                                                                                         0o644,
+		prefix + "/share/doc/ataecina/ataecina.example.json":                                                                             0o644,
 	}
 	for path, mode := range modes {
 		info, err := os.Stat(filepath.Join(destdir, path))
@@ -59,6 +60,21 @@ func TestTheUserInstallationPlacesEverythingUnderThePrefixAndRemovesIt(t *testin
 	}
 	if !strings.Contains(string(unit), "\nExecStart="+prefix+"/bin/ataecina collect\n") || strings.Contains(string(unit), "@BINDIR@") {
 		t.Fatalf("the unit does not run the installed binary:\n%s", unit)
+	}
+
+	launcher, err := os.ReadFile(filepath.Join(destdir, prefix, "share/applications/org.simplicer.ataecina.desktop"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, line := range []string{"\nExec=" + prefix + "/bin/ataecina tray\n", "\nTryExec=" + prefix + "/bin/ataecina\n"} {
+		if !strings.Contains(string(launcher), line) {
+			t.Fatalf("the launcher lacks %q:\n%s", line, launcher)
+		}
+	}
+	if validate, err := exec.LookPath("desktop-file-validate"); err == nil {
+		if out, err := exec.Command(validate, filepath.Join(destdir, prefix, "share/applications/org.simplicer.ataecina.desktop")).CombinedOutput(); err != nil {
+			t.Fatalf("desktop-file-validate: %v\n%s", err, out)
+		}
 	}
 
 	version, err := exec.Command(filepath.Join(destdir, prefix, "bin/ataecina"), "version").Output()

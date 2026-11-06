@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.12.0-unstable` — early development: the core, the
+**Current version:** `0.13.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -178,7 +178,15 @@ systemctl --user daemon-reload
 ```
 
 Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,
-LXQt or GNOME (with the AppIndicator extension) start `ataecina tray`.
+LXQt, Budgie, Waybar or GNOME (with the AppIndicator extension) start
+**Ataecina** from the applications menu, or `ataecina tray`; its menu lists
+every subscription, "Refresh now" (or a middle click) starts the collector,
+and "Quit" closes it. To start it with your session:
+
+```sh
+mkdir -p ~/.config/autostart
+cp /usr/share/applications/org.simplicer.ataecina.desktop ~/.config/autostart/   # or ~/.local/share/applications/…
+```
 
 Packages and `make install-user` install the widget; to try only the
 widget from a checkout (Plasma 6):
@@ -205,14 +213,9 @@ ataecina init                       create ~/.config/ataecina and the master key
 ataecina keys set|list|forget       manage sealed keys (set reads stdin without echo)
 ataecina unlockers add|list|remove  manage how the master key is held
 ataecina doctor                     check permissions, keyring, keys and sources
+ataecina tray                       tray icon for non-Plasma desktops (until Quit)
 ataecina version
 ataecina help
-```
-
-Planned:
-
-```text
-ataecina tray                       tray icon for non-Plasma desktops
 ```
 
 ### Configuration today

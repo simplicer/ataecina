@@ -8,6 +8,22 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.13.0-unstable] - 2026-11-06
+
+### Added
+
+- `ataecina tray`: a StatusNotifierItem with a DBusMenu for XFCE, Cinnamon,
+  MATE, LXQt, Budgie, Waybar and GNOME with the AppIndicator extension. One
+  menu line per subscription, the snapshot's age, "Refresh now" (also a
+  middle click) and "Quit"; attention from 90 %; a tooltip with every line.
+  It registers when the panel's watcher appears and ends on Quit, SIGINT or
+  SIGTERM.
+- "Refresh now" asks the user's systemd manager over the session bus to
+  start `ataecina-collect.service` (no program is run).
+- Launcher `org.simplicer.ataecina.desktop` (hidden on Plasma), installed
+  by the packages and `make install-user` with `Exec` naming the installed
+  binary.
+
 ### Added
 
 - `make package`: `.deb`, `.rpm` and Arch packages for amd64 and arm64 built

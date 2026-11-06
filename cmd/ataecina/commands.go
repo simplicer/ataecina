@@ -65,6 +65,7 @@ Commands:
   unlockers list | add <kind> | remove <kind>
                     manage how the master key is held (secret-service, passphrase, systemd-creds)
   doctor            check permissions, configuration, keys, the keyring and sources
+  tray              show the snapshot in the system tray (StatusNotifierItem) until Quit
   version           print the version
   help              show this help
 
@@ -103,6 +104,8 @@ func run(ctx context.Context, args []string, env environment) int {
 		return unlockersCommand(ctx, rest, env)
 	case "doctor":
 		return doctor(rest, env)
+	case "tray":
+		return trayCommand(ctx, rest, env)
 	case "version":
 		return printVersion(env)
 	case "help":

@@ -31,6 +31,10 @@ menu.
 - The JSON contract (ADR 0010) is the only interface between the widget and
   the binary, so both evolve independently. `tests/widget` (plain `go test`)
   fails when the QML reads a name outside that contract.
+- The tray starts the collector through the user's systemd manager on the
+  session bus (`StartUnit`) instead of running `systemctl`, so the display
+  path still runs no program and opens no socket but the session bus
+  (ADR 0005).
 - `qmllint` is not part of a Plasma desktop installation, so `make check`
   runs it only when it is installed and otherwise warns; the static checks of
   `tests/widget` and `msgfmt --check` always run, and the widget is checked

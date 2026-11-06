@@ -663,6 +663,27 @@ StatusNotifierItem with the same icon and a menu listing every subscription;
 for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with the AppIndicator
 extension.
 
+- **Item** (`org.kde.StatusNotifierItem` at `/StatusNotifierItem`, bus name
+  `org.kde.StatusNotifierItem-<pid>-1`): icon `ataecina`; status
+  `NeedsAttention` from 90 % (as the widget), `Active` otherwise; tooltip with
+  the snapshot's age and one line per subscription; `ItemIsMenu`, so a click
+  opens the menu; a middle click refreshes.
+- **Menu** (`com.canonical.dbusmenu` version 3 at `/MenuBar`): one line per
+  subscription as in the terminal (`claude · PRO · 5h 23% ↻ 2h10m · week 41%
+  ↻ 4d12h · fresh 1m ago`), or why there is nothing to show; then the
+  snapshot's age, "Refresh now" and "Quit". A refresh that systemd refuses is
+  shown as a line until the next one.
+- It reads the snapshot every 30 s and 4 s after "Refresh now", which asks
+  the user's systemd manager over the session bus to start
+  `ataecina-collect.service` (`StartUnit`, mode `replace`); it runs no
+  program, never collects and never unseals.
+- It registers with `org.kde.StatusNotifierWatcher`, waits for one when the
+  panel has none yet and registers again when the panel restarts. It ends on
+  "Quit", `SIGINT` or `SIGTERM`.
+- Launcher `org.simplicer.ataecina.desktop` (`Exec=<bindir>/ataecina tray`,
+  hidden on Plasma where the widget is the display); copying it into
+  `~/.config/autostart/` starts the tray with the session.
+
 ## 9. Files and paths
 
 | Path | Content | Mode |
@@ -729,6 +750,7 @@ Nothing is enabled or started by an installation.
 | `/usr/lib/systemd/user/ataecina-collect.timer` | collector timer | `0644` |
 | `/usr/share/plasma/plasmoids/org.simplicer.ataecina/` | Plasma widget with compiled translations in `contents/locale/` | `0755` / `0644` |
 | `/usr/share/icons/hicolor/scalable/apps/ataecina.svg` | icon | `0644` |
+| `/usr/share/applications/org.simplicer.ataecina.desktop` | tray launcher (`Exec` names the installed binary; hidden on Plasma) | `0644` |
 | `/usr/share/doc/ataecina/` | `README.md`, `CHANGELOG.md`, `ataecina.example.json` | `0644` |
 
 Packages: `ataecina_X.Y.Z~unstable-1_<arch>.deb`,

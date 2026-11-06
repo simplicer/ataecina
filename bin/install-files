@@ -10,6 +10,7 @@
 #   SYSTEMD_USER_DIR/ataecina-collect.{service,timer}   (default PREFIX/lib/systemd/user)
 #   PREFIX/share/plasma/plasmoids/org.simplicer.ataecina/
 #   PREFIX/share/icons/hicolor/scalable/apps/ataecina.svg
+#   PREFIX/share/applications/org.simplicer.ataecina.desktop   (the tray launcher)
 #   PREFIX/share/doc/ataecina/{README.md,CHANGELOG.md,ataecina.example.json}
 #
 # It expects `make build widget` to have run (var/build/ataecina and
@@ -46,6 +47,8 @@ widget=var/build/plasmoid/$plasmoid
 bindir=$prefix/bin
 plasmoids=$prefix/share/plasma/plasmoids
 icons=$prefix/share/icons/hicolor/scalable/apps
+applications=$prefix/share/applications
+launcher=org.simplicer.ataecina.desktop
 docs=$prefix/share/doc/ataecina
 
 remove_widget() {
@@ -59,6 +62,7 @@ if $uninstall; then
 		"$destdir$units/ataecina-collect.service" \
 		"$destdir$units/ataecina-collect.timer" \
 		"$destdir$icons/ataecina.svg" \
+		"$destdir$applications/$launcher" \
 		"$destdir$docs/README.md" "$destdir$docs/CHANGELOG.md" "$destdir$docs/ataecina.example.json"
 	remove_widget
 	rmdir "$destdir$docs" 2>/dev/null || true
@@ -87,6 +91,13 @@ find "$destdir$plasmoids/$plasmoid" -type d -exec chmod 0755 {} +
 find "$destdir$plasmoids/$plasmoid" -type f -exec chmod 0644 {} +
 
 install -D -m 0644 share/icons/hicolor/scalable/apps/ataecina.svg "$destdir$icons/ataecina.svg"
+
+# The launcher names the installed binary, so it works without ~/.local/bin
+# on the session's PATH.
+install -d -m 0755 "$destdir$applications"
+sed -e "s|^Exec=ataecina |Exec=$bindir/ataecina |" -e "s|^TryExec=ataecina\$|TryExec=$bindir/ataecina|" \
+	"share/applications/$launcher" >"$destdir$applications/$launcher"
+chmod 0644 "$destdir$applications/$launcher"
 
 install -D -m 0644 README.md "$destdir$docs/README.md"
 install -m 0644 CHANGELOG.md etc/ataecina.example.json "$destdir$docs/"

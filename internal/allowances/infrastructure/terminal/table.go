@@ -29,6 +29,10 @@ const (
 	resetSGR        = "\x1b[0m"
 )
 
+// worstColumn is the WORST column of a row; Line leaves it out because the
+// windows already show every percentage.
+const worstColumn = 2
+
 type cell struct {
 	text   string
 	colour colour
@@ -39,15 +43,14 @@ type cell struct {
 func Render(w io.Writer, report domain.StatusReport, now time.Time, colourful bool) error {
 	takenAt, taken := report.TakenAt()
 	if !taken {
-		_, err := fmt.Fprintln(w, "No snapshot yet. Run `ataecina collect`, or enable ataecina-collect.timer.")
+		_, err := fmt.Fprintln(w, NoSnapshot)
 		return err
 	}
 	rows := [][]cell{{{text: "SUBSCRIPTION"}, {text: "PLAN"}, {text: "WORST"}, {text: "WINDOWS"}, {text: "BALANCE"}, {text: "STATE"}}}
 	for _, status := range report.Statuses() {
 		rows = append(rows, row(status, now))
 	}
-	header := fmt.Sprintf("Ataecina · updated %s", age(now.Sub(takenAt)))
-	if _, err := fmt.Fprintln(w, header); err != nil {
+	if _, err := fmt.Fprintln(w, "Ataecina · "+Updated(takenAt, now)); err != nil {
 		return err
 	}
 	return writeAligned(w, rows, colourful)

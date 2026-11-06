@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Ataecina
+GenericName=AI subscription allowances
+GenericName[es]=Cuotas de suscripciones de IA
+Comment=How much is left of each AI subscription, and when it is reborn
+Comment[es]=Cuánto queda de cada suscripción de IA y cuándo renace
+Exec=ataecina tray
+TryExec=ataecina
+Icon=ataecina
+Terminal=false
+Categories=System;Monitor;
+Keywords=AI;quota;subscription;limits;tray;
+StartupNotify=false
+NotShowIn=KDE;
