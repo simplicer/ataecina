@@ -1,0 +1,44 @@
+{
+  "timePeriod": { "year": 2026, "month": 11 },
+  "user": "octo-cat",
+  "usageItems": [
+    {
+      "product": "Copilot",
+      "sku": "Copilot Premium Request",
+      "model": "example-model-a",
+      "unitType": "requests",
+      "pricePerUnit": 0.04,
+      "grossQuantity": 120,
+      "grossAmount": 4.8,
+      "discountQuantity": 120,
+      "discountAmount": 4.8,
+      "netQuantity": 0,
+      "netAmount": 0
+    },
+    {
+      "product": "Copilot",
+      "sku": "Copilot Premium Request",
+      "model": "example-model-b",
+      "unitType": "requests",
+      "pricePerUnit": 0.04,
+      "grossQuantity": 45,
+      "grossAmount": 1.8,
+      "discountQuantity": 30,
+      "discountAmount": 1.2,
+      "netQuantity": 15,
+      "netAmount": 0.6
+    },
+    {
+      "product": "Actions",
+      "sku": "Actions Linux",
+      "unitType": "minutes",
+      "pricePerUnit": 0.008,
+      "grossQuantity": 500,
+      "grossAmount": 4,
+      "discountQuantity": 500,
+      "discountAmount": 4,
+      "netQuantity": 0,
+      "netAmount": 0
+    }
+  ]
+}

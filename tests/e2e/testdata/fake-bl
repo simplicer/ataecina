@@ -1,0 +1,9 @@
+#!/bin/sh
+# Fake `bl` (Alibaba Bailian CLI) for integration, acceptance and
+# end-to-end tests: records its arguments in $FAKE_BL_JOURNAL and, for
+# `usage`, prints the synthetic answer in $FAKE_BL_USAGE. The real bl, and
+# Alibaba Cloud, are never reached.
+printf '%s\n' "$*" >>"${FAKE_BL_JOURNAL:-/dev/null}"
+[ "$1" = "usage" ] || exit 2
+[ -n "${FAKE_BL_FAIL:-}" ] && exit 1
+cat "$FAKE_BL_USAGE"

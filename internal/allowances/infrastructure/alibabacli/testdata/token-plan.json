@@ -1,0 +1,7 @@
+{
+  "hasQuotaData": true,
+  "per5HourPercentage": 0.125,
+  "per5HourResetTime": 1793995200000,
+  "per1WeekPercentage": 0.7,
+  "per1WeekResetTime": 1794268800000
+}

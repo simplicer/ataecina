@@ -13,7 +13,9 @@ func TestDoctorPointsAtWhatIsMissing(t *testing.T) {
 	w := newWorld(t, `{"version": 1, "subscriptions": [
 	  {"id": "zai", "source": "unbuilt"},
 	  {"id": "zen", "source": "opencode-zen"},
-	  {"id": "codex", "source": "codex-logs", "app_server": true}
+	  {"id": "codex", "source": "codex-logs", "app_server": true},
+	  {"id": "copilot", "source": "copilot-gh", "login": "octo-cat", "monthly_allowance": 300},
+	  {"id": "alibaba", "source": "alibaba-cli"}
 	]}`)
 	w.vars["PATH"] = filepath.Join(w.root, "empty-bin")
 	code, out, _ := w.run("doctor")
@@ -24,6 +26,8 @@ func TestDoctorPointsAtWhatIsMissing(t *testing.T) {
 		"! zai            source unbuilt is not available in this version",
 		"! zen            opencode is not on PATH",
 		"! codex          codex is not on PATH",
+		"! copilot        gh is not on PATH",
+		"! alibaba        bl is not on PATH",
 		"! snapshot       none yet",
 	} {
 		if !strings.Contains(out, want) {

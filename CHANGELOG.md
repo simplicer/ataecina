@@ -8,6 +8,21 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.15.0-unstable] - 2026-11-06
+
+### Added
+
+- GitHub Copilot (`copilot-gh`): this month's Copilot premium requests
+  from GitHub's billing usage report, read through the official `gh api`
+  with gh's own login, against the monthly allowance declared in
+  `config.json` (`login`, `monthly_allowance`); the overage spent as the
+  balance.
+- Alibaba Model Studio Token Plan (`alibaba-cli`): every window
+  `bl usage token-plan --output json` reports (5 hours, week, month).
+- One runner for official CLIs (fixed argv, no shell, timeout, capped
+  output), now shared by OpenCode, gh and bl; `doctor` warns when gh or bl
+  is not on PATH.
+
 ## [0.14.0-unstable] - 2026-11-06
 
 ### Added

@@ -63,7 +63,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED | local 2026-11-06; live to verify |
 | `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` (§3.5) | API key (`Bearer`, to verify) | `data.limits[]` of type `TOKENS_LIMIT`/`CREDIT_LIMIT`: `unit`, `number`, `percentage`, `nextResetTime`; `data.level` | no | REPORTED | third-party 2026-11-06; live to verify |
 | `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (§3.5) | Token Plan key (`Bearer`) | `model_remains[]`: interval and weekly totals, counts (remaining), `*_remaining_percent`, start/end times; `base_resp.status_code` | no | REPORTED | third-party 2026-11-06; live to verify |
-| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) | `bl`'s own login | quota windows, percentage, reset, `hasQuotaData` | yes (Model Studio docs) | REPORTED | docs 2026-11-06; `bl` not installed, to verify |
+| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) (§3.3) | `bl`'s own login | `per5Hour`/`per1Week`/`per1Month` `Percentage` (used fraction 0–1) and `ResetTime` (epoch ms), `hasQuotaData` | yes (Model Studio docs; field names third-party) | REPORTED | docs and third-party 2026-11-06; `bl` not installed, to verify |
 | `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/usage/summary`, `/alpha/billing/subscriptions` (§3.5) | API key (`Bearer`) | `credits.{monthly,purchased,free}Credits`, `windowLimits.{fiveHour,weekly}.{used,cap,resetAt}`, `totalCost`, `data.{planId,currentPeriodEnd}` | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
 | `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` (§3.5) | API key (`Bearer`; `/credits` may need a management key) | `data.{usage,limit,limit_remaining,free_model_daily_requests}`, `data.{total_credits,total_usage}` | yes | REPORTED | docs 2026-11-06 |
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
@@ -240,7 +240,11 @@ Codex performs the network call with its own login.
 
 Milestone 9 implements these adapters against synthetic answers built from
 the shapes below; each must be verified with a live, manual call before a
-release, like the undocumented sources of §3.5.
+release, like the undocumented sources of §3.5. Official CLIs run through
+one runner (`internal/platform/officialcli`): the binary found on `PATH`
+(absolute entries only), a fixed argv, no shell, stderr discarded, stdout
+capped, a timeout. The collector unit's `PATH` can be extended with a
+drop-in when `gh` or `bl` live elsewhere.
 
 **`ollama-api` (Ollama Cloud).** The `ollama` CLI (0.31.1) has no usage
 command. The ollama.com usage page reads `GET https://ollama.com/api/usage`,
@@ -266,10 +270,29 @@ stayed on them); GitHub documents an AI-credit report for a user with the
 same schema (path to verify). Ataecina runs the official `gh` with a fixed
 argv (`gh api --method GET -H X-GitHub-Api-Version:2026-03-10 <path>`), so
 `gh` uses its own login and Ataecina never sees a token; the login name and
-the monthly allowance are declared in `config.json`. Used percentage =
-`Σ grossQuantity` ÷ declared allowance (`DERIVED`); the `MONTHLY` window is
-reborn on the 1st at 00:00 UTC (documented). The user report only covers
-plans the owner pays personally.
+the monthly allowance are declared in `config.json` (`login`,
+`monthly_allowance`). Used percentage = `Σ grossQuantity` of the items whose
+`product` is Copilot ÷ declared allowance (`DERIVED`); the `MONTHLY` window
+is reborn on the 1st at 00:00 UTC (documented); `Σ netAmount` (USD) is the
+overage spent. A month without Copilot items reads 0 % with a hint. `gh`
+runs with `GH_NO_UPDATE_NOTIFIER=1`, `GH_PROMPT_DISABLED=1` and `NO_COLOR=1`,
+a 15 s timeout and 1 MiB of output at most. The user report only covers
+plans the owner pays personally; the AI-credit report path is still to
+verify, so AI-credit plans may read as an empty month.
+
+**`alibaba-cli` (Alibaba Model Studio Token Plan).** The Model Studio docs
+list `bl usage token-plan` for the Token Plan quota and `--output json`,
+whose `hasQuotaData` separates "no quota data" from a normal answer.
+Third-party clients report a flat object whose windows depend on the `bl`
+version: `per5HourPercentage`/`per5HourResetTime` and
+`per1WeekPercentage`/`per1WeekResetTime` (bl 1.x), `per1MonthPercentage`/
+`per1MonthResetTime` (bl 2.2); percentages are used fractions (0–1) and
+reset times epoch milliseconds. Ataecina reads every window present
+(`FIVE_HOURS`, `WEEKLY`, `MONTHLY`); none at all is `CONTRACT_CHANGED`,
+`hasQuotaData: false` is `UNAVAILABLE`. `bl` runs with a fixed argv, no
+shell, `NO_COLOR=1`, a 15 s timeout and 64 KiB of output at most; it keeps
+its own login. Team accounts that need `--region`/`--site` flags are not
+handled yet.
 
 **`orcarouter-api` (Orca Router).** OrcaRouter documents two summary
 endpoints authenticated with the API key: `/v1/dashboard/billing/subscription`
@@ -735,6 +758,7 @@ extension.
     { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
     { "id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef" },
     { "id": "zen", "source": "opencode-zen" },
+    { "id": "copilot", "source": "copilot-gh", "login": "your-github-login", "monthly_allowance": 300 },
     { "id": "gemini", "source": "heimdall", "provider": "google" }
   ]
 }

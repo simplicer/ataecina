@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.14.0-unstable` — early development: the core, the
+**Current version:** `0.15.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -76,7 +76,9 @@ and the cost OpenCode records; **OpenRouter**, **Vercel AI Gateway**,
 **Z.ai**, **MiniMax**, **Command Code**, **Ollama Cloud**, **Orca Router**
 and **Cloudflare Workers AI** (with `"account": "<account id>"` and an
 analytics-only token) with your sealed API keys
-(`ataecina keys set <name>`). The
+(`ataecina keys set <name>`); **GitHub Copilot** through `gh` (with
+`"login"` and `"monthly_allowance"`) and the **Alibaba Model Studio Token
+Plan** through `bl`, each with its own login. The
 other sources arrive as listed in [docs/ROADMAP.md](docs/ROADMAP.md) and read
 as `UNSUPPORTED` until then.
 

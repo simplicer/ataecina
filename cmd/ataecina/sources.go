@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/alibabacli"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/balancefile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/claudestatusline"
@@ -14,6 +15,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/commandcodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/ollamaapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
@@ -111,6 +113,12 @@ func standardSources() sourceRegistry {
 		},
 		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			return opencodezen.NewSource(balancefile.NewStore(c.paths.StateDir()), zenSpend(c.env), c.env.clock.Now)
+		},
+		copilotgh.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
+			return copilotgh.New(pathlookup.Find("gh", c.env.getenv("PATH")), settings.Login, settings.MonthlyAllowance, c.env.clock.Now)
+		},
+		alibabacli.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
+			return alibabacli.New(pathlookup.Find("bl", c.env.getenv("PATH")), c.env.clock.Now)
 		},
 		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			// collect has already required the runtime directory.
