@@ -1,0 +1,18 @@
+# build output
+/ataecina
+bin/ataecina
+dist/
+
+# local development state
+var/*
+!var/.gitkeep
+*.log
+
+# never commit real configuration or keys
+etc/ataecina.json
+keys.json
+.env
+.env.*
+
+# fuzzing cache
+testdata/fuzz/**/corpus-local/

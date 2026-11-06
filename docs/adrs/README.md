@@ -1,0 +1,18 @@
+# Architectural Decision Records
+
+| # | Decision |
+|---|---|
+| [0001](0001-go-vertical-slices-in-internal.md) | Go vertical slices under `internal/` |
+| [0002](0002-bounded-contexts.md) | Bounded contexts: allowances, keys, alerts (outages planned) |
+| [0003](0003-local-signals-and-api-keys-never-sessions.md) | Local signals and API keys; never sessions |
+| [0004](0004-sealed-keys-file-with-unlockers.md) | Sealed keys file with pluggable unlockers |
+| [0005](0005-collector-and-display-separation.md) | Collector and display are separate |
+| [0006](0006-outbound-network-policy.md) | Outbound network policy |
+| [0007](0007-plasma-widget-first-tray-for-others.md) | Plasma widget first, a tray for other desktops |
+| [0008](0008-native-packages-with-nfpm.md) | Native packages built with nfpm |
+| [0009](0009-minimal-dependencies.md) | Minimal dependencies |
+| [0010](0010-json-contract-and-no-http-surface.md) | JSON output contract and no HTTP surface |
+| [0011](0011-source-fidelity-and-isolated-adapters.md) | Source fidelity and isolated adapters |
+
+Each ADR has Context, Decision, Consequences and Alternatives. A superseded
+ADR stays, marked `superseded by NNNN`.
