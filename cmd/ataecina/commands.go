@@ -17,7 +17,6 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/snapshotfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/statusjson"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/terminal"
-	keysdomain "codeberg.org/simplicer/ataecina/internal/keys/domain"
 	"codeberg.org/simplicer/ataecina/internal/platform/logging"
 	"codeberg.org/simplicer/ataecina/internal/platform/privatefs"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
@@ -41,9 +40,6 @@ type environment struct {
 	stdinIsTerminal bool
 	clock           domain.Clock
 	sources         sourceRegistry
-	// desktopUnlockers adds the unlockers that need the session (the
-	// Secret Service) or systemd; nil in tests that do not use them.
-	desktopUnlockers func(paths xdg.Paths) keysdomain.Unlockers
 	// kdfIterations lowers the PBKDF2 cost in tests; 0 means production.
 	kdfIterations int
 }

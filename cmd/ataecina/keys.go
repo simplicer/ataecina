@@ -7,14 +7,18 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/godbus/dbus/v5"
 
 	keysapp "codeberg.org/simplicer/ataecina/internal/keys/application"
 	keysdomain "codeberg.org/simplicer/ataecina/internal/keys/domain"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/aesgcm"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/keyfile"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/passphrase"
+	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/secretservice"
 	"codeberg.org/simplicer/ataecina/internal/platform/privatefs"
 	"codeberg.org/simplicer/ataecina/internal/platform/secret"
 	"codeberg.org/simplicer/ataecina/internal/platform/terminal"
@@ -40,8 +44,9 @@ type keyring struct {
 
 // openKeyring resolves the paths and the unlockers this process can use.
 // passphraseFD > 0 reads passphrases from that descriptor instead of
-// asking on the terminal.
-func openKeyring(env environment, passphraseFD int) (keyring, error) {
+// asking on the terminal; interactive is false for the collector, which
+// never shows the keyring's unlock prompt.
+func openKeyring(env environment, passphraseFD int, interactive bool) (keyring, error) {
 	paths, err := xdg.Resolve(env.getenv)
 	if err != nil {
 		return keyring{}, err
@@ -58,10 +63,9 @@ func openKeyring(env environment, passphraseFD int) (keyring, error) {
 		ask = passphrase.FromReader(os.NewFile(uintptr(duplicate), "passphrase"))
 	}
 	unlockers := keysdomain.Unlockers{keysdomain.Passphrase: passphrase.New(ask, env.passphraseIterations())}
-	if env.desktopUnlockers != nil {
-		for kind, unlocker := range env.desktopUnlockers(paths) {
-			unlockers[kind] = unlocker
-		}
+	if address := sessionBusAddress(env); address != "" {
+		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
+		unlockers[keysdomain.SecretService] = secretservice.New(connect, interactive)
 	}
 	return keyring{paths: paths, files: keyfile.NewStore(paths.KeysFile()), unlockers: unlockers}, nil
 }
@@ -88,7 +92,7 @@ func initialise(ctx context.Context, args []string, env environment) int {
 	if err := flags.Parse(args); err != nil || flags.NArg() > 0 {
 		return exitUsage
 	}
-	ring, err := openKeyring(env, *fd)
+	ring, err := openKeyring(env, *fd, true)
 	if err != nil {
 		return fail(env, "init", err)
 	}
@@ -122,7 +126,7 @@ func chooseUnlocker(requested string, ring keyring) (keysdomain.UnlockerKind, er
 	if requested != "" {
 		return keysdomain.ParseUnlockerKind(requested)
 	}
-	if _, desktop := ring.unlockers[keysdomain.SecretService]; desktop {
+	if desktop, ok := ring.unlockers[keysdomain.SecretService].(secretservice.Unlocker); ok && desktop.Reachable() {
 		return keysdomain.SecretService, nil
 	}
 	return keysdomain.Passphrase, nil
@@ -143,7 +147,7 @@ func keysCommand(ctx context.Context, args []string, env environment) int {
 	if err := flags.Parse(rest); err != nil || flags.NArg() > 0 {
 		return exitUsage
 	}
-	ring, err := openKeyring(env, *fd)
+	ring, err := openKeyring(env, *fd, true)
 	if err != nil {
 		return fail(env, "keys", err)
 	}
@@ -227,7 +231,7 @@ func unlockersCommand(ctx context.Context, args []string, env environment) int {
 	if err := flags.Parse(rest); err != nil || flags.NArg() > 0 {
 		return exitUsage
 	}
-	ring, err := openKeyring(env, *fd)
+	ring, err := openKeyring(env, *fd, true)
 	if err != nil {
 		return fail(env, "unlockers", err)
 	}
@@ -261,4 +265,21 @@ func unlockersCommand(ctx context.Context, args []string, env environment) int {
 func fail(env environment, command string, err error) int {
 	fmt.Fprintf(env.stderr, "ataecina: %s: %v\n", command, err)
 	return exitFailure
+}
+
+// sessionBusAddress is the session bus: DBUS_SESSION_BUS_ADDRESS, or the
+// systemd user bus socket in XDG_RUNTIME_DIR; empty when there is none.
+func sessionBusAddress(env environment) string {
+	if address := env.getenv("DBUS_SESSION_BUS_ADDRESS"); address != "" {
+		return address
+	}
+	runtimeDir := env.getenv("XDG_RUNTIME_DIR")
+	if !filepath.IsAbs(runtimeDir) {
+		return ""
+	}
+	socket := filepath.Join(runtimeDir, "bus")
+	if info, err := os.Stat(socket); err == nil && info.Mode()&os.ModeSocket != 0 {
+		return "unix:path=" + socket
+	}
+	return ""
 }

@@ -29,3 +29,9 @@ notifications, StatusNotifierItem, systemd) has no standard-library client.
   unnecessary today. Rejected for now.
 - `fyne.io/systray`: pulls more than needed for one StatusNotifierItem.
   Rejected.
+
+## Update (2026-11-06)
+
+`github.com/godbus/dbus/v5` is pinned at v5.2.4. It lists
+`golang.org/x/sys` in its module graph, but imports it only in its FreeBSD
+transport; the Linux binary links nothing from it. `go.sum` pins both.

@@ -410,6 +410,18 @@ not implement yet shows `UNSUPPORTED`.
   the passphrase unlocker is unavailable rather than failing the command,
   unless `--passphrase-fd <n>` gives a file descriptor to read one
   passphrase per line from (scripts and tests; never argv or environment).
+- The `secret-service` record in `keys.json` is only
+  `{ "attributes": { "application": "ataecina", "purpose": "master-key" } }`;
+  the master key itself is an item (label "Ataecina master key", content
+  type `application/octet-stream`) created in the collection behind the
+  `default` alias, replacing an older one. The session uses the `plain`
+  algorithm: the secret crosses the per-user session bus, which only the
+  owner's processes reach. The bus is `DBUS_SESSION_BUS_ADDRESS`, or the
+  systemd user bus socket `$XDG_RUNTIME_DIR/bus`.
+- A locked keyring shows its own unlock prompt only for commands a person
+  runs (`init`, `keys set`, `unlockers add`); the collector never prompts
+  and treats a locked keyring as an unavailable unlocker. A dismissed
+  prompt is an error.
 - Unlockers are tried in the order `secret-service`, `systemd-creds`,
   `passphrase`, among those the process can use; the master key is opened
   at most once per process, however many keys a collection unseals.

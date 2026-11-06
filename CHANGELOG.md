@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.7.0-unstable] - 2026-11-06
+
+### Added
+
+- `secret-service` unlocker: the master key is an item of the session's
+  Secret Service (GNOME Keyring, KWallet/ksecretd, KeePassXC) over D-Bus;
+  `ataecina init` uses it by default when it is reachable. Commands a person
+  runs may show the keyring's unlock prompt; the collector never does.
+- Dependency: `github.com/godbus/dbus/v5` v5.2.4 (ADR 0009).
+
 ## [0.6.0-unstable] - 2026-11-06
 
 ### Added
