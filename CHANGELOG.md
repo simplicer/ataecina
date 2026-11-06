@@ -8,6 +8,28 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.1.0-unstable] - 2026-11-06
+
+### Added
+
+- `allowances` domain: subscriptions, meters over five-hour, daily, weekly,
+  monthly, billing-cycle and other windows (recognised by length, never by
+  position), percentages that may exceed 100, balances in ISO 4217
+  currencies, provider credits, banked resets, several buckets per
+  subscription, fidelity, outcomes, error classes, freshness and the
+  estimated rebirth of a window after its reset.
+- `ataecina collect`: asks every configured subscription once, concurrently
+  and within a 20-second deadline; a failing, slow or panicking source only
+  affects its own subscription and transient failures keep the last good
+  reading. Sources not implemented yet read as `UNSUPPORTED`.
+- `ataecina status` table and `ataecina status --json`, the public JSON
+  contract of SPECS §8.2, with RFC 9457 problems on stderr.
+- Strict `config.json` with per-source options, XDG paths, private file and
+  directory checks, atomic snapshot in `$XDG_RUNTIME_DIR`, Loki-compatible
+  JSON logs with rotation, `etc/ataecina.example.json`.
+- `Makefile` (`check`, `e2e`, `fuzz`, `build`), `bin/set-version`,
+  `bin/check-version`, `bin/check-coverage`.
+
 ## [0.0.0-unstable] - 2026-11-06
 
 ### Added

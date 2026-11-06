@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Fails unless a Go coverage profile covers 100% of its statements
+# (AGENTS.md: application packages are fully covered by unit tests).
+set -euo pipefail
+
+profile=${1:?usage: bin/check-coverage <coverage profile>}
+report=$(go tool cover -func="$profile")
+total=$(awk '/^total:/ { print $3 }' <<<"$report")
+if [ "$total" != "100.0%" ]; then
+	awk '$1 != "total:" && $3 != "100.0%"' <<<"$report" >&2
+	echo "check-coverage: application packages are at $total, they must be at 100.0%" >&2
+	exit 1
+fi
+echo "check-coverage: application packages at $total"

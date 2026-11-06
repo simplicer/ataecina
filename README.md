@@ -10,8 +10,9 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.0.0-unstable` — foundation only: rules, specification
-and decisions. Nothing is implemented yet; see [docs/ROADMAP.md](docs/ROADMAP.md).
+**Current version:** `0.1.0-unstable` — early development: the core, the
+terminal table and the JSON contract work; sources arrive milestone by
+milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
 ## Why "Ataecina"
 
@@ -155,19 +156,41 @@ ataecina                           # the table
 Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,
 LXQt or GNOME (with the AppIndicator extension) start `ataecina tray`.
 
-## Commands (planned)
+## Commands
 
 ```text
 ataecina [status] [--json]          show the snapshot (no network, no keys)
 ataecina collect                    read every subscription now (what the timer runs)
+ataecina version
+ataecina help
+```
+
+Planned:
+
+```text
 ataecina keys set|list|forget       manage sealed keys (set reads stdin)
 ataecina unlockers add|list|remove  manage how the master key is held
 ataecina balance declare            record a top-up for balance-only providers
 ataecina hook claude-statusline     record Claude limits from the Claude Code status line
 ataecina tray                       tray icon for non-Plasma desktops
 ataecina doctor                     check permissions, keyring, units and sources
-ataecina version
 ```
+
+### Configuration today
+
+Until `ataecina init` exists (milestone 3), create the configuration by hand.
+Ataecina refuses to run if the directory is not `0700` or the file not `0600`:
+
+```sh
+install -d -m 700 ~/.config/ataecina
+install -m 600 etc/ataecina.example.json ~/.config/ataecina/config.json
+$EDITOR ~/.config/ataecina/config.json   # keep only your subscriptions
+ataecina collect && ataecina
+```
+
+Sources that this version cannot read yet show as `UNSUPPORTED`; nothing
+breaks. The options of each source are listed in
+[docs/SPECS.md](docs/SPECS.md) §9.
 
 ## Architecture
 
@@ -189,14 +212,19 @@ and decisions in [docs/adrs/](docs/adrs/).
 
 ## Development
 
+Go 1.27 or later; nothing else is needed (`govulncheck` is fetched at a
+pinned version by `make check`).
+
 ```sh
-make check      # format, vet, unit, integration, acceptance, benchmarks, lint, vulnerabilities, build, version
+make check      # format, vet, unit (100 % of use cases), integration, acceptance, benchmarks, vulnerabilities, build, version
 make e2e        # the built binary end to end against fake providers
-make fuzz       # explore the response decoders further
-make package    # .deb, .rpm and Arch packages into dist/
+make fuzz       # explore the decoders further (FUZZ_TIME=30s)
+make build      # var/build/ataecina, static and reproducible
 ```
 
-The suite never calls a real provider and never touches your real keys.
+`make package` (`.deb`, `.rpm`, Arch) arrives with milestone 7. The suite
+never calls a real provider and never touches your real keys or your home:
+every test runs in a throw-away `HOME` and XDG tree.
 
 ## Versioning
 

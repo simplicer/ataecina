@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "interval_minutes": 5,
+  "alerts": { "thresholds": [90, 95] },
+  "network": { "use_environment_proxy": false },
+  "subscriptions": [
+    { "id": "claude", "source": "claude-statusline", "plan": "PRO" },
+    { "id": "codex", "source": "codex-logs", "app_server": false, "app_server_after_minutes": 60 },
+    { "id": "zai", "source": "zai-api", "key": "zai" },
+    { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
+    { "id": "zen", "source": "opencode-zen" },
+    { "id": "gemini", "source": "heimdall", "provider": "google" }
+  ]
+}

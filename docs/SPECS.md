@@ -1,6 +1,6 @@
 # Ataecina — Business specification
 
-Status: foundation (`0.0.0-unstable`). This document is the source of truth
+Status: see `docs/ROADMAP.md`. This document is the source of truth
 for behaviour; `AGENTS.md` holds the engineering rules and `docs/adrs/` the
 decisions.
 
@@ -234,7 +234,9 @@ key could not be unlocked), `UNSUPPORTED`.
   (default interval 5 minutes); `STALE` afterwards; `UNKNOWN` if never read.
 - Local signals (Claude, Codex) only change when their tool is used. When the
   clock passes a meter's `resets_at`, the display shows that window as
-  reborn — 0 % used, marked `ESTIMATED` — until a new reading arrives.
+  reborn — 0 % used, `estimated: true`, next reset unknown (`resets_at`
+  null) — until a new reading arrives. The snapshot keeps the reported
+  figures; rebirth is applied only when a display reads it.
 - A display never hides staleness: every figure carries its `observed_at`.
 
 ### 4.3 Error classes
@@ -249,11 +251,21 @@ Provider failures are classified in infrastructure:
 | `CONTRACT_CHANGED` | unexpected shape or fields | outcome `BROKEN`, logged without the body |
 | `UNREADABLE` | local file missing, locked or malformed | outcome `UNAVAILABLE` for that source |
 
+After a transient failure (`RATE_LIMITED`, `UNAVAILABLE`, `UNREADABLE`) the
+last reading with figures is kept as it was, with `error_class` and `hint`
+recording why it was not refreshed; without such a reading the outcome is
+`UNAVAILABLE`. `KEY_REJECTED` shows `KEY_MISSING` and `CONTRACT_CHANGED`
+shows `BROKEN`, both without figures. A failure an adapter did not classify,
+an adapter that panics, or a source that answers for another subscription
+shows `BROKEN` for that subscription only. A source that does not answer
+before the collector's deadline is `UNAVAILABLE`. A source this build does
+not implement yet shows `UNSUPPORTED`.
+
 ## 5. Use cases
 
 | Use case (file) | Context | Actor | Behaviour |
 |---|---|---|---|
-| `collect_readings` | allowances | collector (timer or `ataecina collect`) | For each enabled subscription, ask its source through the `Source` port (keys via the `KeyRing` port), classify failures, merge with the previous snapshot (keep last good reading on transient errors), write the snapshot atomically. One attempt per source; sources run concurrently with a global deadline. |
+| `collect_readings` | allowances | collector (timer or `ataecina collect`) | For each enabled subscription, ask its source through the `Source` port (keys via the `KeyRing` port), classify failures, merge with the previous snapshot (keep last good reading on transient errors), write the snapshot atomically. One attempt per source; sources run concurrently with a global deadline (20 s); a source that asked to wait (`retry_not_before`) is not asked. Logs one line per subscription. |
 | `report_snapshot` | allowances | display | Read the snapshot, apply freshness and rebirth rules at the current time, return the view model. Never touches keys or the network. |
 | `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, write the Claude signal file (§3.1); print nothing, or a summary line with `--print`. Must finish in a few milliseconds and never fail the status line. |
 | `declare_balance` | allowances | owner | Record a top-up or current balance for a balance-only subscription. |
@@ -344,7 +356,31 @@ Public, versioned contract (Zalando JSON rules). Example:
 }
 ```
 
-Errors are RFC 9457 problem objects on stderr with a non-zero exit code.
+Contract details:
+
+- `meters` and `subscriptions` are always lists (possibly empty), never
+  null. Absent optional values are `null`.
+- `source` is the source id in `UPPER_SNAKE_CASE`; `provider` and `id` are
+  lowercase identifiers; `plan` is `UPPER_SNAKE_CASE` or `null`.
+- Additive fields beyond the example: on a meter, `bucket` (the provider's
+  limit name when a subscription has several, e.g. Codex `codex` and
+  `premium`; `null` for the main one) and `window_minutes` (`300`, `1440`,
+  `10080`, the length of an `OTHER` window, or `null` for `MONTHLY` and
+  `BILLING_CYCLE`); on a subscription, `credits`
+  (`{ "available": <decimal>, "unlimited": <bool> }`, provider credits that
+  are not money), `banked_resets` (`{ "available": <int> }`, information
+  only), `error_class` (why the latest attempt failed, §4.3) and `hint` (a
+  short sentence for the owner); in `meta`, `snapshot_taken_at` (`null`
+  before the first collection) and `worst_used_percent` (`null` without
+  meters).
+- `used_percent` may exceed 100 when a provider allows overage.
+- Before the first collection the document has an empty `subscriptions`
+  list; this is not an error.
+
+Errors are RFC 9457 problem objects on stderr with exit code 1 (`2` for
+usage errors): `{ "type": "urn:ataecina:problem:<slug>", "title": …,
+"detail": … }`. Slugs: `environment` (HOME or XDG_RUNTIME_DIR missing) and
+`snapshot-unreadable` (corrupt file, loose permissions).
 
 ### 8.3 Plasma widget
 
@@ -406,22 +442,45 @@ extension.
 | `$XDG_RUNTIME_DIR/ataecina/signals/` | signals written by hooks (Claude limits), read by the collector | `0700` / `0600` |
 | `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, log offsets, log | `0700` / `0600` |
 
-`config.json` example:
+`config.json` example (`etc/ataecina.example.json`):
 
 ```json
 {
   "version": 1,
   "interval_minutes": 5,
   "alerts": { "thresholds": [90, 95] },
+  "network": { "use_environment_proxy": false },
   "subscriptions": [
     { "id": "claude", "source": "claude-statusline", "plan": "PRO" },
-    { "id": "codex", "source": "codex-logs", "app_server_after_minutes": 60 },
+    { "id": "codex", "source": "codex-logs", "app_server": false, "app_server_after_minutes": 60 },
     { "id": "zai", "source": "zai-api", "key": "zai" },
     { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
-    { "id": "zen", "source": "opencode-zen" }
+    { "id": "zen", "source": "opencode-zen" },
+    { "id": "gemini", "source": "heimdall", "provider": "google" }
   ]
 }
 ```
+
+Validation is strict; any violation stops the command before it does
+anything:
+
+| Key | Rule |
+|---|---|
+| `version` | required, `1` |
+| `interval_minutes` | 1–1440, default 5 (freshness and the timer use it) |
+| `alerts.thresholds` | 1–5 integers rising strictly within 1–100, default `[90, 95]` |
+| `network.use_environment_proxy` | default `false` (ADR 0006) |
+| `subscriptions[].id` | required, unique, `[a-z0-9][a-z0-9-]{0,31}` |
+| `subscriptions[].source` | required, a source id of §3 |
+| `subscriptions[].plan` | optional, any text, normalised to `UPPER_SNAKE_CASE`; a plan reported by the source wins |
+| `subscriptions[].key` | only for sources that need a key; the sealed key's name, default the subscription id |
+| `subscriptions[].app_server`, `app_server_after_minutes` | only for `codex-logs`; default `false` and 60 (≥ 1) |
+| `subscriptions[].provider` | only for `heimdall`, where it is required |
+
+Unknown keys, and options given to a source that does not take them, are
+errors. The snapshot file is internal (`version`, `taken_at`,
+`interval_seconds`, `readings` with the fields of §8.2 plus
+`retry_not_before`); only `status --json` is a contract.
 
 ## 10. Constraints
 

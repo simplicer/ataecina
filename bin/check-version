@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Fails when the version drifts (AGENTS.md, "Versioning"): VERSION must be
+# a valid Simplicer version, stated in README.md, CHANGELOG.md and the
+# Plasma widget metadata, and must follow the Conventional Commit history
+# (equal to the version derived at HEAD, or one step ahead of it: the
+# change being committed).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+fail() {
+	echo "check-version: $*" >&2
+	exit 1
+}
+
+version=$(tr -d '[:space:]' <VERSION)
+pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(unstable|rc\.[1-9][0-9]*|lts))?$'
+[[ $version =~ $pattern ]] || fail "VERSION '$version' is not X.Y.Z[-unstable|-rc.N|-lts]"
+major=${BASH_REMATCH[1]} minor=${BASH_REMATCH[2]} patch=${BASH_REMATCH[3]}
+[[ $major != 0 || $version == *-unstable ]] || fail "while the major is 0 every version ends in -unstable"
+
+grep -qF "**Current version:** \`$version\`" README.md || fail "README.md does not state version $version"
+grep -q "^## \[$version\]" CHANGELOG.md || fail "CHANGELOG.md has no [$version] section"
+metadata=share/plasma/plasmoids/org.simplicer.ataecina/metadata.json
+if [ -f "$metadata" ]; then
+	grep -Eq "\"Version\": *\"$version\"" "$metadata" || fail "$metadata does not state version $version"
+fi
+
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+	echo "check-version: $version (no git history to compare with)"
+	exit 0
+fi
+
+# Derive MINOR.PATCH from the history since the foundation (major 0 only;
+# release ceremonies are checked by hand when they happen).
+found=no derived_minor=0 derived_patch=0
+while IFS= read -r subject; do
+	if [ $found = no ]; then
+		[ "$subject" = "chore: initialize foundation" ] && found=yes
+		continue
+	fi
+	if [[ $subject =~ ^feat!?:\ release(\ candidate\ [0-9]+\.0\.0|\ [0-9]+\.[0-9]+\.[0-9]+)?$ ]]; then
+		echo "check-version: $version (release ceremony in history; derived check skipped)"
+		exit 0
+	elif [[ $subject =~ ^feat(\([^\)]*\))?!?:\  ]]; then
+		derived_minor=$((derived_minor + 1)) derived_patch=0
+	elif [[ $subject =~ ^(fix|refactor|perf)(\([^\)]*\))?!?:\  ]]; then
+		derived_patch=$((derived_patch + 1))
+	fi
+done < <(git log --reverse --format=%s)
+
+if [ $found = no ]; then
+	echo "check-version: $version (foundation commit not in history; derived check skipped)"
+	exit 0
+fi
+[ "$major" = 0 ] || fail "major $major without a release ceremony in history"
+
+derived="0.$derived_minor.$derived_patch"
+if [ "$minor.$patch" = "$derived_minor.$derived_patch" ] ||
+	{ [ "$minor" = $((derived_minor + 1)) ] && [ "$patch" = 0 ]; } ||
+	{ [ "$minor" = "$derived_minor" ] && [ "$patch" = $((derived_patch + 1)) ]; }; then
+	echo "check-version: $version (history at HEAD gives $derived-unstable)"
+	exit 0
+fi
+fail "VERSION $version does not follow the history ($derived-unstable at HEAD)"

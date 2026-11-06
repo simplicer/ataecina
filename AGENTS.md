@@ -322,7 +322,8 @@ further. `govulncheck` runs in `make check`.
 
 - Go-native first: `go build`, `go test`, `go vet`, `gofmt`, `govulncheck`.
   The `Makefile` orchestrates: `make check` (fmt-check, vet, unit,
-  integration, acceptance, bench-smoke, qmllint, govulncheck, build,
+  coverage of the application packages, integration, acceptance,
+  bench-smoke, qmllint from milestone 6, govulncheck, build,
   check-version), `make e2e`, `make fuzz`, `make package` (deb, rpm, Arch),
   `make install-user` (binary, units, widget into `~/.local`).
 - Builds are reproducible: `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`,

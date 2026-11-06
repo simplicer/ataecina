@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Sets the project version everywhere it lives, in one go (AGENTS.md,
+# "Versioning"): VERSION, the README "Current version" line, a CHANGELOG
+# section made from [Unreleased], and the Plasma widget metadata when it
+# exists. Usage: bin/set-version X.Y.Z[-unstable|-rc.N|-lts]
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+new=${1:?usage: bin/set-version X.Y.Z[-unstable|-rc.N|-lts]}
+pattern='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-(unstable|rc\.[1-9][0-9]*|lts))?$'
+if [[ ! $new =~ $pattern ]]; then
+	echo "set-version: '$new' is not X.Y.Z[-unstable|-rc.N|-lts]" >&2
+	exit 1
+fi
+if [[ ${BASH_REMATCH[1]} == 0 && $new != *-unstable ]]; then
+	echo "set-version: while the major is 0 every version ends in -unstable" >&2
+	exit 1
+fi
+
+old=$(tr -d '[:space:]' <VERSION)
+printf '%s\n' "$new" >VERSION
+
+sed -i -E "s/^\*\*Current version:\*\* \`[^\`]+\`/**Current version:** \`$new\`/" README.md
+
+if ! grep -q "^## \[$new\]" CHANGELOG.md; then
+	today=$(date -u +%Y-%m-%d)
+	sed -i "s/^## \[Unreleased\]\$/## [Unreleased]\n\n## [$new] - $today/" CHANGELOG.md
+fi
+
+metadata=share/plasma/plasmoids/org.simplicer.ataecina/metadata.json
+if [ -f "$metadata" ]; then
+	sed -i -E "s/(\"Version\": *\")[^\"]*\"/\1$new\"/" "$metadata"
+fi
+
+echo "set-version: $old -> $new"
