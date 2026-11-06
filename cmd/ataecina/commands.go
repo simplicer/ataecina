@@ -223,9 +223,11 @@ func collect(ctx context.Context, args []string, env environment) int {
 			Clock:    env.clock,
 		},
 	)
-	if _, err := collector.Collect(ctx); err != nil {
+	snapshot, err := collector.Collect(ctx)
+	if err != nil {
 		logger.Error("collection failed", slog.String("error", err.Error()))
 		return exitFailure
 	}
+	raiseAlerts(ctx, snapshot, settings, paths, env, logger)
 	return exitOK
 }

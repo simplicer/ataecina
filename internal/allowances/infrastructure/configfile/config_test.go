@@ -42,7 +42,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	  "subscriptions": [
 	    {"id": "codex", "source": "codex-logs", "plan": "plus", "app_server": true, "app_server_after_minutes": 30},
 	    {"id": "zai", "source": "zai-api", "key": "zai-coding"},
-	    {"id": "openrouter", "source": "openrouter-api"},
+	    {"id": "openrouter", "source": "openrouter-api", "thresholds": [50]},
 	    {"id": "gemini", "source": "heimdall", "provider": "google"}
 	  ]}`)
 	if err != nil {
@@ -57,6 +57,9 @@ func TestEveryOptionIsRead(t *testing.T) {
 	}
 	if zai.Key != "zai-coding" || openrouter.Key != "openrouter" {
 		t.Fatalf("keys = %q, %q", zai.Key, openrouter.Key)
+	}
+	if len(zai.Thresholds) != 3 || len(openrouter.Thresholds) != 1 || openrouter.Thresholds[0] != 50 {
+		t.Fatalf("thresholds = %v, %v", zai.Thresholds, openrouter.Thresholds)
 	}
 	if gemini.Subscription.Provider() != "google" || gemini.Subscription.Fidelity() != domain.FidelityObserved {
 		t.Fatalf("gemini = %+v", gemini)
@@ -87,6 +90,7 @@ func TestStrictValidation(t *testing.T) {
 		"bad provider":        `{"version": 1, "subscriptions": [{"id": "a", "source": "heimdall", "provider": "Google"}]}`,
 		"provider elsewhere":  `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "provider": "x"}]}`,
 		"app server too soon": `{"version": 1, "subscriptions": [{"id": "a", "source": "codex-logs", "app_server_after_minutes": 0}]}`,
+		"bad own thresholds":  `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "thresholds": [120]}]}`,
 	}
 	for name, text := range cases {
 		if _, err := decode(t, text); !errors.Is(err, configfile.ErrInvalid) {

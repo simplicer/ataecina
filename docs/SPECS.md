@@ -493,11 +493,25 @@ not implement yet shows `UNSUPPORTED`.
 
 ## 7. Alerts
 
-- Default thresholds: 90 and 95 % of any meter; configurable per subscription.
-- Delivered through `org.freedesktop.Notifications` (Plasma, GNOME, XFCE…);
-  the Plasma widget also highlights the meter.
-- State in `$XDG_STATE_HOME/ataecina/alerts.json`, keyed by subscription,
-  window and `resets_at`, so each threshold fires once per window.
+- Default thresholds: 90 and 95 % of any meter (`alerts.thresholds`);
+  a subscription may set its own (`subscriptions[].thresholds`).
+- After every collection the collector hands the meters with figures, as
+  they stand now (a reborn window is not watched), to
+  `raise_threshold_alerts`. Each crossed threshold is remembered once per
+  window instance — subscription, bucket, window and `resets_at`, where two
+  resets less than a minute apart are the same window; when several
+  thresholds are crossed at once only the highest is announced. The memory
+  of a window no longer watched (reborn, or gone) is forgotten, so the next
+  window announces again.
+- Delivered through `org.freedesktop.Notifications` (Plasma, GNOME, XFCE…)
+  with app name "Ataecina", icon `ataecina`, summary
+  "`<subscription> · <window> at <n> %`" and the time to rebirth; urgency
+  normal, critical from 95 %. Without a session bus (SSH, headless) alerts
+  are kept and logged, not shown; a failed notification is not repeated.
+  The Plasma widget also highlights the meter.
+- State in `$XDG_STATE_HOME/ataecina/alerts.json` (`0600`): `{ "version": 1,
+  "raised": [ { "subscription", "bucket", "window", "resets_at",
+  "threshold", "raised_at" } ] }`.
 
 ## 8. Displays and the JSON contract
 
@@ -660,6 +674,7 @@ anything:
 | `version` | required, `1` |
 | `interval_minutes` | 1–1440, default 5 (freshness and the timer use it) |
 | `alerts.thresholds` | 1–5 integers rising strictly within 1–100, default `[90, 95]` |
+| `subscriptions[].thresholds` | optional, same rules; replaces `alerts.thresholds` for that subscription |
 | `network.use_environment_proxy` | default `false` (ADR 0006) |
 | `subscriptions[].id` | required, unique, `[a-z0-9][a-z0-9-]{0,31}` |
 | `subscriptions[].source` | required, a source id of §3 |

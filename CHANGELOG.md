@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.10.0-unstable] - 2026-11-06
+
+### Added
+
+- `alerts` context: after each collection, every threshold a meter crosses
+  (default 90 and 95 %, configurable per subscription) is announced once
+  per window through `org.freedesktop.Notifications`, the highest only when
+  several are crossed at once; the state lives in `alerts.json` and is
+  forgotten when the window is reborn. Without a session bus alerts are
+  logged.
+
 ## [0.9.0-unstable] - 2026-11-06
 
 ### Added

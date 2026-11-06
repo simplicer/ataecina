@@ -58,6 +58,8 @@ type SubscriptionSettings struct {
 	Key            string
 	AppServer      bool
 	AppServerAfter time.Duration
+	// Thresholds are the subscription's own, or the global ones.
+	Thresholds []int
 }
 
 type document struct {
@@ -84,6 +86,7 @@ type subscriptionDocument struct {
 	Key                   *string `json:"key"`
 	AppServer             *bool   `json:"app_server"`
 	AppServerAfterMinutes *int    `json:"app_server_after_minutes"`
+	Thresholds            []int   `json:"thresholds"`
 }
 
 // Load reads config.json after checking that it and its directory are private.
@@ -144,6 +147,13 @@ func Decode(data []byte, sources catalog.Catalog) (Settings, error) {
 			return Settings{}, fmt.Errorf("%w: subscription %q appears twice", ErrInvalid, item.ID)
 		}
 		seen[item.ID] = true
+		subscription.Thresholds = settings.Thresholds
+		if item.Thresholds != nil {
+			if err := validThresholds(item.Thresholds); err != nil {
+				return Settings{}, fmt.Errorf("subscription %q: %w", item.ID, err)
+			}
+			subscription.Thresholds = item.Thresholds
+		}
 		settings.Subscriptions = append(settings.Subscriptions, subscription)
 	}
 	return settings, nil

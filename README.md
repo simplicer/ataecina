@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.9.0-unstable` — early development: the core, the
+**Current version:** `0.10.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -45,7 +45,8 @@ For each subscription you configure:
   locally, *observed* by Heimdall or *declared* by you.
 - **Freshness** — when it was read, so a stale figure never looks current.
 - **Alerts** — a desktop notification when a meter crosses 90 % and 95 %
-  (configurable), once per window.
+  (configurable, also per subscription), once per window, after every
+  collection.
 
 ## Supported subscriptions (planned)
 
