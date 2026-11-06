@@ -8,7 +8,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 |---|---|---|---|
 | 0 | Foundation | Rules (`AGENTS.md`), specification, roadmap, ADRs | done |
 | 1 | Core and terminal | `allowances` domain (subscriptions, meters, balances, readings, freshness, rebirth); snapshot file; `ataecina status` table and `--json` contract; strict `config.json`; XDG paths and permission checks; Loki-compatible logging; `Makefile`, `bin/set-version`, `bin/check-version` | planned |
-| 2 | Token-free sources | `codex-logs` (incremental reader), `claude-statusline` hook (with chaining to an existing status line), `opencode-zen` derived balance and `balance declare` | planned |
+| 2 | Token-free sources | `codex-logs` (incremental reader, windows by duration), `codex-app-server` fallback (method allowlist), `claude-statusline` hook (chained from an existing status line, or `--print` as the status line itself), `opencode-zen` derived balance and `balance declare` | planned |
 | 3 | Sealed keys | `keys` context: `init`, sealed `keys.json`, `keys set/list/forget` from stdin without echo; unlockers `secret-service` (D-Bus, ADR 0009) and `passphrase`; `doctor` | planned |
 | 4 | API-key sources | `openrouter-api`, `vercel-api`, `zai-api`, `commandcode-api`, `minimax-api` (each verified live first); hardened HTTP client (ADR 0006) | planned |
 | 5 | Collector service | `ataecina collect` with global deadline and isolated failures; hardened systemd user service and timer; `systemd-creds` unlocker; `alerts` context with desktop notifications | planned |
@@ -24,7 +24,8 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 - GNOME Shell extension with the full view (the tray covers GNOME meanwhile).
 - Landlock self-sandbox of the collector (Linux ≥ 5.13), restricting reads to
   the documented paths.
-- History of readings (daily usage per subscription) kept locally.
+- History of readings (daily usage per subscription) kept locally, and token
+  history from Codex `account/usage/read` and Claude Code transcripts.
 - Waybar and XFCE Generic Monitor output formats.
 
 ## Design principles

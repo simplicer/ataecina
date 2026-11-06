@@ -5,6 +5,12 @@ mandatory. The business specification is `docs/SPECS.md`, the plan is
 `docs/ROADMAP.md` and every architectural decision lives in `docs/adrs/`
 (this file states the rules; the ADRs keep the reasons, never duplicated here).
 
+**Precedence.** This file overrides any `AGENTS.md` or `CLAUDE.md` found in
+parent directories (for example a generic PHP/Slim template in `~/CODE/`)
+wherever they differ: this is a Go project with no PHP, Slim, PostgreSQL,
+Redis, RabbitMQ, Behat or Playwright. The owner's commit rules below
+(no AI attribution) apply on top of any tool default.
+
 ## What this system is
 
 `ataecina` is a single Go binary for Linux that tells its owner how much is
@@ -132,8 +138,9 @@ feature (ADRs 0003–0006).
 - **Privilege separation** (ADR 0005): only the collector (`ataecina
   collect`, run by a hardened systemd user timer) opens network connections
   and unseals keys. The display paths (`status`, `--json`, tray, Plasma
-  widget) only read the snapshot; they never unseal a key nor open a socket
-  other than the session D-Bus.
+  widget) only read the snapshot, and hooks (`hook claude-statusline`) only
+  write a signal file; none of them unseals a key or opens a socket other
+  than the session D-Bus.
 - **Snapshot** holds only non-secret figures (percentages, amounts, dates,
   states) in `$XDG_RUNTIME_DIR/ataecina/snapshot.json` (`0600`, tmpfs).
 - **Outbound network** (ADR 0006): each adapter has a fixed HTTPS host
@@ -188,6 +195,7 @@ the repository's `etc/`/`var/` convention for an installed desktop tool:
 | Configuration (no secrets) | `$XDG_CONFIG_HOME/ataecina/config.json` (default `~/.config/ataecina/`) |
 | Sealed keys | `$XDG_CONFIG_HOME/ataecina/keys.json` |
 | Snapshot | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` |
+| Hook signals (Claude limits) | `$XDG_RUNTIME_DIR/ataecina/signals/` |
 | Alert state, declared balances | `$XDG_STATE_HOME/ataecina/` |
 | Logs | `$XDG_STATE_HOME/ataecina/ataecina.log` |
 

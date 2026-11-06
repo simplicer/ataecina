@@ -51,7 +51,7 @@ For each subscription you configure:
 | Subscription | What Ataecina reads | Source | Credential | Fidelity |
 |---|---|---|---|---|
 | Claude (Pro, Max) | 5-hour and weekly usage, resets | Claude Code status line (`ataecina hook claude-statusline`) | none | reported |
-| ChatGPT / Codex | 5-hour and weekly usage, credits, plan | Codex session logs in `~/.codex/sessions` | none | reported |
+| ChatGPT / Codex | 5-hour and weekly usage, credits, plan, banked resets | Codex session logs in `~/.codex/sessions`; the official `codex app-server` when they are stale (opt-in) | none | reported |
 | Z.ai GLM Coding Plan | 5-hour and weekly token quotas | Z.ai quota API (undocumented) | API key | reported |
 | MiniMax Token Plan | interval quota, reset | MiniMax `remains` API (undocumented) | API key | reported |
 | Alibaba Model Studio Token Plan | quota usage, reset | official `bl usage token-plan` CLI | `bl`'s own login | reported |
@@ -64,6 +64,32 @@ For each subscription you configure:
 Undocumented endpoints may change without notice. When one does, only that
 subscription shows `BROKEN`; everything else keeps working. Adding a provider
 is one small adapter (see [AGENTS.md](AGENTS.md#adding-a-provider-the-common-task)).
+
+### Claude Code
+
+Claude Code hands its rate limits to your status line command. Add one line
+to your status line script, right after it reads its input:
+
+```sh
+printf '%s' "$input" | ataecina hook claude-statusline &
+```
+
+or, if you have no status line yet, let Ataecina be it:
+
+```json
+{ "statusLine": { "type": "command", "command": "ataecina hook claude-statusline --print" } }
+```
+
+Ataecina never opens `~/.claude/.credentials.json` or `~/.codex/auth.json`.
+
+## One program, one widget
+
+Everything is **one binary**, `ataecina`, with subcommands: the timer runs
+`ataecina collect`, you type `ataecina` in a terminal, and on non-Plasma
+desktops `ataecina tray` is the tray icon. On **KDE Plasma** the panel icon
+and its popup are a native Plasma widget — a few QML files that Plasma itself
+draws, themed like the battery or network widgets — which asks
+`ataecina status --json` for the figures. The same package installs both.
 
 ## How your keys are kept safe
 

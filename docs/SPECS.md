@@ -49,8 +49,9 @@ the only ones read.
 
 | Source id | Subscription | Kind | Host / location | Credential | Fields read | Documented | Fidelity |
 |---|---|---|---|---|---|---|---|
-| `claude-statusline` | Claude Pro/Max/Ultra | local signal | stdin of `ataecina hook claude-statusline`, configured as (or chained from) the Claude Code status line | none | `rate_limits.five_hour` / `seven_day` / `spend_limit`: `used_percentage`, `resets_at` | yes (Claude Code docs) | REPORTED |
-| `codex-logs` | ChatGPT / Codex | local signal | `~/.codex/sessions/**/rollout-*.jsonl` (read-only, incremental) | none | latest `rate_limits` of `limit_id: codex`: `primary`/`secondary` `used_percent`, `window_minutes`, `resets_at`; `credits`; `plan_type` | no (stable in practice) | REPORTED |
+| `claude-statusline` | Claude Pro/Max/Ultra | local signal | stdin of `ataecina hook claude-statusline`, called from the Claude Code status line (§3.1) | none | `rate_limits.five_hour` / `seven_day` (and `spend_limit` behind a Claude apps gateway): `used_percentage`, `resets_at` | yes (Claude Code docs) | REPORTED |
+| `codex-logs` | ChatGPT / Codex | local signal | `~/.codex/sessions/**/rollout-*.jsonl` and `~/.codex/archived_sessions/` (read-only, incremental) (§3.2) | none | latest `rate_limits` with `limit_id: codex`: windows, credits, plan | no (stable in practice) | REPORTED |
+| `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED |
 | `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` | API key | token limits per window, percentage, next reset | no | REPORTED |
 | `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (or `/coding_plan/remains`, to verify) | API key | interval totals, remaining (field meaning to verify), reset | no | REPORTED |
 | `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) | `bl`'s own login | quota windows, percentage, reset, `hasQuotaData` | yes (Model Studio docs) | REPORTED |
@@ -59,6 +60,86 @@ the only ones read.
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` | API key | `balance`, `total_used` | yes | REPORTED |
 | `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --days <N> --models --json` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` over the range since the last declaration | yes (CLI help) | DERIVED |
 | `heimdall` | any plan Heimdall serves | local service | Heimdall admin API on loopback | Heimdall admin token | plan cooldowns, announced resets, usage ledger | yes (Heimdall OpenAPI) | OBSERVED |
+
+### 3.1 Claude in detail (verified 2026-11-06, Claude Code 2.1.319)
+
+- The status line input is the only official source that needs no
+  credential. Claude Code has no non-interactive usage command (`/usage`
+  exists only inside a session), and the OAuth usage endpoint is excluded by
+  ADR 0003.
+- `rate_limits` is present only for Pro, Max and Ultra subscribers (or behind
+  a Claude apps gateway that sets a spend limit), only after the first API
+  response of a session; each window may be absent, and Claude Code drops a
+  window once its `resets_at` passes. `used_percentage` is 0–100;
+  `resets_at` is Unix epoch seconds.
+- The status line runs at session start, after each assistant message, after
+  `/compact`, when a window reaches `resets_at`, and every `refreshInterval`
+  seconds if configured. Figures change only after an API response, so usage
+  made on claude.ai or Claude Desktop (which spends the same windows) is seen
+  at the next Claude Code response. Displays therefore show freshness and
+  estimate rebirth after `resets_at` (§4.2).
+- `ataecina hook claude-statusline` reads the status line JSON from stdin
+  (capped at 1 MiB), keeps only `rate_limits`, writes
+  `$XDG_RUNTIME_DIR/ataecina/signals/claude.json` atomically and exits 0 in
+  a few milliseconds, **even on error**: it must never break or slow the
+  owner's status line. It holds no key and opens no socket. The collector
+  reads that signal file like any local source.
+- With an existing status line script, one line after the script reads its
+  input chains the hook:
+  `printf '%s' "$input" | ataecina hook claude-statusline &`.
+  Without one, `ataecina hook claude-statusline --print` can be the status
+  line itself and prints a compact summary (`5h 23% · 7d 41% · ↻ 2h10m`).
+- The plan (Pro, Max…) is not in the input: it is declared in `config.json`
+  (`"plan": "PRO"`). Ataecina never opens `~/.claude/.credentials.json`,
+  because it holds the OAuth token.
+- Several Claude accounts (`CLAUDE_CONFIG_DIR`) map to several
+  subscriptions: `ataecina hook claude-statusline --subscription claude-work`.
+
+### 3.2 Codex in detail (verified 2026-11-06, codex-cli 0.166.0)
+
+Two official sources; neither gives Ataecina a token. Ataecina never opens
+`~/.codex/auth.json`.
+
+**`codex-logs` (default).** After each response Codex writes a
+`rate_limits` object into the session log
+`~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`. The reader scans only the
+newest files, from the last byte offset it processed, and keeps the latest
+object with `limit_id == "codex"`:
+
+| Field (snake_case) | Meaning |
+|---|---|
+| `primary`, `secondary` | windows: `used_percent`, `window_minutes`, `resets_at` (Unix seconds) |
+| `credits` | `has_credits`, `unlimited`, `balance` (decimal string) |
+| `plan_type` | `free`, `go`, `plus`, `pro`, `team`, `business`, `enterprise`, `edu`… |
+| `limit_id`, `limit_name` | bucket (`codex`; also seen: `premium`, `base_model_inference`) |
+| `individual_limit`, `spend_control_reached`, `rate_limit_reached_type` | spend controls and which limit was hit |
+
+- Windows are mapped by `window_minutes` (300 → `FIVE_HOURS`, 10080 →
+  `WEEKLY`, anything else → `OTHER`), **never by position**: logs where
+  `primary` is the weekly window exist (238 of 3 174 entries on the
+  reference machine).
+- Buckets other than `codex` are shown only when they carry windows.
+
+**`codex-app-server` (opt-in fallback for freshness).** The official binary
+is started as `codex app-server` (fixed argv, no shell, stdio, 15 s
+timeout). Ataecina sends `initialize` with `clientInfo.name = "ataecina"`,
+then `account/rateLimits/read`, reads the answer and closes the process.
+Codex performs the network call with its own login.
+
+- Response: `rateLimitsByLimitId` (map by `limit_id`; fallback
+  `rateLimits`), each a snapshot with `primary`/`secondary`
+  (`usedPercent`, `windowDurationMins`, `resetsAt`), `credits`
+  (`hasCredits`, `unlimited`, `balance`), `planType`, `limitId`,
+  `limitName`, `spendControlReached`, `rateLimitReachedType`; plus
+  `rateLimitResetCredits.availableCount` (banked resets, shown as
+  information only).
+- Used only when the `codex-logs` reading is older than
+  `app_server_after_minutes` (default 60) and the owner enabled it.
+- **Method allowlist**: `initialize`, `account/rateLimits/read` (and later
+  `account/usage/read` for history). Never `account/rateLimitResetCredit/consume`,
+  login, logout, config writes or any method that changes state.
+- Codex marks the protocol experimental: any surprise is `CONTRACT_CHANGED`
+  and the logs remain the source.
 
 Declared balances (`ataecina balance declare`) are stored in
 `$XDG_STATE_HOME/ataecina/balances.json` with fidelity `DECLARED`; `opencode-zen`
@@ -104,7 +185,7 @@ Provider failures are classified in infrastructure:
 |---|---|---|---|
 | `collect_readings` | allowances | collector (timer or `ataecina collect`) | For each enabled subscription, ask its source through the `Source` port (keys via the `KeyRing` port), classify failures, merge with the previous snapshot (keep last good reading on transient errors), write the snapshot atomically. One attempt per source; sources run concurrently with a global deadline. |
 | `report_snapshot` | allowances | display | Read the snapshot, apply freshness and rebirth rules at the current time, return the view model. Never touches keys or the network. |
-| `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, update the `claude` reading, print nothing (or pass through to a chained status line command). Must finish in a few milliseconds. |
+| `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, write the Claude signal file (§3.1); print nothing, or a summary line with `--print`. Must finish in a few milliseconds and never fail the status line. |
 | `declare_balance` | allowances | owner | Record a top-up or current balance for a balance-only subscription. |
 | `seal_key` | keys | owner (`keys set`) | Read the key from stdin, seal it under the master key with the provider id as associated data, write `keys.json` atomically. |
 | `forget_key` | keys | owner | Remove a sealed key. |
@@ -197,11 +278,46 @@ Errors are RFC 9457 problem objects on stderr with a non-zero exit code.
 
 ### 8.3 Plasma widget
 
-Compact form: an icon whose ring shows the worst meter, coloured by
-threshold. Full form: one row per subscription with bars per window,
-countdown to rebirth, balance, freshness and outcome. It runs
-`ataecina status --json` on a timer and offers "refresh now", which starts
-`ataecina-collect.service` through systemd — the widget itself never collects.
+A native Plasma 6 widget (`org.simplicer.ataecina`) built with Plasma and
+Kirigami components, so it follows the Breeze theme, light and dark colour
+schemes and the accent colour like the battery or network widgets.
+
+- **Compact form (panel):** a ring drawn around the Ataecina icon showing
+  the worst meter, optionally with its percentage. Colours: normal; warning
+  from the first threshold; critical from the second; grey when the figure is
+  stale or broken. Tooltip: worst subscription, window and time to rebirth.
+- **Full form (popup):** one block per subscription with its plan, a bar per
+  window, the percentage, the countdown to rebirth (`↻ 2 h 10 m`), the
+  balance when there is one, a fidelity badge for anything not `REPORTED`,
+  and the outcome when not `OK`. A footer shows when the snapshot was taken
+  and a refresh button.
+
+```text
+┌──────────────────────────────────────────────────┐
+│  Ataecina                       updated 2 min ago ⟳ │
+├──────────────────────────────────────────────────┤
+│  Claude · Pro                                    │
+│  5 h    ███████░░░░░░░░░░░░░  23 %   ↻ 2 h 10 m  │
+│  week   ████████░░░░░░░░░░░░  41 %   ↻ 4 d 12 h  │
+│  Codex · Plus                                    │
+│  5 h    █░░░░░░░░░░░░░░░░░░░   4 %   ↻ 3 h 02 m  │
+│  week   ░░░░░░░░░░░░░░░░░░░░   1 %   ↻ 6 d 01 h  │
+│  Z.ai GLM · Lite                                 │
+│  5 h    ██████████████████░░  92 % ⚠ ↻ 0 h 41 m  │
+│  OpenRouter              $8.42 left · $11.58 used │
+│  OpenCode Zen            ≈ $3.10 left   derived  │
+│  MiniMax                 ✕ contract changed      │
+└──────────────────────────────────────────────────┘
+```
+
+- It runs `ataecina status --json` on a timer (default 60 s) through the
+  Plasma 5 support executable engine; "refresh now" starts
+  `ataecina-collect.service` through systemd. It never collects, never reads
+  keys and has no network code.
+- Settings page: which subscriptions to show and in which order, show the
+  percentage in the panel, widget refresh interval.
+- Translatable through KDE i18n: English source strings, Spanish shipped from
+  the first release.
 
 ### 8.4 Tray (`ataecina tray`)
 
@@ -217,6 +333,7 @@ extension.
 | `…/config.json` | subscriptions, sources, thresholds, interval (no secrets) | `0600` |
 | `…/keys.json` | sealed keys and wrapped master key | `0600` |
 | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` | latest readings (figures only) | `0600` |
+| `$XDG_RUNTIME_DIR/ataecina/signals/` | signals written by hooks (Claude limits), read by the collector | `0700` / `0600` |
 | `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, log offsets, log | `0700` / `0600` |
 
 `config.json` example:
@@ -227,8 +344,8 @@ extension.
   "interval_minutes": 5,
   "alerts": { "thresholds": [90, 95] },
   "subscriptions": [
-    { "id": "claude", "source": "claude-statusline" },
-    { "id": "codex", "source": "codex-logs" },
+    { "id": "claude", "source": "claude-statusline", "plan": "PRO" },
+    { "id": "codex", "source": "codex-logs", "app_server_after_minutes": 60 },
     { "id": "zai", "source": "zai-api", "key": "zai" },
     { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
     { "id": "zen", "source": "opencode-zen" }
