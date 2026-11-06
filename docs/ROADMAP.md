@@ -16,7 +16,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch for amd64 and arm64, verified by `bin/check-packages`), AUR `PKGBUILD`, `make install-user`/`uninstall-user` through one layout script (`bin/install-files`); reproducible packages; checksums signed by the maintainer at release | done |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator; refresh through systemd's `StartUnit`; launcher `.desktop` | done |
 | 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | done (every adapter built against synthetic answers; live verification by the owner before a release) |
-| 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | in progress (`SECURITY.md` and `CONTRIBUTING.md` done; license, remotes, push mirror and published packages wait for the maintainer) |
+| 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | in progress (`SECURITY.md`, `CONTRIBUTING.md` and the Forgejo workflow done; license, remotes, push mirror and published packages wait for the maintainer) |
 
 ## Later (not scheduled)
 

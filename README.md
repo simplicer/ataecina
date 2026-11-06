@@ -307,6 +307,16 @@ every test runs in a throw-away `HOME` and XDG tree.
 How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md); how to report a
 vulnerability, and what Ataecina promises, is in [SECURITY.md](SECURITY.md).
 
+### Continuous integration
+
+`.forgejo/workflows/check.yml` runs `make check`, `make e2e` and
+`make package` in a `golang:1.27-bookworm` container on every push to `main`
+and every pull request, once the repository lives on Codeberg with Actions
+enabled. It asks for a runner labelled `docker` (the default of a
+self-hosted `forgejo-runner`); to use Codeberg's hosted runners instead,
+change `runs-on` to the label Codeberg assigns. The GitHub repository is a
+push mirror configured in Codeberg's repository settings; it runs nothing.
+
 ## Versioning
 
 Semantic Versioning with the Simplicer policy: `VERSION` is the single source

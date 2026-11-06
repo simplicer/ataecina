@@ -12,6 +12,8 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 - `SECURITY.md` (how to report a vulnerability and what Ataecina promises)
   and `CONTRIBUTING.md` (how a change is made, tested and committed).
+- Forgejo Actions workflow running `make check`, `make e2e` and
+  `make package` on every push to `main` and every pull request.
 
 ## [0.16.0-unstable] - 2026-11-06
 
