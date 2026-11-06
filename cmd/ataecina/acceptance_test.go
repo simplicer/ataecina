@@ -16,7 +16,6 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
-	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
 
 // Acceptance tests drive whole flows through run(): configuration,
@@ -91,8 +90,10 @@ func newWorld(t *testing.T, config string) *world {
 	source := &scriptedSource{clock: clock}
 	registry := standardSources().with(
 		catalog.Entry{Source: "scripted", Provider: "acme", Fidelity: domain.FidelityReported},
-		func(configfile.SubscriptionSettings, xdg.Paths, environment) domain.Source { return source },
+		func(configfile.SubscriptionSettings, collection) domain.Source { return source },
 	)
+	// A source the catalog knows but this build does not implement.
+	registry.catalog = registry.catalog.With(catalog.Entry{Source: "unbuilt", Provider: "acme", Fidelity: domain.FidelityReported})
 	return &world{t: t, root: root, vars: vars, clock: clock, source: source, env: environment{
 		getenv:  func(key string) string { return vars[key] },
 		stdin:   strings.NewReader(""),
@@ -152,7 +153,7 @@ func (w *world) collect() {
 
 const twoSubscriptions = `{"version": 1, "subscriptions": [
   {"id": "acme", "source": "scripted", "plan": "pro"},
-  {"id": "zai", "source": "zai-api"}
+  {"id": "zai", "source": "unbuilt"}
 ]}`
 
 func fiveHours(used float64, resetsIn time.Duration) func(domain.Subscription, time.Time) (domain.Reading, error) {

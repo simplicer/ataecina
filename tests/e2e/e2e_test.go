@@ -153,7 +153,7 @@ func TestCollectAndShowTheSnapshot(t *testing.T) {
 	for _, s := range doc.Data.Subscriptions {
 		outcomes[s.ID] = s.Outcome
 	}
-	want := map[string]string{"claude": "OK", "minimax": "BROKEN", "openrouter": "OK", "zai": "UNSUPPORTED"}
+	want := map[string]string{"claude": "OK", "minimax": "BROKEN", "openrouter": "OK", "zai": "KEY_MISSING"}
 	for id, outcome := range want {
 		if outcomes[id] != outcome {
 			t.Fatalf("%s = %s, want %s", id, outcomes[id], outcome)
@@ -170,7 +170,7 @@ func TestCollectAndShowTheSnapshot(t *testing.T) {
 	}
 
 	code, table, _ := tr.run(bin)
-	for _, fragment := range []string{"5h 23.5% ↻ 2h10m", "week 41.2%", "broken", "$8.42 left", "unsupported"} {
+	for _, fragment := range []string{"5h 23.5% ↻ 2h10m", "week 41.2%", "broken", "$8.42 left", "key missing: no keys yet"} {
 		if code != 0 || !strings.Contains(table, fragment) {
 			t.Fatalf("table lacks %q:\n%s", fragment, table)
 		}

@@ -20,7 +20,12 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/codexlogs:FuzzDecodeLine \
 	./internal/allowances/infrastructure/codexappserver:FuzzDecodeRateLimits \
 	./internal/allowances/infrastructure/claudestatusline:FuzzDecodeRateLimits \
-	./internal/allowances/infrastructure/opencodezen:FuzzDecodeSpend
+	./internal/allowances/infrastructure/opencodezen:FuzzDecodeSpend \
+	./internal/allowances/infrastructure/openrouterapi:FuzzDecodeKey \
+	./internal/allowances/infrastructure/vercelapi:FuzzDecodeCredits \
+	./internal/allowances/infrastructure/zaiapi:FuzzDecodeQuota \
+	./internal/allowances/infrastructure/minimaxapi:FuzzDecodeRemains \
+	./internal/allowances/infrastructure/commandcodeapi:FuzzDecodeCredits
 FUZZ_TIME ?= 30s
 
 .PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke vulncheck build check-version e2e fuzz clean

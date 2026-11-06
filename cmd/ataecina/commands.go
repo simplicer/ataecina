@@ -14,9 +14,13 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/journal"
+	sealedkeys "codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/keyring"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/snapshotfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/statusjson"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/terminal"
+	keysapp "codeberg.org/simplicer/ataecina/internal/keys/application"
+	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/aesgcm"
+	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
 	"codeberg.org/simplicer/ataecina/internal/platform/logging"
 	"codeberg.org/simplicer/ataecina/internal/platform/privatefs"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
@@ -161,6 +165,7 @@ func status(args []string, env environment) int {
 // collect reads every subscription once and keeps the snapshot.
 func collect(ctx context.Context, args []string, env environment) int {
 	flags := newFlags("collect", env)
+	fd := passphraseFlag(flags)
 	if err := flags.Parse(args); err != nil || flags.NArg() > 0 {
 		return exitUsage
 	}
@@ -192,12 +197,26 @@ func collect(ctx context.Context, args []string, env environment) int {
 	}
 	defer logFile.Close()
 
+	ring, err := openKeyring(env, *fd, false)
+	if err != nil {
+		return fail(err)
+	}
+	sources := env.sources.build(settings, collection{
+		paths: paths,
+		env:   env,
+		keys:  sealedkeys.New(keysapp.NewUnsealKey(ring.files, aesgcm.Cipher{}, ring.unlockers)),
+		http: httpclient.New(httpclient.Options{
+			Version:             version,
+			UseEnvironmentProxy: settings.UseEnvironmentProxy,
+			AllowPlainHTTP:      plainHTTPAllowed,
+		}),
+	})
 	store := snapshotfile.NewStore(runtimeDir)
 	collector := application.NewCollectReadings(
 		settings.DomainSubscriptions(),
 		application.CollectionPolicy{Interval: settings.Interval, Deadline: collectionDeadline},
 		application.CollectReadingsPorts{
-			Sources:  env.sources.build(settings, paths, env),
+			Sources:  sources,
 			Previous: store,
 			Store:    store,
 			Journal:  journal.New(logger),

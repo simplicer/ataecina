@@ -3,7 +3,10 @@ package domain
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
+
+	"codeberg.org/simplicer/ataecina/internal/platform/secret"
 )
 
 // ErrNoSnapshot reports that the collector has not taken a snapshot yet.
@@ -56,4 +59,23 @@ type LimitSignals interface {
 // Clock tells the time; the domain itself never reads it.
 type Clock interface {
 	Now() time.Time
+}
+
+// KeyName names the sealed key a subscription uses (by default its id).
+type KeyName string
+
+// NewKeyName validates a key name.
+func NewKeyName(raw string) (KeyName, error) {
+	if !shortIdentifier.MatchString(raw) {
+		return "", fmt.Errorf("%w: key %q", ErrInvalidIdentifier, raw)
+	}
+	return KeyName(raw), nil
+}
+
+func (n KeyName) String() string { return string(n) }
+
+// KeyRing gives the collector a provider key; the keys context implements
+// it (ADR 0002). Failures are *SourceFailure: KeyMissing or KeysLocked.
+type KeyRing interface {
+	KeyFor(ctx context.Context, name KeyName) (secret.Key, error)
 }

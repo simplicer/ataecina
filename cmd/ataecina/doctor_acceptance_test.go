@@ -11,7 +11,7 @@ import (
 
 func TestDoctorPointsAtWhatIsMissing(t *testing.T) {
 	w := newWorld(t, `{"version": 1, "subscriptions": [
-	  {"id": "zai", "source": "zai-api"},
+	  {"id": "zai", "source": "unbuilt"},
 	  {"id": "zen", "source": "opencode-zen"},
 	  {"id": "codex", "source": "codex-logs", "app_server": true}
 	]}`)
@@ -21,7 +21,7 @@ func TestDoctorPointsAtWhatIsMissing(t *testing.T) {
 		"✓ configuration",
 		"! keys           no keys.json yet",
 		"! keyring        no session bus here",
-		"! zai            source zai-api is not available in this version",
+		"! zai            source unbuilt is not available in this version",
 		"! zen            opencode is not on PATH",
 		"! codex          codex is not on PATH",
 		"! snapshot       none yet",
@@ -43,6 +43,14 @@ func TestDoctorPointsAtWhatIsMissing(t *testing.T) {
 		if !strings.Contains(out, want) {
 			t.Fatalf("missing %q in\n%s", want, out)
 		}
+	}
+}
+
+func TestDoctorFailsOnAMissingKey(t *testing.T) {
+	w := newWorld(t, `{"version": 1, "subscriptions": [{"id": "zai", "source": "zai-api"}]}`)
+	code, out, _ := w.run("doctor")
+	if code != exitFailure || !strings.Contains(out, "✗ zai            no sealed key \"zai\": run `ataecina keys set zai`") {
+		t.Fatalf("doctor = %d\n%s", code, out)
 	}
 }
 

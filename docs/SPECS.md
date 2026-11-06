@@ -61,12 +61,12 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `claude-statusline` | Claude Pro/Max/Ultra | local signal | stdin of `ataecina hook claude-statusline`, called from the Claude Code status line (§3.1) | none | `rate_limits.five_hour` / `seven_day` (and `spend_limit` behind a Claude apps gateway): `used_percentage`, `resets_at` | yes (Claude Code docs) | REPORTED | local 2026-11-06 |
 | `codex-logs` | ChatGPT / Codex | local signal | `~/.codex/sessions/**/rollout-*.jsonl` and `~/.codex/archived_sessions/` (read-only, incremental) (§3.2) | none | latest `rate_limits` with `limit_id: codex`: windows, credits, plan | no (stable in practice) | REPORTED | local 2026-11-06 |
 | `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED | local 2026-11-06; live to verify |
-| `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` | API key | token limits per window, percentage, next reset | no | REPORTED | third-party 2026-11-06; live to verify |
-| `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (or `/coding_plan/remains`, to verify) | API key | interval totals, remaining (field meaning to verify), reset | no | REPORTED | third-party 2026-11-06; live to verify |
+| `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` (§3.5) | API key (`Bearer`, to verify) | `data.limits[]` of type `TOKENS_LIMIT`/`CREDIT_LIMIT`: `unit`, `number`, `percentage`, `nextResetTime`; `data.level` | no | REPORTED | third-party 2026-11-06; live to verify |
+| `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (§3.5) | Token Plan key (`Bearer`) | `model_remains[]`: interval and weekly totals, counts (remaining), `*_remaining_percent`, start/end times; `base_resp.status_code` | no | REPORTED | third-party 2026-11-06; live to verify |
 | `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) | `bl`'s own login | quota windows, percentage, reset, `hasQuotaData` | yes (Model Studio docs) | REPORTED | docs 2026-11-06; `bl` not installed, to verify |
-| `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/billing/subscriptions`, `/alpha/usage/summary` | API key | monthly credits, 5-hour and weekly windows, period end | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
-| `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` | API key (credits may need a management key) | usage, limit, limit remaining, free tier, total credits | yes | REPORTED | docs 2026-11-06 |
-| `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` | API key | `balance`, `total_used` | yes | REPORTED | docs 2026-11-06 |
+| `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/usage/summary`, `/alpha/billing/subscriptions` (§3.5) | API key (`Bearer`) | `credits.{monthly,purchased,free}Credits`, `windowLimits.{fiveHour,weekly}.{used,cap,resetAt}`, `totalCost`, `data.{planId,currentPeriodEnd}` | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
+| `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` (§3.5) | API key (`Bearer`; `/credits` may need a management key) | `data.{usage,limit,limit_remaining,free_model_daily_requests}`, `data.{total_credits,total_usage}` | yes | REPORTED | docs 2026-11-06 |
+| `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
 | `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --all --models --limit 1000 --json --standalone` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` to date, against the declared balance (§3.4) | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape and `--standalone` to verify |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/usage` (§3.3) | Ollama API key (`Authorization: Bearer`) | `limits.session.usage`, `limits.weekly.usage` (fraction 0–1 of the cap); monthly-credit plans: fields to verify | no (called by the ollama.com web page) | REPORTED | third-party 2026-11-06; live to verify |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
@@ -282,6 +282,47 @@ The token needs only *Account Analytics: Read* (it cannot run inference).
 The `DAILY` window is reborn at 00:00 UTC (to verify); analytics may lag a
 few minutes behind the dashboard.
 
+### 3.5 API-key sources in detail (milestone 4; undocumented ones verified live by the owner before release)
+
+Every request goes through the hardened client of ADR 0006 with the
+subscription's sealed key (`key`, default the subscription id) as
+`Authorization: Bearer <key>`; the key is unsealed in memory, used once and
+wiped.
+
+- **`openrouter-api`.** `/api/v1/key` gives the key's `usage` (USD) and its
+  optional `limit`/`limit_remaining`; `/api/v1/credits` gives the account's
+  `total_credits` and `total_usage`. Remaining is `total_credits −
+  total_usage` when `/credits` answers, else the key's `limit_remaining`;
+  without either the reading is `PARTIAL` with the spend only. Free-model
+  requests (`free_model_daily_requests.used/limit`) become a `DAILY` meter in
+  bucket `free_models`, reborn at 00:00 UTC.
+- **`vercel-api`.** `balance` and `total_used` (USD strings) are remaining
+  and spent.
+- **`zai-api`.** Entries of `data.limits` with type `TOKENS_LIMIT` or
+  `CREDIT_LIMIT` (renamed by Z.ai in November 2026) are windows: `unit` 3 is
+  hours (`number` 5 → `FIVE_HOURS`), `unit` 6 is weeks (`number` 1 →
+  `WEEKLY`); `percentage` is the share used; `nextResetTime` is epoch
+  milliseconds and absent for an untouched window. `TIME_LIMIT` entries
+  (tool calls) are skipped. `data.level` is the plan. `code` 401/403 is
+  `KEY_REJECTED`; `success: false` is `CONTRACT_CHANGED`.
+- **`minimax-api`.** Per `model_remains[]` entry (bucket = `model_name`):
+  the interval window lasts `end_time − start_time` (epoch ms; 300 minutes
+  → `FIVE_HOURS`, anything else `OTHER`), the weekly one ends at
+  `weekly_end_time`. MiniMax confirmed that `current_*_usage_count` holds
+  the **remaining** count, so used = `(total − count) / total`; an explicit
+  `current_*_remaining_percent` wins when present. A window with a zero total
+  and no percentage is skipped. `base_resp.status_code` 1004 or 2049 is
+  `KEY_REJECTED`, any other non-zero is `CONTRACT_CHANGED`; no window at all
+  is `UNREADABLE`.
+- **`commandcode-api`.** `/alpha/billing/credits` is required:
+  remaining = `monthlyCredits + purchasedCredits + freeCredits` (read as USD,
+  to verify), `fiveHour` and `weekly` windows as `used / cap`, reset at
+  `resetAt` (epoch ms). `/alpha/usage/summary` (`totalCost`, spent in the
+  billing period) and `/alpha/billing/subscriptions` (`planId`,
+  `currentPeriodEnd`) are optional: with both, a `BILLING_CYCLE` meter shows
+  `spent / (spent + remaining)` until the period end; without them the
+  reading is `PARTIAL`.
+
 ### 3.4 OpenCode Zen and declared balances
 
 OpenCode Zen has no balance API for a key; OpenCode records the cost of
@@ -350,6 +391,14 @@ Provider failures are classified in infrastructure:
 | `UNAVAILABLE` | timeout, 5xx, DNS | keep the last reading, mark it `STALE` when it ages |
 | `CONTRACT_CHANGED` | unexpected shape or fields | outcome `BROKEN`, logged without the body |
 | `UNREADABLE` | local file missing, locked or malformed | outcome `UNAVAILABLE` for that source |
+
+HTTP answers map as: 2xx read; 401 and 403 `KEY_REJECTED`; 429
+`RATE_LIMITED`, with `Retry-After` (seconds or an HTTP date) kept as
+`retry_not_before` so the source is not asked before; 5xx, timeouts, DNS
+and connection errors `UNAVAILABLE`; any other status, a redirect, a body
+over 64 KiB or an unexpected shape `CONTRACT_CHANGED`. A key that is not
+sealed shows `KEY_MISSING` with the `keys set` command to run; a master key
+no unlocker can open here shows `LOCKED`.
 
 After a transient failure (`RATE_LIMITED`, `UNAVAILABLE`, `UNREADABLE`) the
 last reading with figures is kept as it was, with `error_class` and `hint`

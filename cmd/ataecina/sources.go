@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"path/filepath"
+	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/balancefile"
@@ -9,14 +11,28 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/claudestatusline"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexappserver"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/commandcodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/openrouterapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/vercelapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/zaiapi"
+	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
 	"codeberg.org/simplicer/ataecina/internal/platform/pathlookup"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
 
+// collection is what every adapter of one collection may use.
+type collection struct {
+	paths xdg.Paths
+	env   environment
+	keys  domain.KeyRing
+	http  httpclient.Client
+}
+
 // sourceFactory builds the adapter of one configured subscription.
-type sourceFactory func(settings configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source
+type sourceFactory func(settings configfile.SubscriptionSettings, c collection) domain.Source
 
 // sourceRegistry knows every source id (the catalog) and builds the
 // adapters this binary implements; the others read as UNSUPPORTED.
@@ -42,37 +58,60 @@ func (s subscriptionSources) SourceOf(subscription domain.Subscription) (domain.
 	return source, ok
 }
 
-func (r sourceRegistry) build(settings configfile.Settings, paths xdg.Paths, env environment) subscriptionSources {
+func (r sourceRegistry) build(settings configfile.Settings, c collection) subscriptionSources {
 	sources := make(subscriptionSources, len(settings.Subscriptions))
 	for _, item := range settings.Subscriptions {
 		if factory, ok := r.factories[item.Subscription.Source()]; ok {
-			sources[item.Subscription.ID()] = factory(item, paths, env)
+			sources[item.Subscription.ID()] = factory(item, c)
 		}
 	}
 	return sources
 }
 
+// viaAPI builds a provider API adapter bound to its compiled-in origin.
+func viaAPI[S domain.Source](origin string, build func(httpclient.Endpoint, domain.KeyRing, domain.KeyName, func() time.Time) S) sourceFactory {
+	return func(settings configfile.SubscriptionSettings, c collection) domain.Source {
+		endpoint, err := c.http.For(providerOrigin(c.env, origin))
+		if err != nil {
+			return failing{domain.Failure(domain.ErrorContractChanged, "the provider origin is invalid", err)}
+		}
+		return build(endpoint, c.keys, domain.KeyName(settings.Key), c.env.clock.Now)
+	}
+}
+
+// failing is a source that can only fail.
+type failing struct{ failure *domain.SourceFailure }
+
+func (f failing) Read(context.Context, domain.Subscription) (domain.Reading, error) {
+	return domain.Reading{}, f.failure
+}
+
 // standardSources is the production registry.
 func standardSources() sourceRegistry {
 	return sourceRegistry{catalog: catalog.Standard(), factories: map[domain.SourceID]sourceFactory{
-		codexlogs.SourceID: func(settings configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
-			logs := codexlogs.New(codexHome(paths, env), filepath.Join(paths.StateDir(), "codex-logs"), env.clock.Now)
+		codexlogs.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
+			logs := codexlogs.New(codexHome(c.paths, c.env), filepath.Join(c.paths.StateDir(), "codex-logs"), c.env.clock.Now)
 			if !settings.AppServer {
 				return logs
 			}
-			return codexappserver.NewFallback(logs, appServer(env), settings.AppServerAfter, env.clock.Now)
+			return codexappserver.NewFallback(logs, appServer(c.env), settings.AppServerAfter, c.env.clock.Now)
 		},
-		codexappserver.SourceID: func(_ configfile.SubscriptionSettings, _ xdg.Paths, env environment) domain.Source {
-			return appServer(env)
+		codexappserver.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
+			return appServer(c.env)
 		},
-		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
-			return opencodezen.NewSource(balancefile.NewStore(paths.StateDir()), zenSpend(env), env.clock.Now)
+		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
+			return opencodezen.NewSource(balancefile.NewStore(c.paths.StateDir()), zenSpend(c.env), c.env.clock.Now)
 		},
-		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, _ environment) domain.Source {
+		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			// collect has already required the runtime directory.
-			runtimeDir, _ := paths.RuntimeDir()
+			runtimeDir, _ := c.paths.RuntimeDir()
 			return claudestatusline.NewSource(filepath.Join(runtimeDir, "signals"))
 		},
+		"openrouter-api":  viaAPI(openrouterapi.Origin, openrouterapi.New),
+		"vercel-api":      viaAPI(vercelapi.Origin, vercelapi.New),
+		"zai-api":         viaAPI(zaiapi.Origin, zaiapi.New),
+		"minimax-api":     viaAPI(minimaxapi.Origin, minimaxapi.New),
+		"commandcode-api": viaAPI(commandcodeapi.Origin, commandcodeapi.New),
 	}}
 }
 

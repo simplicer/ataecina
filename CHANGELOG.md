@@ -8,6 +8,18 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.9.0-unstable] - 2026-11-06
+
+### Added
+
+- API-key sources `openrouter-api`, `vercel-api`, `zai-api`, `minimax-api`
+  and `commandcode-api`, reading with the sealed key of each subscription;
+  `collect --passphrase-fd`.
+- Hardened HTTP client (ADR 0006): one compiled-in HTTPS origin per
+  adapter, no redirects, no proxy unless enabled, 5 s connect and 10 s
+  request timeouts, 64 KiB bodies after decompression, `ataecina/<version>`
+  User-Agent, no retries; `Retry-After` is honoured.
+
 ## [0.8.0-unstable] - 2026-11-06
 
 ### Added
