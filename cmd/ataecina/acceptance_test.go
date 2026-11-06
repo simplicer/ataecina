@@ -61,6 +61,7 @@ func (s *scriptedSource) set(answer func(domain.Subscription, time.Time) (domain
 type world struct {
 	t      *testing.T
 	root   string
+	vars   map[string]string
 	clock  *movableClock
 	source *scriptedSource
 	env    environment
@@ -92,7 +93,7 @@ func newWorld(t *testing.T, config string) *world {
 		catalog.Entry{Source: "scripted", Provider: "acme", Fidelity: domain.FidelityReported},
 		func(configfile.SubscriptionSettings, xdg.Paths, environment) domain.Source { return source },
 	)
-	return &world{t: t, root: root, clock: clock, source: source, env: environment{
+	return &world{t: t, root: root, vars: vars, clock: clock, source: source, env: environment{
 		getenv:  func(key string) string { return vars[key] },
 		stdin:   strings.NewReader(""),
 		clock:   clock,

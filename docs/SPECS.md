@@ -144,6 +144,23 @@ object with `limit_id == "codex"`:
   `primary` is the weekly window exist (238 of 3 174 entries on the
   reference machine).
 - Buckets other than `codex` are shown only when they carry windows.
+- Only lines of type `event_msg` whose `payload.type` is `token_count` are
+  decoded, and of them only `timestamp` and `payload.rate_limits`; a line is
+  parsed at all only if it contains `"rate_limits"`. Lines longer than
+  64 KiB are skipped unread; a last line without its newline is left for
+  the next collection. A missing `limit_id` means `codex`; older logs with
+  `resets_in_seconds` are read relative to the event's `timestamp`.
+- Files are walked under `$CODEX_HOME` (when absolute, as Codex reads it)
+  or `~/.codex`, without following symlinks, and only when modified within
+  the last 8 days (a weekly window plus a day). For each file the reader
+  keeps its inode and byte offset, plus the latest figures per `limit_id`,
+  in `$XDG_STATE_HOME/ataecina/codex-logs/<subscription>.json` (`0600`); no
+  log content is ever stored. A rotated or truncated file is read again
+  from the start. The newest event wins by `timestamp`, not by file order.
+- Failures: no Codex directory, or no rate limits in recent logs →
+  `UNREADABLE` (outcome `UNAVAILABLE`, the last good reading is kept);
+  only malformed `rate_limits` → `CONTRACT_CHANGED` (`BROKEN`); the
+  collector's deadline → `UNAVAILABLE`.
 
 **`codex-app-server` (opt-in fallback for freshness).** The official binary
 is started as `codex app-server` (fixed argv, no shell, stdio, 15 s

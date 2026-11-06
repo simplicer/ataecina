@@ -1,8 +1,11 @@
 package main
 
 import (
+	"path/filepath"
+
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
@@ -46,5 +49,17 @@ func (r sourceRegistry) build(settings configfile.Settings, paths xdg.Paths, env
 
 // standardSources is the production registry.
 func standardSources() sourceRegistry {
-	return sourceRegistry{catalog: catalog.Standard(), factories: map[domain.SourceID]sourceFactory{}}
+	return sourceRegistry{catalog: catalog.Standard(), factories: map[domain.SourceID]sourceFactory{
+		codexlogs.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
+			return codexlogs.New(codexHome(paths, env), filepath.Join(paths.StateDir(), "codex-logs"), env.clock.Now)
+		},
+	}}
+}
+
+// codexHome is $CODEX_HOME when absolute, as Codex itself reads it, else ~/.codex.
+func codexHome(paths xdg.Paths, env environment) string {
+	if home := env.getenv("CODEX_HOME"); filepath.IsAbs(home) {
+		return filepath.Clean(home)
+	}
+	return filepath.Join(paths.Home(), ".codex")
 }

@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.2.0-unstable] - 2026-11-06
+
+### Added
+
+- `codex-logs` source: reads the rate limits Codex writes into its session
+  logs, incrementally from the last byte offset, read-only and without
+  storing any log content; windows are mapped by duration, every limit id
+  with windows is a bucket, Codex credits and the plan are shown.
+
 ## [0.1.0-unstable] - 2026-11-06
 
 ### Added
