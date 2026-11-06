@@ -4,8 +4,10 @@
 package providerhttptest
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -44,8 +46,12 @@ func Serve(t testing.TB, answers map[string]Answer) *Provider {
 	t.Helper()
 	p := &Provider{answers: answers}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Keep the body so that tests can read what was sent.
+		body, _ := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+		received := r.Clone(context.Background())
+		received.Body = io.NopCloser(bytes.NewReader(body))
 		p.mu.Lock()
-		p.received = append(p.received, r.Clone(context.Background()))
+		p.received = append(p.received, received)
 		answer, ok := p.answers[r.URL.RequestURI()]
 		p.mu.Unlock()
 		if !ok {
@@ -92,12 +98,38 @@ func (r Ring) KeyFor(context.Context, domain.KeyName) (secret.Key, error) {
 // Build makes the adapter under test from an endpoint and a key ring.
 type Build func(endpoint httpclient.Endpoint, keys domain.KeyRing) domain.Source
 
-// Conformance checks the request every adapter sends on path and its
-// handling of each failure class (SPECS §4.3).
+// Case is what an adapter is checked with: the request on Path (by Method,
+// GET when empty) whose failures are classified, its good answer, and the
+// good answers of any other path the adapter also needs.
+type Case struct {
+	Subscription domain.Subscription
+	Method       string
+	Path         string
+	OK           string
+	Also         map[string]Answer
+}
+
+// Conformance checks one GET path; see Check.
 func Conformance(t *testing.T, subscription domain.Subscription, path, okBody string, build Build) {
 	t.Helper()
+	Check(t, Case{Subscription: subscription, Path: path, OK: okBody}, build)
+}
+
+// Check verifies the request an adapter sends on c.Path and its handling
+// of each failure class (SPECS §4.3).
+func Check(t *testing.T, c Case, build Build) {
+	t.Helper()
+	method := c.Method
+	if method == "" {
+		method = http.MethodGet
+	}
+	subscription, path, okBody := c.Subscription, c.Path, c.OK
 	read := func(answer Answer, keys domain.KeyRing) (*Provider, domain.Reading, error) {
-		provider := Serve(t, map[string]Answer{path: answer})
+		answers := map[string]Answer{path: answer}
+		for other, good := range c.Also {
+			answers[other] = good
+		}
+		provider := Serve(t, answers)
 		reading, err := build(provider.Endpoint, keys).Read(context.Background(), subscription)
 		return provider, reading, err
 	}
@@ -110,11 +142,11 @@ func Conformance(t *testing.T, subscription domain.Subscription, path, okBody st
 		t.Fatalf("reading for %s", reading.Subscription())
 	}
 	first := provider.Received()[0]
-	if first.Header.Get("Authorization") != "Bearer "+Key || first.Header.Get("User-Agent") != "ataecina/test" || first.Method != http.MethodGet {
+	if first.Header.Get("Authorization") != "Bearer "+Key || first.Header.Get("User-Agent") != "ataecina/test" || first.Method != method {
 		t.Fatalf("request = %s %v", first.Method, first.Header)
 	}
 
-	cases := []struct {
+	failures := []struct {
 		name   string
 		answer Answer
 		class  domain.ErrorClass
@@ -128,14 +160,14 @@ func Conformance(t *testing.T, subscription domain.Subscription, path, okBody st
 		{"not JSON", Answer{Body: "<html>"}, domain.ErrorContractChanged},
 		{"empty object", Answer{Body: "{}"}, domain.ErrorContractChanged},
 	}
-	for _, c := range cases {
-		_, _, err := read(c.answer, Ring{})
+	for _, f := range failures {
+		_, _, err := read(f.answer, Ring{})
 		var failure *domain.SourceFailure
-		if !errors.As(err, &failure) || failure.Class() != c.class {
-			t.Fatalf("%s: %v, want %s", c.name, err, c.class)
+		if !errors.As(err, &failure) || failure.Class() != f.class {
+			t.Fatalf("%s: %v, want %s", f.name, err, f.class)
 		}
 		if strings.Contains(failure.Error(), Key) {
-			t.Fatalf("%s: the failure carries the key", c.name)
+			t.Fatalf("%s: the failure carries the key", f.name)
 		}
 	}
 	_, _, err = read(Answer{Status: 429, Header: http.Header{"Retry-After": {"120"}}}, Ring{})

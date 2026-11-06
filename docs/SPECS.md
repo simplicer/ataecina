@@ -238,16 +238,21 @@ Codex performs the network call with its own login.
 
 ### 3.3 Other sources in detail (researched 2026-11-06, not yet verified live)
 
+Milestone 9 implements these adapters against synthetic answers built from
+the shapes below; each must be verified with a live, manual call before a
+release, like the undocumented sources of §3.5.
+
 **`ollama-api` (Ollama Cloud).** The `ollama` CLI (0.31.1) has no usage
 command. The ollama.com usage page reads `GET https://ollama.com/api/usage`,
 which accepts the owner's Ollama API key as `Authorization: Bearer` (an
 `X-API-Key` header is rejected). It returns `limits.session.usage` and
 `limits.weekly.usage` as a fraction of the cap (0–1, shown ×100) and no exact
 reset instant, so those meters are `FIVE_HOURS` and `WEEKLY` with an unknown
-`resets_at`. Plans started after 2026-08-31 replace both windows with a
-monthly credit allowance that renews on the subscription day; its fields
-are to verify. The same key can spend credits, so it is sealed like any
-other key.
+`resets_at`; either may be missing, not both. Plans started after 2026-08-31
+replace both windows with a monthly credit allowance that renews on the
+subscription day; its fields are to verify, and until then such an answer
+reads as `BROKEN` (`CONTRACT_CHANGED`). The same key can spend credits, so it
+is sealed like any other key.
 
 **`copilot-gh` (GitHub Copilot).** The Copilot CLI shows usage only inside a
 session (`/usage`). GitHub publishes a per-user billing report:
@@ -271,7 +276,13 @@ endpoints authenticated with the API key: `/v1/dashboard/billing/subscription`
 (remaining allowance and expiry) and `/v1/dashboard/billing/usage`
 (cumulative usage). Rate limits are per workspace and only `Retry-After` is
 returned. Key limits may renew daily, weekly or monthly (UTC); there is no
-documented call to read a key's own limit.
+documented call to read a key's own limit. Both summaries follow the
+OpenAI-compatible billing shape, which Ataecina reads (to verify live):
+`hard_limit_usd` (the key's total allowance in USD; 1 000 000 or more means
+no limit) and `access_until` (Unix seconds, 0 when it does not expire) from
+the first, `total_usage` (US cents) from the second. Balance: spent =
+`total_usage` ÷ 100; left = `hard_limit_usd` − spent (never below 0); the
+expiry is the hint. Both calls are required.
 
 **`cloudflare-api` (Cloudflare Workers AI).** Workers AI grants 10 000
 neurons per day on every plan. The GraphQL Analytics API
@@ -280,7 +291,21 @@ neurons per day on every plan. The GraphQL Analytics API
 filtered by `accountTag` and today's UTC date and reads `sum.totalNeurons`.
 The token needs only *Account Analytics: Read* (it cannot run inference).
 The `DAILY` window is reborn at 00:00 UTC (to verify); analytics may lag a
-few minutes behind the dashboard.
+few minutes behind the dashboard. The query text is fixed in the binary;
+only the variables change:
+
+```graphql
+query AtaecinaNeurons($accountTag: string!, $date: Date!) {
+  viewer { accounts(filter: {accountTag: $accountTag}) {
+    aiInferenceAdaptiveGroups(limit: 10000, filter: {date_geq: $date}) { sum { totalNeurons } }
+  } }
+}
+```
+
+It is sent as `POST /client/v4/graphql` with the token as `Bearer`. The
+neurons of every returned group are summed; used = neurons ÷ 10 000 × 100.
+A GraphQL error saying "not authorized", or an answer without the account,
+is `KEY_REJECTED`; any other GraphQL error is `CONTRACT_CHANGED`.
 
 ### 3.5 API-key sources in detail (milestone 4; undocumented ones verified live by the owner before release)
 
@@ -708,6 +733,7 @@ extension.
     { "id": "codex", "source": "codex-logs", "app_server": false, "app_server_after_minutes": 60 },
     { "id": "zai", "source": "zai-api", "key": "zai" },
     { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
+    { "id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef" },
     { "id": "zen", "source": "opencode-zen" },
     { "id": "gemini", "source": "heimdall", "provider": "google" }
   ]
@@ -730,6 +756,9 @@ anything:
 | `subscriptions[].key` | only for sources that need a key; the sealed key's name, default the subscription id |
 | `subscriptions[].app_server`, `app_server_after_minutes` | only for `codex-logs`; default `false` and 60 (≥ 1) |
 | `subscriptions[].provider` | only for `heimdall`, where it is required |
+| `subscriptions[].account` | only for `cloudflare-api`, where it is required: the 32 lowercase hexadecimal digits of the account id |
+| `subscriptions[].login`, `monthly_allowance` | only for `copilot-gh`, where both are required: the GitHub login and the plan's monthly premium requests or AI credits (above 0, at most 1 000 000) |
+| `subscriptions[].port` | only for `heimdall`: its admin port on loopback, 1–65535, default 4001 |
 
 Unknown keys, and options given to a source that does not take them, are
 errors. The snapshot file is internal (`version`, `taken_at`,

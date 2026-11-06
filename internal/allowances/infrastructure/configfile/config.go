@@ -11,6 +11,7 @@ import (
 	"io"
 	"io/fs"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
@@ -25,9 +26,15 @@ const (
 	maxIntervalMinutes     = 1440
 	defaultAppServerAfter  = 60
 	maxThresholds          = 5
+	defaultHeimdallPort    = 4001
+	maxMonthlyAllowance    = 1_000_000
 )
 
-var defaultThresholds = []int{90, 95}
+var (
+	defaultThresholds = []int{90, 95}
+	cloudflareAccount = regexp.MustCompile(`^[0-9a-f]{32}$`)
+	githubLogin       = regexp.MustCompile(`^[A-Za-z0-9](?:[A-Za-z0-9]|-[A-Za-z0-9]){0,38}$`)
+)
 
 // ErrInvalid reports a configuration Ataecina refuses.
 var ErrInvalid = errors.New("invalid configuration")
@@ -58,6 +65,14 @@ type SubscriptionSettings struct {
 	Key            string
 	AppServer      bool
 	AppServerAfter time.Duration
+	// Account is the Cloudflare account id (cloudflare-api).
+	Account string
+	// Login and MonthlyAllowance are the GitHub login and the monthly
+	// premium requests or AI credits of its Copilot plan (copilot-gh).
+	Login            string
+	MonthlyAllowance float64
+	// Port is Heimdall's admin port on loopback (heimdall).
+	Port int
 	// Thresholds are the subscription's own, or the global ones.
 	Thresholds []int
 }
@@ -79,14 +94,18 @@ type networkDocument struct {
 }
 
 type subscriptionDocument struct {
-	ID                    string  `json:"id"`
-	Source                string  `json:"source"`
-	Plan                  *string `json:"plan"`
-	Provider              *string `json:"provider"`
-	Key                   *string `json:"key"`
-	AppServer             *bool   `json:"app_server"`
-	AppServerAfterMinutes *int    `json:"app_server_after_minutes"`
-	Thresholds            []int   `json:"thresholds"`
+	ID                    string   `json:"id"`
+	Source                string   `json:"source"`
+	Plan                  *string  `json:"plan"`
+	Provider              *string  `json:"provider"`
+	Key                   *string  `json:"key"`
+	AppServer             *bool    `json:"app_server"`
+	AppServerAfterMinutes *int     `json:"app_server_after_minutes"`
+	Account               *string  `json:"account"`
+	Login                 *string  `json:"login"`
+	MonthlyAllowance      *float64 `json:"monthly_allowance"`
+	Port                  *int     `json:"port"`
+	Thresholds            []int    `json:"thresholds"`
 }
 
 // Load reads config.json after checking that it and its directory are private.
@@ -191,10 +210,21 @@ func decodeSubscription(item subscriptionDocument, sources catalog.Catalog) (Sub
 		{catalog.OptionAppServer, item.AppServer != nil},
 		{catalog.OptionAppServerAfter, item.AppServerAfterMinutes != nil},
 		{catalog.OptionProvider, item.Provider != nil},
+		{catalog.OptionAccount, item.Account != nil},
+		{catalog.OptionLogin, item.Login != nil},
+		{catalog.OptionMonthlyAllowance, item.MonthlyAllowance != nil},
+		{catalog.OptionPort, item.Port != nil},
 	}
+	present := make(map[catalog.Option]bool, len(options))
 	for _, option := range options {
 		if option.present && !entry.Accepts(option.name) {
 			return SubscriptionSettings{}, fmt.Errorf("%w: subscription %q: source %s does not take %q", ErrInvalid, id, source, option.name)
+		}
+		present[option.name] = option.present
+	}
+	for _, required := range entry.Requires {
+		if !present[required] {
+			return SubscriptionSettings{}, fmt.Errorf("%w: subscription %q: source %s needs %q", ErrInvalid, id, source, required)
 		}
 	}
 	if item.Key != nil && !entry.NeedsKey {
@@ -217,6 +247,9 @@ func decodeSubscription(item subscriptionDocument, sources catalog.Catalog) (Sub
 	if settings.AppServerAfter < time.Minute {
 		return SubscriptionSettings{}, fmt.Errorf("%w: subscription %q: \"app_server_after_minutes\" must be at least 1", ErrInvalid, id)
 	}
+	if err := sourceOptions(item, entry, &settings); err != nil {
+		return SubscriptionSettings{}, fmt.Errorf("%w: subscription %q: %w", ErrInvalid, id, err)
+	}
 	if entry.NeedsKey {
 		settings.Key = valueOr(item.Key, id.String())
 		if _, err := domain.NewSubscriptionID(settings.Key); err != nil {
@@ -224,6 +257,31 @@ func decodeSubscription(item subscriptionDocument, sources catalog.Catalog) (Sub
 		}
 	}
 	return settings, nil
+}
+
+// sourceOptions validates the options that only one source takes; the
+// catalog has already refused them for any other source.
+func sourceOptions(item subscriptionDocument, entry catalog.Entry, settings *SubscriptionSettings) error {
+	settings.Account = valueOr(item.Account, "")
+	if item.Account != nil && !cloudflareAccount.MatchString(settings.Account) {
+		return errors.New(`"account" must be the 32 lowercase hexadecimal digits of a Cloudflare account id`)
+	}
+	settings.Login = valueOr(item.Login, "")
+	if item.Login != nil && !githubLogin.MatchString(settings.Login) {
+		return errors.New(`"login" must be a GitHub login`)
+	}
+	settings.MonthlyAllowance = valueOr(item.MonthlyAllowance, 0)
+	if item.MonthlyAllowance != nil && (settings.MonthlyAllowance <= 0 || settings.MonthlyAllowance > maxMonthlyAllowance) {
+		return fmt.Errorf(`"monthly_allowance" must be above 0 and at most %d`, maxMonthlyAllowance)
+	}
+	if !entry.Accepts(catalog.OptionPort) {
+		return nil
+	}
+	settings.Port = valueOr(item.Port, defaultHeimdallPort)
+	if settings.Port < 1 || settings.Port > 65535 {
+		return errors.New(`"port" must be between 1 and 65535`)
+	}
+	return nil
 }
 
 func valueOr[T any](pointer *T, fallback T) T {

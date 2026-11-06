@@ -8,6 +8,21 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.14.0-unstable] - 2026-11-06
+
+### Added
+
+- Ollama Cloud (`ollama-api`): session and weekly usage from the
+  ollama.com usage API, without reset instants.
+- Orca Router (`orcarouter-api`): what is left of the key's allowance,
+  what was spent and when the allowance expires, from its two billing
+  summaries.
+- Cloudflare Workers AI (`cloudflare-api`): today's neurons against the
+  10 000 granted per UTC day, from one fixed GraphQL Analytics query with
+  an analytics-only token and the account id (`"account"`).
+- Configuration options `account`, `login`, `monthly_allowance` and `port`,
+  each accepted only by its source and required where the source needs it.
+
 ## [0.13.0-unstable] - 2026-11-06
 
 ### Added

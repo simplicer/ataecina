@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.13.0-unstable` — early development: the core, the
+**Current version:** `0.14.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -73,7 +73,9 @@ from the official `codex app-server` when the logs are stale (opt-in);
 **Claude** from the Claude Code status line hook; **OpenCode Zen** derived
 from your declared top-ups (`ataecina balance declare zen --top-up 20`)
 and the cost OpenCode records; **OpenRouter**, **Vercel AI Gateway**,
-**Z.ai**, **MiniMax** and **Command Code** with your sealed API keys
+**Z.ai**, **MiniMax**, **Command Code**, **Ollama Cloud**, **Orca Router**
+and **Cloudflare Workers AI** (with `"account": "<account id>"` and an
+analytics-only token) with your sealed API keys
 (`ataecina keys set <name>`). The
 other sources arrive as listed in [docs/ROADMAP.md](docs/ROADMAP.md) and read
 as `UNSUPPORTED` until then.

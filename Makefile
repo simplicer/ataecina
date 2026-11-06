@@ -38,7 +38,10 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/vercelapi:FuzzDecodeCredits \
 	./internal/allowances/infrastructure/zaiapi:FuzzDecodeQuota \
 	./internal/allowances/infrastructure/minimaxapi:FuzzDecodeRemains \
-	./internal/allowances/infrastructure/commandcodeapi:FuzzDecodeCredits
+	./internal/allowances/infrastructure/commandcodeapi:FuzzDecodeCredits \
+	./internal/allowances/infrastructure/ollamaapi:FuzzDecodeUsage \
+	./internal/allowances/infrastructure/orcarouterapi:FuzzDecodeSubscription \
+	./internal/allowances/infrastructure/cloudflareapi:FuzzDecodeNeurons
 FUZZ_TIME ?= 30s
 
 .PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz package install-user uninstall-user clean

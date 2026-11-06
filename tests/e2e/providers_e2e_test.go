@@ -18,14 +18,18 @@ import (
 func fakeProviders(t *testing.T) (string, func() map[string]string) {
 	t.Helper()
 	routes := map[string]string{
-		"/api/v1/key":                    "openrouterapi/testdata/key.json",
-		"/api/v1/credits":                "openrouterapi/testdata/credits.json",
-		"/v1/credits":                    "vercelapi/testdata/credits.json",
-		"/api/monitor/usage/quota/limit": "zaiapi/testdata/quota.json",
-		"/v1/token_plan/remains":         "minimaxapi/testdata/remains.json",
-		"/alpha/billing/credits":         "commandcodeapi/testdata/credits.json",
-		"/alpha/usage/summary":           "commandcodeapi/testdata/summary.json",
-		"/alpha/billing/subscriptions":   "commandcodeapi/testdata/subscriptions.json",
+		"/api/v1/key":                        "openrouterapi/testdata/key.json",
+		"/api/v1/credits":                    "openrouterapi/testdata/credits.json",
+		"/v1/credits":                        "vercelapi/testdata/credits.json",
+		"/api/monitor/usage/quota/limit":     "zaiapi/testdata/quota.json",
+		"/v1/token_plan/remains":             "minimaxapi/testdata/remains.json",
+		"/alpha/billing/credits":             "commandcodeapi/testdata/credits.json",
+		"/alpha/usage/summary":               "commandcodeapi/testdata/summary.json",
+		"/alpha/billing/subscriptions":       "commandcodeapi/testdata/subscriptions.json",
+		"/api/usage":                         "ollamaapi/testdata/usage.json",
+		"/v1/dashboard/billing/subscription": "orcarouterapi/testdata/subscription.json",
+		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
+		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
 	}
 	var mu sync.Mutex
 	seen := map[string]string{}
@@ -64,7 +68,10 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	  {"id": "vercel", "source": "vercel-api"},
 	  {"id": "zai", "source": "zai-api"},
 	  {"id": "minimax", "source": "minimax-api"},
-	  {"id": "commandcode", "source": "commandcode-api", "key": "command"}
+	  {"id": "commandcode", "source": "commandcode-api", "key": "command"},
+	  {"id": "ollama", "source": "ollama-api"},
+	  {"id": "orca", "source": "orcarouter-api"},
+	  {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"}
 	]}`, nil)
 	origin, received := fakeProviders(t)
 	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", origin)
@@ -72,7 +79,7 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "init", "--unlocker", "passphrase"); code != 0 {
 		t.Fatalf("init = %d %s", code, stderr)
 	}
-	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command"} {
+	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command", "ollama", "orca", "workers-ai"} {
 		if code, _, stderr := tr.runWithPassphrase(bin, "sk-synthetic-"+name+"\n", phrase, "keys", "set", name); code != 0 {
 			t.Fatalf("keys set %s = %d %s", name, code, stderr)
 		}
@@ -130,6 +137,15 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	}
 	if command := subscriptions[byID["commandcode"]]; *command.Plan != "INDIVIDUAL_PRO" || len(command.Meters) != 3 {
 		t.Fatalf("commandcode = %+v", command)
+	}
+	if ollama := subscriptions[byID["ollama"]]; len(ollama.Meters) != 2 || ollama.Meters[1].UsedPercent != 41 {
+		t.Fatalf("ollama = %+v", ollama)
+	}
+	if b := subscriptions[byID["orca"]].Balance; b == nil || b.Remaining.Amount != 8.42 {
+		t.Fatalf("orca balance = %+v", b)
+	}
+	if workers := subscriptions[byID["workers-ai"]]; len(workers.Meters) != 1 || workers.Meters[0].Window != "DAILY" || workers.Meters[0].UsedPercent != 33.505 {
+		t.Fatalf("workers-ai = %+v", workers)
 	}
 	keysJSON, _ := os.ReadFile(filepath.Join(tr.root, "config", "ataecina", "keys.json"))
 	snapshot, _ := os.ReadFile(filepath.Join(tr.root, "run", "ataecina", "snapshot.json"))

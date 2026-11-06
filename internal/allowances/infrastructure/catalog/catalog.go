@@ -10,9 +10,13 @@ type Option string
 
 // Source-specific options.
 const (
-	OptionAppServer      Option = "app_server"
-	OptionAppServerAfter Option = "app_server_after_minutes"
-	OptionProvider       Option = "provider"
+	OptionAppServer        Option = "app_server"
+	OptionAppServerAfter   Option = "app_server_after_minutes"
+	OptionProvider         Option = "provider"
+	OptionAccount          Option = "account"
+	OptionLogin            Option = "login"
+	OptionMonthlyAllowance Option = "monthly_allowance"
+	OptionPort             Option = "port"
 )
 
 // Entry describes one source.
@@ -22,6 +26,8 @@ type Entry struct {
 	Fidelity domain.Fidelity
 	NeedsKey bool
 	Options  []Option
+	// Requires lists the options a subscription of this source must set.
+	Requires []Option
 	// TakesDeclarations marks balance-only sources that derive what is
 	// left from `ataecina balance declare`.
 	TakesDeclarations bool
@@ -57,10 +63,12 @@ func Standard() Catalog {
 		{Source: "vercel-api", Provider: "vercel", Fidelity: reported, NeedsKey: true},
 		{Source: "opencode-zen", Provider: "opencode", Fidelity: derived, TakesDeclarations: true},
 		{Source: "ollama-api", Provider: "ollama", Fidelity: reported, NeedsKey: true},
-		{Source: "copilot-gh", Provider: "github", Fidelity: derived},
+		{Source: "copilot-gh", Provider: "github", Fidelity: derived,
+			Options: []Option{OptionLogin, OptionMonthlyAllowance}, Requires: []Option{OptionLogin, OptionMonthlyAllowance}},
 		{Source: "orcarouter-api", Provider: "orcarouter", Fidelity: reported, NeedsKey: true},
-		{Source: "cloudflare-api", Provider: "cloudflare", Fidelity: reported, NeedsKey: true},
-		{Source: "heimdall", Fidelity: observed, NeedsKey: true, Options: []Option{OptionProvider}},
+		{Source: "cloudflare-api", Provider: "cloudflare", Fidelity: reported, NeedsKey: true,
+			Options: []Option{OptionAccount}, Requires: []Option{OptionAccount}},
+		{Source: "heimdall", Fidelity: observed, NeedsKey: true, Options: []Option{OptionProvider, OptionPort}},
 	}
 	catalog := Catalog{entries: make(map[domain.SourceID]Entry, len(entries))}
 	for _, entry := range entries {

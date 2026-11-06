@@ -9,13 +9,16 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/balancefile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/claudestatusline"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/cloudflareapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexappserver"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/commandcodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/ollamaapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/openrouterapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/orcarouterapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/vercelapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/zaiapi"
 	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
@@ -70,12 +73,19 @@ func (r sourceRegistry) build(settings configfile.Settings, c collection) subscr
 
 // viaAPI builds a provider API adapter bound to its compiled-in origin.
 func viaAPI[S domain.Source](origin string, build func(httpclient.Endpoint, domain.KeyRing, domain.KeyName, func() time.Time) S) sourceFactory {
+	return viaEndpoint(origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
+		return build(endpoint, c.keys, domain.KeyName(settings.Key), c.env.clock.Now)
+	})
+}
+
+// viaEndpoint is viaAPI for adapters that also need the subscription's options.
+func viaEndpoint(origin string, build func(httpclient.Endpoint, configfile.SubscriptionSettings, collection) domain.Source) sourceFactory {
 	return func(settings configfile.SubscriptionSettings, c collection) domain.Source {
 		endpoint, err := c.http.For(providerOrigin(c.env, origin))
 		if err != nil {
 			return failing{domain.Failure(domain.ErrorContractChanged, "the provider origin is invalid", err)}
 		}
-		return build(endpoint, c.keys, domain.KeyName(settings.Key), c.env.clock.Now)
+		return build(endpoint, settings, c)
 	}
 }
 
@@ -112,6 +122,11 @@ func standardSources() sourceRegistry {
 		"zai-api":         viaAPI(zaiapi.Origin, zaiapi.New),
 		"minimax-api":     viaAPI(minimaxapi.Origin, minimaxapi.New),
 		"commandcode-api": viaAPI(commandcodeapi.Origin, commandcodeapi.New),
+		"ollama-api":      viaAPI(ollamaapi.Origin, ollamaapi.New),
+		"orcarouter-api":  viaAPI(orcarouterapi.Origin, orcarouterapi.New),
+		"cloudflare-api": viaEndpoint(cloudflareapi.Origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
+			return cloudflareapi.New(endpoint, c.keys, domain.KeyName(settings.Key), settings.Account, c.env.clock.Now)
+		}),
 	}}
 }
 

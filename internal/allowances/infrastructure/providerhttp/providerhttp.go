@@ -4,9 +4,11 @@
 package providerhttp
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -19,9 +21,23 @@ import (
 // Fetch sends one GET with "Authorization: Bearer <key>" and returns the
 // body of a 2xx answer; anything else is a *domain.SourceFailure.
 func Fetch(ctx context.Context, endpoint httpclient.Endpoint, path string, key secret.Key, now time.Time) ([]byte, error) {
+	return ask(ctx, endpoint, http.MethodGet, path, key, nil, now)
+}
+
+// Post sends one POST of a fixed JSON document, like Fetch.
+func Post(ctx context.Context, endpoint httpclient.Endpoint, path string, key secret.Key, document []byte, now time.Time) ([]byte, error) {
+	return ask(ctx, endpoint, http.MethodPost, path, key, document, now)
+}
+
+func ask(ctx context.Context, endpoint httpclient.Endpoint, method, path string, key secret.Key, document []byte, now time.Time) ([]byte, error) {
 	header := http.Header{}
 	header.Set("Authorization", "Bearer "+string(key.Reveal()))
-	response, err := endpoint.Get(ctx, path, header)
+	var body io.Reader
+	if document != nil {
+		header.Set("Content-Type", "application/json")
+		body = bytes.NewReader(document)
+	}
+	response, err := endpoint.Do(ctx, method, path, header, body)
 	switch {
 	case errors.Is(err, httpclient.ErrTooLarge):
 		return nil, domain.Failure(domain.ErrorContractChanged, endpoint.Host()+" answered more than 64 KiB", nil)

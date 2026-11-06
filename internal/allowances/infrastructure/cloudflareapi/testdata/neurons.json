@@ -1,0 +1,15 @@
+{
+  "data": {
+    "viewer": {
+      "accounts": [
+        {
+          "aiInferenceAdaptiveGroups": [
+            { "sum": { "totalNeurons": 2150.5 } },
+            { "sum": { "totalNeurons": 1200 } }
+          ]
+        }
+      ]
+    }
+  },
+  "errors": null
+}

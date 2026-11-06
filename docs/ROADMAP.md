@@ -15,7 +15,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd, settings page, Spanish translation); static widget checks in `go test`, `qmllint` in `make check` when installed | done |
 | 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch for amd64 and arm64, verified by `bin/check-packages`), AUR `PKGBUILD`, `make install-user`/`uninstall-user` through one layout script (`bin/install-files`); reproducible packages; checksums signed by the maintainer at release | done |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator; refresh through systemd's `StartUnit`; launcher `.desktop` | done |
-| 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | planned |
+| 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | in progress (`ollama-api`, `orcarouter-api`, `cloudflare-api` done) |
 | 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | planned |
 
 ## Later (not scheduled)

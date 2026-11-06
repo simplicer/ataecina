@@ -43,7 +43,9 @@ func TestEveryOptionIsRead(t *testing.T) {
 	    {"id": "codex", "source": "codex-logs", "plan": "plus", "app_server": true, "app_server_after_minutes": 30},
 	    {"id": "zai", "source": "zai-api", "key": "zai-coding"},
 	    {"id": "openrouter", "source": "openrouter-api", "thresholds": [50]},
-	    {"id": "gemini", "source": "heimdall", "provider": "google"}
+	    {"id": "gemini", "source": "heimdall", "provider": "google", "port": 4101},
+	    {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"},
+	    {"id": "copilot", "source": "copilot-gh", "login": "octo-cat", "monthly_allowance": 300}
 	  ]}`)
 	if err != nil {
 		t.Fatal(err)
@@ -61,8 +63,21 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if len(zai.Thresholds) != 3 || len(openrouter.Thresholds) != 1 || openrouter.Thresholds[0] != 50 {
 		t.Fatalf("thresholds = %v, %v", zai.Thresholds, openrouter.Thresholds)
 	}
-	if gemini.Subscription.Provider() != "google" || gemini.Subscription.Fidelity() != domain.FidelityObserved {
+	if gemini.Subscription.Provider() != "google" || gemini.Subscription.Fidelity() != domain.FidelityObserved || gemini.Port != 4101 {
 		t.Fatalf("gemini = %+v", gemini)
+	}
+	workers, copilot := settings.Subscriptions[4], settings.Subscriptions[5]
+	if workers.Account != "0123456789abcdef0123456789abcdef" || workers.Key != "workers-ai" {
+		t.Fatalf("workers-ai = %+v", workers)
+	}
+	if copilot.Login != "octo-cat" || copilot.MonthlyAllowance != 300 || copilot.Key != "" {
+		t.Fatalf("copilot = %+v", copilot)
+	}
+	if codex.Port != 0 {
+		t.Fatalf("only heimdall has a port: %d", codex.Port)
+	}
+	if defaulted, err := decode(t, `{"version": 1, "subscriptions": [{"id": "groq", "source": "heimdall", "provider": "groq"}]}`); err != nil || defaulted.Subscriptions[0].Port != 4001 {
+		t.Fatalf("Heimdall's default port = %+v, %v", defaulted.Subscriptions, err)
 	}
 }
 
@@ -91,6 +106,17 @@ func TestStrictValidation(t *testing.T) {
 		"provider elsewhere":  `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "provider": "x"}]}`,
 		"app server too soon": `{"version": 1, "subscriptions": [{"id": "a", "source": "codex-logs", "app_server_after_minutes": 0}]}`,
 		"bad own thresholds":  `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "thresholds": [120]}]}`,
+		"no account":          `{"version": 1, "subscriptions": [{"id": "a", "source": "cloudflare-api"}]}`,
+		"bad account":         `{"version": 1, "subscriptions": [{"id": "a", "source": "cloudflare-api", "account": "ABC"}]}`,
+		"account elsewhere":   `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "account": "0123456789abcdef0123456789abcdef"}]}`,
+		"no login":            `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "monthly_allowance": 300}]}`,
+		"no allowance":        `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo"}]}`,
+		"bad login":           `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "-octo", "monthly_allowance": 300}]}`,
+		"zero allowance":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 0}]}`,
+		"huge allowance":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 1e9}]}`,
+		"key on copilot":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 300, "key": "a"}]}`,
+		"bad port":            `{"version": 1, "subscriptions": [{"id": "a", "source": "heimdall", "provider": "google", "port": 70000}]}`,
+		"port elsewhere":      `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "port": 4001}]}`,
 	}
 	for name, text := range cases {
 		if _, err := decode(t, text); !errors.Is(err, configfile.ErrInvalid) {
