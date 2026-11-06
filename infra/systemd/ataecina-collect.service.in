@@ -1,0 +1,55 @@
+# Ataecina collector: reads every configured subscription once and keeps
+# the snapshot (ADR 0005). Started every few minutes by
+# ataecina-collect.timer, or on demand ("refresh now").
+# @BINDIR@ is replaced at install time (/usr/bin or ~/.local/bin).
+
+[Unit]
+Description=Ataecina: read every AI subscription allowance once
+Documentation=https://codeberg.org/simplicer/ataecina
+
+[Service]
+Type=oneshot
+ExecStart=@BINDIR@/ataecina collect
+TimeoutStartSec=60
+Nice=10
+IOSchedulingClass=idle
+
+# The official CLIs some sources run (codex, opencode) live here; a drop-in
+# can extend PATH.
+Environment=PATH=%h/.local/bin:%h/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin
+
+# Ataecina's own state ($XDG_STATE_HOME/ataecina) and snapshot
+# ($XDG_RUNTIME_DIR/ataecina, kept between runs), created 0700.
+StateDirectory=ataecina
+StateDirectoryMode=0700
+RuntimeDirectory=ataecina
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+
+# Hardening. Home is read-only except what the official CLIs write while
+# answering (Codex and OpenCode keep their own state).
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=-%h/.codex -%h/.local/share/opencode -%h/.local/state/opencode -%h/.cache/opencode
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+CapabilityBoundingSet=
+# MemoryDenyWriteExecute= is not set: opencode runs on a JIT (ADR 0005).
+
+# The systemd-creds unlocker adds LoadCredentialEncrypted= in a drop-in:
+# ~/.config/systemd/user/ataecina-collect.service.d/master-key.conf

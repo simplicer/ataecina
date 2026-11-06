@@ -36,3 +36,26 @@ the keys. Merging them gives the most exposed code the most privileges.
 
 - A resident daemon serving both: simpler wiring, larger attack surface,
   constant memory. Rejected.
+
+## Update (2026-11-06): the units as shipped
+
+- `infra/systemd/ataecina-collect.service.in` (`@BINDIR@` replaced at
+  install) and `ataecina-collect.timer` (every 5 minutes, first run one
+  minute after the user manager starts).
+- `StateDirectory=ataecina` and `RuntimeDirectory=ataecina` with
+  `RuntimeDirectoryPreserve=yes` (all `0700`) give the collector its own
+  writable state and keep the snapshot between runs; the rest of the home
+  is read-only, except what the official CLIs write while answering
+  (`~/.codex`, OpenCode's data, state and cache), each optional.
+- `MemoryDenyWriteExecute=` is **not** set: `opencode` runs on a JIT and
+  would crash. `ProtectHome=read-only`, `ProtectSystem=strict`,
+  `PrivateTmp`, `PrivateDevices`, the kernel and clock protections,
+  `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`,
+  `SystemCallFilter=@system-service`, `NoNewPrivileges`, an empty
+  capability set and `UMask=0077` are.
+- `PATH` is set to `~/.local/bin`, `~/.local/share/pnpm` and the system
+  directories so the collector finds `codex` and `opencode`.
+- The units pass `systemd-analyze --user verify` in `make e2e`. Options
+  that need unprivileged user namespaces must still be checked by hand on
+  distributions that restrict them.
+

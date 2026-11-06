@@ -17,11 +17,13 @@ func TestDefaultsFollowTheSpecification(t *testing.T) {
 		t.Fatal(err)
 	}
 	checks := map[string]string{
-		paths.Home():       "/home/owner",
-		paths.ConfigDir():  "/home/owner/.config/ataecina",
-		paths.ConfigFile(): "/home/owner/.config/ataecina/config.json",
-		paths.StateDir():   "/home/owner/.local/state/ataecina",
-		paths.LogFile():    "/home/owner/.local/state/ataecina/ataecina.log",
+		paths.Home():           "/home/owner",
+		paths.ConfigDir():      "/home/owner/.config/ataecina",
+		paths.ConfigFile():     "/home/owner/.config/ataecina/config.json",
+		paths.StateDir():       "/home/owner/.local/state/ataecina",
+		paths.LogFile():        "/home/owner/.local/state/ataecina/ataecina.log",
+		paths.KeysFile():       "/home/owner/.config/ataecina/keys.json",
+		paths.SystemdUserDir(): "/home/owner/.config/systemd/user",
 	}
 	for got, want := range checks {
 		if got != want {

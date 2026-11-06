@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.10.0-unstable` — early development: the core, the
+**Current version:** `0.11.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -154,14 +154,22 @@ text console there is no desktop session, so you unlock with your passphrase
 | Arch, Manjaro, EndeavourOS | Arch package and an AUR `PKGBUILD` |
 | Anything else | static binary, or `make install-user` from source |
 
-Packages install the `ataecina` binary, the collector's systemd user timer,
-the Plasma widget and the tray launcher. Then:
+Packages install the `ataecina` binary, the collector's systemd user timer
+(`infra/systemd/`), the Plasma widget and the tray launcher. Then:
 
 ```sh
 ataecina init                      # create ~/.config/ataecina with safe permissions
 ataecina keys set zai              # paste the key; it is read without echo and sealed
 systemctl --user enable --now ataecina-collect.timer
 ataecina                           # the table
+```
+
+On a headless machine, hold the master key with the TPM-bound systemd
+credential so the timer needs no passphrase:
+
+```sh
+ataecina unlockers add systemd-creds   # asks the passphrase once
+systemctl --user daemon-reload
 ```
 
 Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,

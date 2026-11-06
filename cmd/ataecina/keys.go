@@ -19,6 +19,8 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/keyfile"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/passphrase"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/secretservice"
+	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/systemdcreds"
+	"codeberg.org/simplicer/ataecina/internal/platform/pathlookup"
 	"codeberg.org/simplicer/ataecina/internal/platform/privatefs"
 	"codeberg.org/simplicer/ataecina/internal/platform/secret"
 	"codeberg.org/simplicer/ataecina/internal/platform/terminal"
@@ -67,6 +69,11 @@ func openKeyring(env environment, passphraseFD int, interactive bool) (keyring, 
 		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
 		unlockers[keysdomain.SecretService] = secretservice.New(connect, interactive)
 	}
+	unlockers[keysdomain.SystemdCreds] = systemdcreds.New(pathlookup.Find("systemd-creds", env.getenv("PATH")), systemdcreds.Paths{
+		CredentialFile:       filepath.Join(paths.ConfigDir(), "master-key.cred"),
+		DropIn:               filepath.Join(paths.SystemdUserDir(), "ataecina-collect.service.d", "master-key.conf"),
+		CredentialsDirectory: env.getenv("CREDENTIALS_DIRECTORY"),
+	})
 	return keyring{paths: paths, files: keysFiles(paths), unlockers: unlockers}, nil
 }
 
@@ -262,6 +269,9 @@ func unlockersCommand(ctx context.Context, args []string, env environment) int {
 		return fail(env, "unlockers", err)
 	}
 	fmt.Fprintf(env.stdout, "%s: %s\n", args[0], kind)
+	if kind == keysdomain.SystemdCreds {
+		fmt.Fprintln(env.stdout, "then run: systemctl --user daemon-reload")
+	}
 	return exitOK
 }
 

@@ -1,0 +1,16 @@
+# Runs the Ataecina collector every five minutes (config.json
+# interval_minutes is used for freshness; change OnUnitActiveSec= with a
+# drop-in to match it).
+
+[Unit]
+Description=Ataecina: collect AI subscription allowances every five minutes
+Documentation=https://codeberg.org/simplicer/ataecina
+
+[Timer]
+OnStartupSec=1min
+OnUnitActiveSec=5min
+AccuracySec=30s
+RandomizedDelaySec=15s
+
+[Install]
+WantedBy=timers.target

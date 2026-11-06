@@ -11,7 +11,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 2 | Token-free sources | `codex-logs` (incremental reader, windows by duration), `codex-app-server` fallback (method allowlist), `claude-statusline` hook (chained from an existing status line, or `--print` as the status line itself), `opencode-zen` derived balance and `balance declare` | done |
 | 3 | Sealed keys | `keys` context: `init`, sealed `keys.json`, `keys set/list/forget` from stdin without echo; unlockers `secret-service` (D-Bus, ADR 0009) and `passphrase`; `doctor` | done |
 | 4 | API-key sources | `openrouter-api`, `vercel-api`, `zai-api`, `commandcode-api`, `minimax-api` (implemented against recorded, synthetic answers; live verification with the owner's keys before release); hardened HTTP client (ADR 0006) | done |
-| 5 | Collector service | hardened systemd user service and timer for `ataecina collect`; `systemd-creds` unlocker; `alerts` context with desktop notifications | planned |
+| 5 | Collector service | hardened systemd user service and timer for `ataecina collect`; `systemd-creds` unlocker; `alerts` context with desktop notifications | done |
 | 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd); `qmllint` in `make check` | planned |
 | 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch), AUR `PKGBUILD`, `make install-user`; reproducible builds; signed checksums | planned |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator | planned |

@@ -476,6 +476,15 @@ not implement yet shows `UNSUPPORTED`.
   runs (`init`, `keys set`, `unlockers add`); the collector never prompts
   and treats a locked keyring as an unavailable unlocker. A dismissed
   prompt is an error.
+- `ataecina unlockers add systemd-creds` runs `systemd-creds encrypt --user
+  --name=ataecina.master-key - ~/.config/ataecina/master-key.cred` (fixed
+  argv, master key on stdin) and writes the drop-in
+  `~/.config/systemd/user/ataecina-collect.service.d/master-key.conf` with
+  `LoadCredentialEncrypted=ataecina.master-key:<file>`; the owner then runs
+  `systemctl --user daemon-reload`. Inside the unit the collector reads
+  `$CREDENTIALS_DIRECTORY/ataecina.master-key`; elsewhere the unlocker runs
+  `systemd-creds decrypt --user`. Removing it deletes both files. The
+  `keys.json` record holds only the credential name and the two paths.
 - Unlockers are tried in the order `secret-service`, `systemd-creds`,
   `passphrase`, among those the process can use; the master key is opened
   at most once per process, however many keys a collection unseals.

@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.11.0-unstable] - 2026-11-06
+
+### Added
+
+- Hardened systemd user units `ataecina-collect.service` and
+  `ataecina-collect.timer` (every five minutes), verified with
+  `systemd-analyze`.
+- `systemd-creds` unlocker: the master key as a TPM-bound user credential,
+  loaded into the collector unit through a drop-in; `doctor` checks that the
+  timer is installed.
+
 ## [0.10.0-unstable] - 2026-11-06
 
 ### Added

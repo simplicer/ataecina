@@ -1,0 +1,18 @@
+#!/bin/sh
+# Fake `systemd-creds` for tests: "encrypts" by base64 (no TPM, no host
+# key) and records its arguments in $FAKE_CREDS_JOURNAL. The real tool is
+# never run by the test suite.
+printf '%s\n' "$*" >>"${FAKE_CREDS_JOURNAL:-/dev/null}"
+case "$1" in
+encrypt)
+	# encrypt --user --name=NAME - OUTPUT
+	base64 >"$5"
+	;;
+decrypt)
+	# decrypt --user --name=NAME INPUT -
+	base64 -d "$4"
+	;;
+*)
+	exit 2
+	;;
+esac

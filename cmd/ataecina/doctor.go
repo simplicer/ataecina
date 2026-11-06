@@ -59,6 +59,7 @@ func doctor(args []string, env environment) int {
 		checkSubscriptions(r, settings, sealed, paths, env)
 	}
 	checkSnapshot(r, paths, env)
+	checkTimer(r, paths)
 	if r.problems > 0 {
 		return exitFailure
 	}
@@ -177,4 +178,20 @@ func checkSnapshot(r *report, paths xdg.Paths, env environment) {
 		return
 	}
 	r.ok("snapshot", "taken %s ago", env.clock.Now().Sub(takenAt).Round(time.Second))
+}
+
+// checkTimer looks for the collector timer where systemd finds user units.
+func checkTimer(r *report, paths xdg.Paths) {
+	for _, dir := range []string{
+		paths.SystemdUserDir(),
+		filepath.Join(paths.Home(), ".local", "share", "systemd", "user"),
+		"/etc/systemd/user",
+		"/usr/lib/systemd/user",
+	} {
+		if _, err := os.Stat(filepath.Join(dir, "ataecina-collect.timer")); err == nil {
+			r.ok("timer", "ataecina-collect.timer in %s (enable it with `systemctl --user enable --now ataecina-collect.timer`)", dir)
+			return
+		}
+	}
+	r.warn("timer", "ataecina-collect.timer is not installed: `make install-user` or a package installs it")
 }
