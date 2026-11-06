@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.8.0-unstable] - 2026-11-06
+
+### Added
+
+- `ataecina doctor`: checks permissions, the configuration, `keys.json` and
+  its unlockers, which process provides the Secret Service, the key of every
+  subscription that needs one, the official CLIs on `PATH` and the snapshot;
+  read-only, exits 1 when something is broken.
+
 ## [0.7.0-unstable] - 2026-11-06
 
 ### Added

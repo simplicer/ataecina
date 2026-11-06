@@ -84,6 +84,25 @@ func (u Unlocker) Reachable() bool {
 	return false
 }
 
+// Owner tells which process provides the Secret Service: its unique bus
+// name and process id (for `ataecina doctor`).
+func (u Unlocker) Owner() (string, uint32, error) {
+	conn, err := u.connect()
+	if err != nil {
+		return "", 0, err
+	}
+	defer conn.Close()
+	var name string
+	if err := conn.BusObject().Call("org.freedesktop.DBus.GetNameOwner", 0, BusName).Store(&name); err != nil {
+		return "", 0, err
+	}
+	var pid uint32
+	if err := conn.BusObject().Call("org.freedesktop.DBus.GetConnectionUnixProcessID", 0, name).Store(&pid); err != nil {
+		return name, 0, err
+	}
+	return name, pid, nil
+}
+
 // Wrap stores the master key as a keyring item, replacing an older one.
 func (u Unlocker) Wrap(ctx context.Context, master secret.Key) (domain.WrappedMasterKey, error) {
 	s, err := u.open()

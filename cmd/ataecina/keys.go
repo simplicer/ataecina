@@ -67,8 +67,11 @@ func openKeyring(env environment, passphraseFD int, interactive bool) (keyring, 
 		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
 		unlockers[keysdomain.SecretService] = secretservice.New(connect, interactive)
 	}
-	return keyring{paths: paths, files: keyfile.NewStore(paths.KeysFile()), unlockers: unlockers}, nil
+	return keyring{paths: paths, files: keysFiles(paths), unlockers: unlockers}, nil
 }
+
+// keysFiles is keys.json.
+func keysFiles(paths xdg.Paths) keyfile.Store { return keyfile.NewStore(paths.KeysFile()) }
 
 // passphraseIterations is the production PBKDF2 cost; tests may lower it.
 func (env environment) passphraseIterations() int {

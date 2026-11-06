@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.7.0-unstable` — early development: the core, the
+**Current version:** `0.8.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -174,6 +174,7 @@ ataecina balance declare            record a top-up or the balance of OpenCode Z
 ataecina init                       create ~/.config/ataecina and the master key
 ataecina keys set|list|forget       manage sealed keys (set reads stdin without echo)
 ataecina unlockers add|list|remove  manage how the master key is held
+ataecina doctor                     check permissions, keyring, keys and sources
 ataecina version
 ataecina help
 ```
@@ -182,7 +183,6 @@ Planned:
 
 ```text
 ataecina tray                       tray icon for non-Plasma desktops
-ataecina doctor                     check permissions, keyring, units and sources
 ```
 
 ### Configuration today

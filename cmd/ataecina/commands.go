@@ -60,6 +60,7 @@ Commands:
                     seal a provider key read from stdin without echo, list or forget keys
   unlockers list | add <kind> | remove <kind>
                     manage how the master key is held (secret-service, passphrase, systemd-creds)
+  doctor            check permissions, configuration, keys, the keyring and sources
   version           print the version
   help              show this help
 
@@ -96,6 +97,8 @@ func run(ctx context.Context, args []string, env environment) int {
 		return keysCommand(ctx, rest, env)
 	case "unlockers":
 		return unlockersCommand(ctx, rest, env)
+	case "doctor":
+		return doctor(rest, env)
 	case "version":
 		return printVersion(env)
 	case "help":

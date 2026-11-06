@@ -47,4 +47,8 @@ func TestTheDesktopKeyringHoldsTheMasterKey(t *testing.T) {
 	if code, out, stderr := tr.runWithPassphrase(bin, "sk-synthetic-zai\n", phrase, "keys", "set", "zai"); code != 0 || out != "sealed key zai\n" {
 		t.Fatalf("keys set with the passphrase = %d %q %q", code, out, stderr)
 	}
+	_, out, _ := tr.run(bin, "doctor")
+	if !strings.Contains(out, "✓ keyring        org.freedesktop.secrets is provided by") || !strings.Contains(out, "(2 sealed)") {
+		t.Fatalf("doctor:\n%s", out)
+	}
 }

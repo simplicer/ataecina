@@ -400,7 +400,12 @@ not implement yet shows `UNSUPPORTED`.
     (TPM2 when present) and given to the collector unit through
     `LoadCredentialEncrypted=`. For headless collectors.
 - `doctor` reports which process owns the Secret Service name, which unlockers
-  exist and whether file permissions are correct.
+  exist and whether file permissions are correct. It only reads: no
+  network, no unsealing, no prompt. One line per check, `✓` fine, `!` worth
+  a look (no keyring on SSH, a source not available yet, an official CLI
+  missing from `PATH`, no snapshot yet), `✗` broken (loose or invalid
+  configuration, unreadable `keys.json`, a subscription whose key is not
+  sealed, no runtime directory); it exits 1 when anything is broken.
 - The `passphrase` record in `keys.json` is
   `{ "kdf": "pbkdf2-sha256", "iterations": 600000, "salt": <base64>,
   "nonce": <base64>, "sealed": <base64> }`; the master key is sealed with
