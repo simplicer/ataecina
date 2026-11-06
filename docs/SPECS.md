@@ -47,19 +47,44 @@ re-verified with a live, manual call (owner's key) before an adapter is
 merged, and again whenever they report `CONTRACT_CHANGED`. Fields listed are
 the only ones read.
 
-| Source id | Subscription | Kind | Host / location | Credential | Fields read | Documented | Fidelity |
-|---|---|---|---|---|---|---|---|
-| `claude-statusline` | Claude Pro/Max/Ultra | local signal | stdin of `ataecina hook claude-statusline`, called from the Claude Code status line (§3.1) | none | `rate_limits.five_hour` / `seven_day` (and `spend_limit` behind a Claude apps gateway): `used_percentage`, `resets_at` | yes (Claude Code docs) | REPORTED |
-| `codex-logs` | ChatGPT / Codex | local signal | `~/.codex/sessions/**/rollout-*.jsonl` and `~/.codex/archived_sessions/` (read-only, incremental) (§3.2) | none | latest `rate_limits` with `limit_id: codex`: windows, credits, plan | no (stable in practice) | REPORTED |
-| `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED |
-| `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` | API key | token limits per window, percentage, next reset | no | REPORTED |
-| `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (or `/coding_plan/remains`, to verify) | API key | interval totals, remaining (field meaning to verify), reset | no | REPORTED |
-| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) | `bl`'s own login | quota windows, percentage, reset, `hasQuotaData` | yes (Model Studio docs) | REPORTED |
-| `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/billing/subscriptions`, `/alpha/usage/summary` | API key | monthly credits, 5-hour and weekly windows, period end | no (used by the official CLI) | REPORTED |
-| `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` | API key (credits may need a management key) | usage, limit, limit remaining, free tier, total credits | yes | REPORTED |
-| `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` | API key | `balance`, `total_used` | yes | REPORTED |
-| `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --days <N> --models --json` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` over the range since the last declaration | yes (CLI help) | DERIVED |
-| `heimdall` | any plan Heimdall serves | local service | Heimdall admin API on loopback | Heimdall admin token | plan cooldowns, announced resets, usage ledger | yes (Heimdall OpenAPI) | OBSERVED |
+Sources are chosen in this order of preference (ADR 0003): a local signal
+written by the official client → the official CLI run with a fixed argv →
+a documented API with the owner's API key → an undocumented API with the
+owner's API key → what Heimdall observes while serving → `UNSUPPORTED`.
+"Verified" records how each row was checked: `local` (the tool's own files
+or `--help` on the reference machine), `docs` (the provider's published
+documentation) or `third-party` (issues or write-ups of other clients);
+**to verify** marks anything not yet confirmed by a live, manual call.
+
+| Source id | Subscription | Kind | Host / location | Credential | Fields read | Documented | Fidelity | Verified |
+|---|---|---|---|---|---|---|---|---|
+| `claude-statusline` | Claude Pro/Max/Ultra | local signal | stdin of `ataecina hook claude-statusline`, called from the Claude Code status line (§3.1) | none | `rate_limits.five_hour` / `seven_day` (and `spend_limit` behind a Claude apps gateway): `used_percentage`, `resets_at` | yes (Claude Code docs) | REPORTED | local 2026-11-06 |
+| `codex-logs` | ChatGPT / Codex | local signal | `~/.codex/sessions/**/rollout-*.jsonl` and `~/.codex/archived_sessions/` (read-only, incremental) (§3.2) | none | latest `rate_limits` with `limit_id: codex`: windows, credits, plan | no (stable in practice) | REPORTED | local 2026-11-06 |
+| `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED | local 2026-11-06; live to verify |
+| `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` | API key | token limits per window, percentage, next reset | no | REPORTED | third-party 2026-11-06; live to verify |
+| `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (or `/coding_plan/remains`, to verify) | API key | interval totals, remaining (field meaning to verify), reset | no | REPORTED | third-party 2026-11-06; live to verify |
+| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) | `bl`'s own login | quota windows, percentage, reset, `hasQuotaData` | yes (Model Studio docs) | REPORTED | docs 2026-11-06; `bl` not installed, to verify |
+| `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/billing/subscriptions`, `/alpha/usage/summary` | API key | monthly credits, 5-hour and weekly windows, period end | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
+| `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` | API key (credits may need a management key) | usage, limit, limit remaining, free tier, total credits | yes | REPORTED | docs 2026-11-06 |
+| `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` | API key | `balance`, `total_used` | yes | REPORTED | docs 2026-11-06 |
+| `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --days <N> --models --json` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` over the range since the last declaration | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape to verify |
+| `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/usage` (§3.3) | Ollama API key (`Authorization: Bearer`) | `limits.session.usage`, `limits.weekly.usage` (fraction 0–1 of the cap); monthly-credit plans: fields to verify | no (called by the ollama.com web page) | REPORTED | third-party 2026-11-06; live to verify |
+| `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
+| `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
+| `cloudflare-api` | Cloudflare Workers AI | provider API | `https://api.cloudflare.com/client/v4/graphql` (GraphQL Analytics, one fixed query) (§3.3) | API token with *Account Analytics: Read* only, plus the account id | `aiInferenceAdaptiveGroups` → `sum.totalNeurons` for the current UTC day, against the published 10 000 neurons/day allocation | yes (GraphQL Analytics API; dataset fields to verify) | REPORTED | docs and third-party 2026-11-06; live to verify |
+| `heimdall` | any plan Heimdall serves | local service | Heimdall admin API on loopback | Heimdall admin token | plan cooldowns, announced resets, usage ledger | yes (Heimdall OpenAPI) | OBSERVED | to verify |
+
+### Providers without a readable allowance
+
+| Provider | What exists (2026-11-06) | Decision |
+|---|---|---|
+| Google AI Studio (Gemini API keys) | Limits are per Google Cloud project, not per key; requests per day reset at midnight Pacific time (docs). Usage is shown only in the AI Studio console; reading Cloud quota metrics needs a Google OAuth or service-account credential. | `heimdall` (`OBSERVED`: `429 RESOURCE_EXHAUSTED`, daily rebirth at midnight Pacific), else `UNSUPPORTED` |
+| Gemini CLI with a Google account | Quota is shown only inside a session (`/stats`); the CLI has no non-interactive usage command (`gemini --help`, 0.1.9) and its quota call needs the Google OAuth token (ADR 0003). | `UNSUPPORTED`. Candidate, to verify: a `DERIVED` request count from the CLI's opt-in local telemetry file (`telemetry.target: local`, prompts not logged), read for event names only |
+| Qwen Code (Qwen OAuth) | The free Qwen OAuth tier was discontinued on 2026-04-15 (`qwen auth` reports "removed" in 0.21.8). Qwen Code on a Model Studio plan is covered by `alibaba-cli`. | `UNSUPPORTED` |
+| NVIDIA (build.nvidia.com) | Trial credits and a per-minute rate limit, visible only in the console; no usage API. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
+| Groq | Documented `x-ratelimit-limit/remaining/reset-requests` (per day) and `-tokens` (per minute) headers on every inference response; no endpoint answers without spending a request. | `heimdall` (`OBSERVED` from the headers of traffic it already serves) |
+| LLM7 | Free-token quotas (tokens per day, requests per second/minute/hour) that may change without notice; only a models catalogue is documented. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
+| Kilo Gateway | The documented gateway API has chat, FIM, models and providers only; the balance is shown in the Kilo app, whose profile call uses the app's device-login token (ADR 0003). Free models: 200 requests/hour per IP. | `heimdall` (`OBSERVED`: `402` balance, `429` free models), else `UNSUPPORTED` |
 
 ### 3.1 Claude in detail (verified 2026-11-06, Claude Code 2.1.319)
 
@@ -141,13 +166,58 @@ Codex performs the network call with its own login.
 - Codex marks the protocol experimental: any surprise is `CONTRACT_CHANGED`
   and the logs remain the source.
 
+### 3.3 Other sources in detail (researched 2026-11-06, not yet verified live)
+
+**`ollama-api` (Ollama Cloud).** The `ollama` CLI (0.31.1) has no usage
+command. The ollama.com usage page reads `GET https://ollama.com/api/usage`,
+which accepts the owner's Ollama API key as `Authorization: Bearer` (an
+`X-API-Key` header is rejected). It returns `limits.session.usage` and
+`limits.weekly.usage` as a fraction of the cap (0–1, shown ×100) and no exact
+reset instant, so those meters are `FIVE_HOURS` and `WEEKLY` with an unknown
+`resets_at`. Plans started after 2026-08-31 replace both windows with a
+monthly credit allowance that renews on the subscription day; its fields
+are to verify. The same key can spend credits, so it is sealed like any
+other key.
+
+**`copilot-gh` (GitHub Copilot).** The Copilot CLI shows usage only inside a
+session (`/usage`). GitHub publishes a per-user billing report:
+`GET /users/<login>/settings/billing/premium_request/usage` (query `year`,
+`month`, optional `day`, `model`, `product`; header
+`X-GitHub-Api-Version: 2026-03-10`), whose `usageItems[]` carry `product`,
+`sku`, `model`, `unitType`, `grossQuantity`, `discountQuantity`,
+`netQuantity` and `netAmount`. Since 2026-06-01 Copilot plans are billed in
+AI credits (premium requests remain only for annual Pro/Pro+ plans that
+stayed on them); GitHub documents an AI-credit report for a user with the
+same schema (path to verify). Ataecina runs the official `gh` with a fixed
+argv (`gh api --method GET -H X-GitHub-Api-Version:2026-03-10 <path>`), so
+`gh` uses its own login and Ataecina never sees a token; the login name and
+the monthly allowance are declared in `config.json`. Used percentage =
+`Σ grossQuantity` ÷ declared allowance (`DERIVED`); the `MONTHLY` window is
+reborn on the 1st at 00:00 UTC (documented). The user report only covers
+plans the owner pays personally.
+
+**`orcarouter-api` (Orca Router).** OrcaRouter documents two summary
+endpoints authenticated with the API key: `/v1/dashboard/billing/subscription`
+(remaining allowance and expiry) and `/v1/dashboard/billing/usage`
+(cumulative usage). Rate limits are per workspace and only `Retry-After` is
+returned. Key limits may renew daily, weekly or monthly (UTC); there is no
+documented call to read a key's own limit.
+
+**`cloudflare-api` (Cloudflare Workers AI).** Workers AI grants 10 000
+neurons per day on every plan. The GraphQL Analytics API
+(`POST https://api.cloudflare.com/client/v4/graphql`) exposes the
+`aiInferenceAdaptiveGroups` dataset; Ataecina sends one fixed query
+filtered by `accountTag` and today's UTC date and reads `sum.totalNeurons`.
+The token needs only *Account Analytics: Read* (it cannot run inference).
+The `DAILY` window is reborn at 00:00 UTC (to verify); analytics may lag a
+few minutes behind the dashboard.
+
 Declared balances (`ataecina balance declare`) are stored in
 `$XDG_STATE_HOME/ataecina/balances.json` with fidelity `DECLARED`; `opencode-zen`
 derives `remaining = declared top-ups − recorded cost since the declaration`.
 
-Providers with no readable allowance (Gemini AI Studio keys, NVIDIA, Groq,
-Kilo, LLM7, Cloudflare) are shown only through `heimdall`, or as
-`UNSUPPORTED` with a hint.
+Providers without a readable allowance (table above) are shown only through
+`heimdall`, or as `UNSUPPORTED` with a hint.
 
 ## 4. Readings
 

@@ -59,7 +59,12 @@ For each subscription you configure:
 | OpenRouter | credits, key limit, free tier | OpenRouter API | API key | reported |
 | Vercel AI Gateway | balance and total spent | AI Gateway `/v1/credits` | API key | reported |
 | OpenCode Zen | balance | your declared top-ups minus the cost reported by `opencode stats` | none | derived |
-| Gemini, NVIDIA, Groq, Kilo, LLM7, Cloudflare | cooldowns and resets seen while serving | [Heimdall](https://codeberg.org/simplicer/heimdall), optional | Heimdall admin token | observed |
+| Ollama Cloud | session and weekly usage (or monthly credits on newer plans) | ollama.com usage API (undocumented) | API key | reported |
+| GitHub Copilot | premium requests or AI credits used this month | official `gh api` against GitHub's billing usage report, with your monthly allowance declared | `gh`'s own login | derived |
+| Orca Router | remaining allowance and usage | OrcaRouter billing API | API key | reported |
+| Cloudflare Workers AI | neurons used today out of the free daily allocation | Cloudflare GraphQL Analytics API | read-only analytics token | reported |
+| Gemini (AI Studio keys), NVIDIA, Groq, Kilo Gateway, LLM7 | cooldowns and resets seen while serving | [Heimdall](https://codeberg.org/simplicer/heimdall), optional | Heimdall admin token | observed |
+| Gemini CLI (Google account), Qwen Code (Qwen OAuth) | nothing readable without the tool's login token | — | — | unsupported |
 
 Undocumented endpoints may change without notice. When one does, only that
 subscription shows `BROKEN`; everything else keeps working. Adding a provider

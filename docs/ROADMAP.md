@@ -15,7 +15,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd); `qmllint` in `make check` | planned |
 | 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch), AUR `PKGBUILD`, `make install-user`; reproducible builds; signed checksums | planned |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator | planned |
-| 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `heimdall` observed cooldowns for free tiers | planned |
+| 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | planned |
 | 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | planned |
 
 ## Later (not scheduled)
