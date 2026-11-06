@@ -92,6 +92,31 @@ func TestWindowsAreValidated(t *testing.T) {
 	}
 }
 
+func TestANullNeverErasesWhatIsKnown(t *testing.T) {
+	withWindows := codexlimits.Limits{ObservedAt: observed, LimitID: "codex", Plan: "plus",
+		Windows: []codexlimits.Window{{Minutes: 300, UsedPercent: 20}},
+		Credits: &codexlimits.Credits{HasCredits: true, Balance: "3"}}
+	empty := codexlimits.Limits{ObservedAt: observed.Add(48 * time.Hour), LimitID: "codex"}
+
+	merged := codexlimits.Update(withWindows, empty)
+	if len(merged.Windows) != 1 || merged.Credits == nil || merged.Plan != "plus" || !merged.ObservedAt.Equal(observed) {
+		t.Fatalf("a later empty snapshot erased figures: %+v", merged)
+	}
+	if again := codexlimits.Update(empty, withWindows); len(again.Windows) != 1 || !again.ObservedAt.Equal(observed) {
+		t.Fatalf("order of arrival must not matter: %+v", again)
+	}
+
+	newer := codexlimits.Limits{ObservedAt: observed.Add(time.Hour), LimitID: "codex",
+		Windows: []codexlimits.Window{{Minutes: 300, UsedPercent: 35}}}
+	merged = codexlimits.Update(withWindows, newer)
+	if merged.Windows[0].UsedPercent != 35 || !merged.ObservedAt.Equal(newer.ObservedAt) || merged.Credits == nil || merged.Plan != "plus" {
+		t.Fatalf("newer windows win and unknown fields are kept: %+v", merged)
+	}
+	if first := codexlimits.Update(codexlimits.Limits{}, newer); first.Windows[0].UsedPercent != 35 {
+		t.Fatalf("a first snapshot is taken as is: %+v", first)
+	}
+}
+
 func TestNothingToShow(t *testing.T) {
 	latest := map[string]codexlimits.Limits{"codex": {ObservedAt: observed, LimitID: "codex"}}
 	if _, err := codexlimits.Reading(codex(), "codex-logs", latest, nil); !errors.Is(err, codexlimits.ErrNoFigures) {

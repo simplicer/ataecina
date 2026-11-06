@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.5.1-unstable] - 2026-11-06
+
+### Fixed
+
+- `codex-logs` no longer reads as `UNAVAILABLE` when Codex has not been used
+  for more than 8 days: older logs are read once, newest first, until the
+  `codex` bucket shows its windows. A snapshot logged with null windows or
+  credits no longer erases the figures already known.
+
 ## [0.5.0-unstable] - 2026-11-06
 
 ### Added

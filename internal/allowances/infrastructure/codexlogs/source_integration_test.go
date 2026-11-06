@@ -179,14 +179,74 @@ func TestARewrittenFileIsReadAgain(t *testing.T) {
 	}
 }
 
-func TestMissingStaleOrChangedLogs(t *testing.T) {
+func TestOlderLogsAreReadOnceWhenRecentOnesLackCodexFigures(t *testing.T) {
 	c := newCodexHome(t)
 	c.touch(now.Add(-10 * 24 * time.Hour))
-	if _, err := c.read(); !hasClass(err, domain.ErrorUnreadable) {
-		t.Fatalf("old logs = %v", err)
+	// A recent log with only a bucket that carries nothing, as Codex
+	// writes for `premium` when the plan has no such limit.
+	recent := filepath.Join(filepath.Dir(c.log), "rollout-recent.jsonl")
+	premium := `{"timestamp":"2026-11-06T11:59:00Z","type":"event_msg","payload":{"type":"token_count","rate_limits":{"limit_id":"premium","primary":null,"secondary":null,"credits":{"has_credits":false,"unlimited":false,"balance":"0"}}}}` + "\n"
+	if err := os.WriteFile(recent, []byte(premium), 0o600); err != nil {
+		t.Fatal(err)
 	}
+	if err := os.Chtimes(recent, now, now); err != nil {
+		t.Fatal(err)
+	}
+	reading, err := c.read()
+	if err != nil || used(t, reading, domain.WeeklyWindow()) != 40 || reading.Plan() != "PLUS" {
+		t.Fatalf("older logs = %v", err)
+	}
+	// The backfill happens once: its figures stay in the state even if the
+	// old file disappears.
+	if err := os.Remove(c.log); err != nil {
+		t.Fatal(err)
+	}
+	if reading, err := c.read(); err != nil || used(t, reading, domain.WeeklyWindow()) != 40 {
+		t.Fatalf("after the backfill = %v", err)
+	}
+}
 
-	c = newCodexHome(t)
+func TestAnEventWithNullWindowsKeepsTheKnownOnes(t *testing.T) {
+	c := newCodexHome(t)
+	// Codex sometimes logs its own bucket with null windows and credits.
+	c.append(`{"timestamp":"2026-11-06T11:45:00Z","type":"event_msg","payload":{"type":"token_count","rate_limits":{"limit_id":"codex","primary":null,"secondary":null,"credits":null,"plan_type":null}}}` + "\n")
+	reading, err := c.read()
+	if err != nil || used(t, reading, domain.FiveHourWindow()) != 20 || reading.Plan() != "PLUS" {
+		t.Fatalf("null windows erased the known ones: %v", err)
+	}
+	if at, _ := reading.ObservedAt(); !at.Equal(time.Date(2026, 11, 6, 11, 30, 2, 0, time.UTC)) {
+		t.Fatalf("observed_at must follow the windows, got %v", at)
+	}
+}
+
+func TestTheBackfillLooksPastSnapshotsWithoutWindows(t *testing.T) {
+	c := newCodexHome(t)
+	c.touch(now.Add(-12 * 24 * time.Hour))
+	nulls := filepath.Join(filepath.Dir(c.log), "rollout-nulls.jsonl")
+	empty := `{"timestamp":"2026-11-06T11:50:00Z","type":"event_msg","payload":{"type":"token_count","rate_limits":{"limit_id":"codex","primary":null,"secondary":null,"credits":null}}}` + "\n"
+	if err := os.WriteFile(nulls, []byte(empty), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chtimes(nulls, now.Add(-10*24*time.Hour), now.Add(-10*24*time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	reading, err := c.read()
+	if err != nil || used(t, reading, domain.WeeklyWindow()) != 40 {
+		t.Fatalf("the backfill stopped at a snapshot without windows: %v", err)
+	}
+}
+
+func TestNoRateLimitsAnywhere(t *testing.T) {
+	c := newCodexHome(t)
+	c.write([]byte(`{"timestamp":"2026-11-06T10:00:00Z","type":"session_meta","payload":{}}` + "\n"))
+	c.touch(now.Add(-30 * 24 * time.Hour))
+	if _, err := c.read(); !hasClass(err, domain.ErrorUnreadable) {
+		t.Fatalf("no rate limits = %v", err)
+	}
+}
+
+func TestMissingStaleOrChangedLogs(t *testing.T) {
+	c := newCodexHome(t)
 	c.write([]byte(`{"timestamp":"2026-11-06T10:00:00Z","type":"event_msg","payload":{"type":"token_count","rate_limits":{"primary":{"used_percent":"high"}}}}` + "\n"))
 	if _, err := c.read(); !hasClass(err, domain.ErrorContractChanged) {
 		t.Fatalf("changed format = %v", err)

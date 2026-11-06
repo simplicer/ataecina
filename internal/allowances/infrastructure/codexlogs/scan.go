@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -19,9 +20,11 @@ import (
 
 const (
 	stateVersion = 1
-	// recentFiles bounds the scan to logs touched within a weekly window
-	// plus a day: older files cannot hold a window that is still open.
+	// recentFiles bounds the incremental scan to logs touched within a
+	// weekly window plus a day: older files cannot hold an open window.
 	recentFiles = 8 * 24 * time.Hour
+	// maxBackfillBytes bounds the one-time read of older logs.
+	maxBackfillBytes = 256 << 20
 	// maxLineBytes skips longer lines unread; token_count events are small.
 	maxLineBytes  = 64 << 10
 	maxStateBytes = 1 << 20
@@ -31,9 +34,10 @@ const (
 // read each file, and the latest limits per limit id. It holds no log
 // content beyond those figures.
 type scanState struct {
-	Version int                           `json:"version"`
-	Files   map[string]fileMark           `json:"files"`
-	Latest  map[string]codexlimits.Limits `json:"latest"`
+	Version    int                           `json:"version"`
+	Files      map[string]fileMark           `json:"files"`
+	Latest     map[string]codexlimits.Limits `json:"latest"`
+	Backfilled bool                          `json:"backfilled"`
 }
 
 type fileMark struct {
@@ -54,8 +58,44 @@ type scanResult struct {
 
 func (s scanner) scan(ctx context.Context, now time.Time) (scanResult, error) {
 	state := s.loadState()
-	next := scanState{Version: stateVersion, Files: map[string]fileMark{}, Latest: state.Latest}
+	recent, older, err := s.listLogs(ctx, now)
+	if err != nil {
+		return scanResult{}, err
+	}
+	next := scanState{Version: stateVersion, Files: map[string]fileMark{}, Backfilled: state.Backfilled}
 	result := scanResult{latest: state.Latest}
+	for _, log := range recent {
+		if ctx.Err() != nil {
+			return scanResult{}, ctx.Err()
+		}
+		mark, malformed, err := advance(log.path, log.info, state.Files[log.path], result.latest)
+		if err != nil {
+			continue
+		}
+		result.malformed += malformed
+		next.Files[log.path] = mark
+	}
+	if !hasMainWindows(result.latest) && !state.Backfilled {
+		malformed, err := backfill(ctx, older, result.latest)
+		if err != nil {
+			return scanResult{}, err
+		}
+		result.malformed += malformed
+		next.Backfilled = true
+	}
+	next.Latest = result.latest
+	s.saveState(next)
+	return result, nil
+}
+
+type logFile struct {
+	path string
+	info fs.FileInfo
+}
+
+// listLogs finds every rollout log under the roots, without following
+// symlinks, split into recent and older files.
+func (s scanner) listLogs(ctx context.Context, now time.Time) (recent, older []logFile, err error) {
 	for _, root := range s.roots {
 		err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {
 			if err != nil {
@@ -68,24 +108,50 @@ func (s scanner) scan(ctx context.Context, now time.Time) (scanResult, error) {
 				return nil
 			}
 			info, err := entry.Info()
-			if err != nil || now.Sub(info.ModTime()) > recentFiles {
-				return nil
-			}
-			mark, malformed, err := advance(path, info, state.Files[path], result.latest)
 			if err != nil {
 				return nil
 			}
-			result.malformed += malformed
-			next.Files[path] = mark
+			if now.Sub(info.ModTime()) > recentFiles {
+				older = append(older, logFile{path, info})
+			} else {
+				recent = append(recent, logFile{path, info})
+			}
 			return nil
 		})
 		if err != nil {
-			return scanResult{}, err
+			return nil, nil, err
 		}
 	}
-	next.Latest = result.latest
-	s.saveState(next)
-	return result, nil
+	return recent, older, nil
+}
+
+// backfill reads older logs once, newest first, until Codex's own bucket
+// has windows, so a Codex left unused for a while still shows its plan,
+// its credits and its windows (reborn by then). It reads at most
+// maxBackfillBytes.
+func backfill(ctx context.Context, older []logFile, latest map[string]codexlimits.Limits) (int, error) {
+	sort.Slice(older, func(i, j int) bool { return older[i].info.ModTime().After(older[j].info.ModTime()) })
+	var read int64
+	malformed := 0
+	for _, log := range older {
+		if hasMainWindows(latest) || read > maxBackfillBytes {
+			break
+		}
+		if ctx.Err() != nil {
+			return malformed, ctx.Err()
+		}
+		_, bad, err := readFrom(log.path, 0, latest)
+		if err != nil {
+			continue
+		}
+		malformed += bad
+		read += log.info.Size()
+	}
+	return malformed, nil
+}
+
+func hasMainWindows(latest map[string]codexlimits.Limits) bool {
+	return len(latest[codexlimits.MainLimit].Windows) > 0
 }
 
 func isRollout(name string) bool {
@@ -117,8 +183,9 @@ func advance(path string, info fs.FileInfo, mark fileMark, latest map[string]cod
 	return mark, malformed, nil
 }
 
-// readFrom reads complete lines from offset, keeps the newest limits per
-// limit id in latest, and returns the offset after the last complete line.
+// readFrom reads complete lines from offset, folds every limits snapshot
+// into latest (codexlimits.Update) and returns the offset after the last
+// complete line.
 // A line still being written (no newline yet) is left for the next scan.
 func readFrom(path string, offset int64, latest map[string]codexlimits.Limits) (int64, int, error) {
 	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0)
@@ -149,8 +216,8 @@ func readFrom(path string, offset int64, latest map[string]codexlimits.Limits) (
 			switch {
 			case err != nil:
 				malformed++
-			case ok && !limits.ObservedAt.Before(latest[limits.LimitID].ObservedAt):
-				latest[limits.LimitID] = limits
+			case ok:
+				latest[limits.LimitID] = codexlimits.Update(latest[limits.LimitID], limits)
 			}
 		}
 		tooLong = false

@@ -56,6 +56,28 @@ type Credits struct {
 	Balance    string `json:"balance,omitempty"`
 }
 
+// Update folds two snapshots of the same limit id. Codex sometimes logs a
+// snapshot with null windows or credits; a null is "unknown", never "gone",
+// so each field keeps its most recent known value. ObservedAt follows the
+// snapshot the windows come from, so freshness never overstates them.
+func Update(known, other Limits) Limits {
+	recent, earlier := other, known
+	if other.ObservedAt.Before(known.ObservedAt) {
+		recent, earlier = known, other
+	}
+	merged := recent
+	if len(recent.Windows) == 0 && len(earlier.Windows) > 0 {
+		merged.Windows, merged.ObservedAt = earlier.Windows, earlier.ObservedAt
+	}
+	if merged.Credits == nil {
+		merged.Credits = earlier.Credits
+	}
+	if merged.Plan == "" {
+		merged.Plan = earlier.Plan
+	}
+	return merged
+}
+
 // Reading builds the subscription's reading from the latest limits of
 // each limit id. The main bucket comes first; other buckets are shown only
 // when they carry windows. banked is the number of banked resets, or nil

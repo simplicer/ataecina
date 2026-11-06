@@ -175,12 +175,22 @@ object with `limit_id == "codex"`:
   the next collection. A missing `limit_id` means `codex`; older logs with
   `resets_in_seconds` are read relative to the event's `timestamp`.
 - Files are walked under `$CODEX_HOME` (when absolute, as Codex reads it)
-  or `~/.codex`, without following symlinks, and only when modified within
-  the last 8 days (a weekly window plus a day). For each file the reader
-  keeps its inode and byte offset, plus the latest figures per `limit_id`,
-  in `$XDG_STATE_HOME/ataecina/codex-logs/<subscription>.json` (`0600`); no
-  log content is ever stored. A rotated or truncated file is read again
-  from the start. The newest event wins by `timestamp`, not by file order.
+  or `~/.codex`, without following symlinks. Files modified within the last
+  8 days (a weekly window plus a day) are read incrementally: for each the
+  reader keeps its inode and byte offset, plus the latest figures per
+  `limit_id`, in `$XDG_STATE_HOME/ataecina/codex-logs/<subscription>.json`
+  (`0600`); no log content is ever stored. A rotated or truncated file is
+  read again from the start.
+- Codex sometimes logs its own bucket with `primary`, `secondary` and
+  `credits` set to null. A null is "unknown", never "gone": per `limit_id`
+  every field (windows, credits, plan) keeps its most recent known value,
+  by `timestamp`, not by file order, and `observed_at` follows the event
+  the windows come from.
+- When the recent files give no window for the `codex` bucket (Codex left
+  unused for more than 8 days), older files are read **once**, newest
+  first, until they do (at most 256 MiB); the result is kept in the state,
+  so a Codex unused for weeks still shows its plan and its windows, reborn
+  by then, marked stale.
 - Failures: no Codex directory, or no rate limits in recent logs →
   `UNREADABLE` (outcome `UNAVAILABLE`, the last good reading is kept);
   only malformed `rate_limits` → `CONTRACT_CHANGED` (`BROKEN`); the

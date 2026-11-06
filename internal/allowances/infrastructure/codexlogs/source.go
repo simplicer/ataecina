@@ -45,7 +45,7 @@ func (s Source) Read(ctx context.Context, subscription domain.Subscription) (dom
 		return domain.Reading{}, domain.Failure(domain.ErrorContractChanged, "the Codex log format changed: rate limits cannot be read", nil)
 	}
 	if len(result.latest) == 0 {
-		return domain.Reading{}, domain.Failure(domain.ErrorUnreadable, "no Codex rate limits in the session logs of the last 8 days; use Codex once", nil)
+		return domain.Reading{}, domain.Failure(domain.ErrorUnreadable, "no Codex rate limits in the session logs yet; use Codex once", nil)
 	}
 	reading, err := codexlimits.Reading(subscription, SourceID, result.latest, nil)
 	if errors.Is(err, codexlimits.ErrNoFigures) {
