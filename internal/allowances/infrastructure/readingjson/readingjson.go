@@ -229,11 +229,11 @@ func DecodeBalance(document *Balance) (*domain.Balance, error) {
 	if document == nil {
 		return nil, nil
 	}
-	remaining, err := decodeMoney(document.Remaining)
+	remaining, err := DecodeMoney(document.Remaining)
 	if err != nil {
 		return nil, err
 	}
-	spent, err := decodeMoney(document.Spent)
+	spent, err := DecodeMoney(document.Spent)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,8 @@ func EncodeMoney(money domain.Money) *Money {
 	return &Money{Amount: json.Number(money.Amount().String()), Currency: money.Currency().String()}
 }
 
-func decodeMoney(document *Money) (*domain.Money, error) {
+// DecodeMoney validates a money document; nil stays nil.
+func DecodeMoney(document *Money) (*domain.Money, error) {
 	if document == nil {
 		return nil, nil
 	}

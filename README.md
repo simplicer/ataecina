@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.4.0-unstable` — early development: the core, the
+**Current version:** `0.5.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -69,7 +69,9 @@ For each subscription you configure:
 
 Available in this version: **ChatGPT / Codex** from its session logs, and
 from the official `codex app-server` when the logs are stale (opt-in);
-**Claude** from the Claude Code status line hook. The
+**Claude** from the Claude Code status line hook; **OpenCode Zen** derived
+from your declared top-ups (`ataecina balance declare zen --top-up 20`)
+and the cost OpenCode records. The
 other sources arrive as listed in [docs/ROADMAP.md](docs/ROADMAP.md) and read
 as `UNSUPPORTED` until then.
 
@@ -167,6 +169,8 @@ LXQt or GNOME (with the AppIndicator extension) start `ataecina tray`.
 ```text
 ataecina [status] [--json]          show the snapshot (no network, no keys)
 ataecina collect                    read every subscription now (what the timer runs)
+ataecina hook claude-statusline     record Claude limits from the Claude Code status line
+ataecina balance declare            record a top-up or the balance of OpenCode Zen
 ataecina version
 ataecina help
 ```
@@ -176,8 +180,6 @@ Planned:
 ```text
 ataecina keys set|list|forget       manage sealed keys (set reads stdin)
 ataecina unlockers add|list|remove  manage how the master key is held
-ataecina balance declare            record a top-up for balance-only providers
-ataecina hook claude-statusline     record Claude limits from the Claude Code status line
 ataecina tray                       tray icon for non-Plasma desktops
 ataecina doctor                     check permissions, keyring, units and sources
 ```

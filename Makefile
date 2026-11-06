@@ -19,7 +19,8 @@ APPLICATION_PACKAGES = $(shell $(GO) list ./internal/... | grep '/application$$'
 FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/codexlogs:FuzzDecodeLine \
 	./internal/allowances/infrastructure/codexappserver:FuzzDecodeRateLimits \
-	./internal/allowances/infrastructure/claudestatusline:FuzzDecodeRateLimits
+	./internal/allowances/infrastructure/claudestatusline:FuzzDecodeRateLimits \
+	./internal/allowances/infrastructure/opencodezen:FuzzDecodeSpend
 FUZZ_TIME ?= 30s
 
 .PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke vulncheck build check-version e2e fuzz clean

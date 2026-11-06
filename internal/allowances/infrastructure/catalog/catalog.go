@@ -22,6 +22,9 @@ type Entry struct {
 	Fidelity domain.Fidelity
 	NeedsKey bool
 	Options  []Option
+	// TakesDeclarations marks balance-only sources that derive what is
+	// left from `ataecina balance declare`.
+	TakesDeclarations bool
 }
 
 // Accepts reports whether the source takes an option.
@@ -52,7 +55,7 @@ func Standard() Catalog {
 		{Source: "commandcode-api", Provider: "commandcode", Fidelity: reported, NeedsKey: true},
 		{Source: "openrouter-api", Provider: "openrouter", Fidelity: reported, NeedsKey: true},
 		{Source: "vercel-api", Provider: "vercel", Fidelity: reported, NeedsKey: true},
-		{Source: "opencode-zen", Provider: "opencode", Fidelity: derived},
+		{Source: "opencode-zen", Provider: "opencode", Fidelity: derived, TakesDeclarations: true},
 		{Source: "ollama-api", Provider: "ollama", Fidelity: reported, NeedsKey: true},
 		{Source: "copilot-gh", Provider: "github", Fidelity: derived},
 		{Source: "orcarouter-api", Provider: "orcarouter", Fidelity: reported, NeedsKey: true},

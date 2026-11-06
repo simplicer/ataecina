@@ -4,11 +4,14 @@ import (
 	"path/filepath"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/balancefile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/claudestatusline"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexappserver"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
+	"codeberg.org/simplicer/ataecina/internal/platform/pathlookup"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
 
@@ -62,6 +65,9 @@ func standardSources() sourceRegistry {
 		codexappserver.SourceID: func(_ configfile.SubscriptionSettings, _ xdg.Paths, env environment) domain.Source {
 			return appServer(env)
 		},
+		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
+			return opencodezen.NewSource(balancefile.NewStore(paths.StateDir()), zenSpend(env), env.clock.Now)
+		},
 		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, _ environment) domain.Source {
 			// collect has already required the runtime directory.
 			runtimeDir, _ := paths.RuntimeDir()
@@ -70,9 +76,14 @@ func standardSources() sourceRegistry {
 	}}
 }
 
+// zenSpend reads OpenCode Zen spending with the `opencode` found on PATH.
+func zenSpend(env environment) opencodezen.Stats {
+	return opencodezen.NewStats(pathlookup.Find("opencode", env.getenv("PATH")))
+}
+
 // appServer runs the official `codex` found on the collector's PATH.
 func appServer(env environment) codexappserver.Source {
-	return codexappserver.New(codexappserver.FindOnPath(env.getenv("PATH")), version, env.clock.Now)
+	return codexappserver.New(pathlookup.Find("codex", env.getenv("PATH")), version, env.clock.Now)
 }
 
 // codexHome is $CODEX_HOME when absolute, as Codex itself reads it, else ~/.codex.

@@ -8,6 +8,22 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.5.0-unstable] - 2026-11-06
+
+### Added
+
+- `ataecina balance declare <subscription> (--top-up | --balance) <amount>`
+  and the `opencode-zen` source: the OpenCode Zen balance is derived from
+  the declared top-ups minus the cost OpenCode records for its `opencode`
+  provider, read from `opencode stats` lifetime statistics with a fixed
+  argv; every declaration keeps the spending to date as its baseline.
+  Without a declaration the spending is shown as `PARTIAL`.
+
+### Changed
+
+- Official CLIs (`codex`, `opencode`) are looked up in the absolute
+  directories of `PATH` by one shared helper.
+
 ## [0.4.0-unstable] - 2026-11-06
 
 ### Added

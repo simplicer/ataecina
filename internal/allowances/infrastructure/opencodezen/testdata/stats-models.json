@@ -1,0 +1,9 @@
+{
+  "range": { "all": true },
+  "totals": { "sessions": 3, "messages": 42, "cost": 12.75 },
+  "models": [
+    { "model": { "providerID": "opencode", "modelID": "zen-synthetic-large" }, "messages": 20, "cost": 4.25, "tokens": { "input": 1000, "output": 100 } },
+    { "model": { "providerID": "opencode", "modelID": "zen-synthetic-small" }, "messages": 12, "cost": 0.5, "tokens": { "input": 500, "output": 50 } },
+    { "model": { "providerID": "openrouter", "modelID": "synthetic" }, "messages": 10, "cost": 8, "tokens": { "input": 800, "output": 80 } }
+  ]
+}

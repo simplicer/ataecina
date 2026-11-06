@@ -182,14 +182,4 @@ func TestMissingCodexIsUnreadable(t *testing.T) {
 	if _, err := broken.Read(context.Background(), domain.NewSubscription("codex", "openai", codexappserver.SourceID, domain.FidelityReported, "")); !errors.As(err, &failure) {
 		t.Fatalf("unstartable codex = %v", err)
 	}
-	dir := t.TempDir()
-	if _, err := codexappserver.FindOnPath("relative:" + dir)(); err == nil {
-		t.Fatal("an empty directory has no codex")
-	}
-	if err := os.WriteFile(filepath.Join(dir, "codex"), []byte("#!/bin/sh\n"), 0o700); err != nil {
-		t.Fatal(err)
-	}
-	if found, err := codexappserver.FindOnPath("relative:" + dir)(); err != nil || found != filepath.Join(dir, "codex") {
-		t.Fatalf("FindOnPath = %q, %v", found, err)
-	}
 }

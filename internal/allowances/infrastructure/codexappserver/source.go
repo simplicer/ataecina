@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
@@ -29,27 +26,10 @@ type Source struct {
 	now       func() time.Time
 }
 
-// New finds the codex binary with findCodex (FindOnPath in production)
+// New finds the codex binary with findCodex (pathlookup.Find in production)
 // and introduces itself to the server as ataecina/version.
 func New(findCodex func() (string, error), version string, now func() time.Time) Source {
 	return Source{findCodex: findCodex, version: version, now: now}
-}
-
-// FindOnPath finds an executable `codex` in the directories of a PATH
-// value, as the shell would, without running anything.
-func FindOnPath(path string) func() (string, error) {
-	return func() (string, error) {
-		for _, dir := range filepath.SplitList(path) {
-			if !filepath.IsAbs(dir) {
-				continue
-			}
-			candidate := filepath.Join(dir, "codex")
-			if info, err := os.Stat(candidate); err == nil && info.Mode().IsRegular() && info.Mode().Perm()&0o111 != 0 {
-				return candidate, nil
-			}
-		}
-		return "", exec.ErrNotFound
-	}
 }
 
 // Read runs one app-server session and maps its answer.

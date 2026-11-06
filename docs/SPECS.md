@@ -67,7 +67,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/billing/subscriptions`, `/alpha/usage/summary` | API key | monthly credits, 5-hour and weekly windows, period end | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
 | `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` | API key (credits may need a management key) | usage, limit, limit remaining, free tier, total credits | yes | REPORTED | docs 2026-11-06 |
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` | API key | `balance`, `total_used` | yes | REPORTED | docs 2026-11-06 |
-| `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --days <N> --models --json` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` over the range since the last declaration | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape to verify |
+| `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --all --models --limit 1000 --json --standalone` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` to date, against the declared balance (§3.4) | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape and `--standalone` to verify |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/usage` (§3.3) | Ollama API key (`Authorization: Bearer`) | `limits.session.usage`, `limits.weekly.usage` (fraction 0–1 of the cap); monthly-credit plans: fields to verify | no (called by the ollama.com web page) | REPORTED | third-party 2026-11-06; live to verify |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
@@ -272,9 +272,39 @@ The token needs only *Account Analytics: Read* (it cannot run inference).
 The `DAILY` window is reborn at 00:00 UTC (to verify); analytics may lag a
 few minutes behind the dashboard.
 
-Declared balances (`ataecina balance declare`) are stored in
-`$XDG_STATE_HOME/ataecina/balances.json` with fidelity `DECLARED`; `opencode-zen`
-derives `remaining = declared top-ups − recorded cost since the declaration`.
+### 3.4 OpenCode Zen and declared balances
+
+OpenCode Zen has no balance API for a key; OpenCode records the cost of
+every message itself. Ataecina derives the balance from the owner's
+declarations and those records:
+
+- `ataecina balance declare <subscription> --top-up <amount>` adds money;
+  `--balance <amount>` states the whole current balance and replaces the
+  declarations before it. `--currency` defaults to `USD` (Zen bills in
+  dollars). Only subscriptions whose source takes declarations
+  (`opencode-zen`) accept them.
+- Every declaration stores the money spent to date at that moment (the
+  *spend baseline*), read from `opencode stats` **lifetime** statistics
+  (`--all`), which only ever grow; no day boundary or time zone matters.
+  `--limit 1000` keeps every model row; `--standalone` runs a private
+  server so no OpenCode background service is left running (to verify).
+- At each collection: `remaining = latest declared balance (or 0) + top-ups
+  after it − (spent to date − baseline of that reference)` and
+  `spent = spent to date − baseline` (never below zero, in case OpenCode's
+  records were cleared). `remaining` may go negative when a top-up was not
+  declared. Fidelity `DERIVED`. Without any declaration the reading is
+  `PARTIAL`, shows only the spending to date and hints at the command.
+- Spending sums the `cost` of every entry `{ "model": { "providerID":
+  "opencode", … }, "cost": <number> }` wherever it sits in the JSON
+  output; other providers are ignored. An output with no model entry and no
+  `models` key, a non-numeric or negative cost, or more than 1 MiB is
+  `CONTRACT_CHANGED`; `opencode` missing from `PATH` is `UNREADABLE`; a
+  failing or slow run (15 s) is `UNAVAILABLE`.
+- Declarations live in `$XDG_STATE_HOME/ataecina/balances.json` (`0600`):
+  `{ "version": 1, "subscriptions": { "<id>": [ { "kind": "TOP_UP" |
+  "BALANCE", "amount": <money>, "declared_at": <RFC 3339>,
+  "spent_baseline": <money> } ] } }`, at most 100 top-ups after the last
+  declared balance.
 
 Providers without a readable allowance (table above) are shown only through
 `heimdall`, or as `UNSUPPORTED` with a hint.
@@ -328,7 +358,7 @@ not implement yet shows `UNSUPPORTED`.
 | `collect_readings` | allowances | collector (timer or `ataecina collect`) | For each enabled subscription, ask its source through the `Source` port (keys via the `KeyRing` port), classify failures, merge with the previous snapshot (keep last good reading on transient errors), write the snapshot atomically. One attempt per source; sources run concurrently with a global deadline (20 s); a source that asked to wait (`retry_not_before`) is not asked. Logs one line per subscription. |
 | `report_snapshot` | allowances | display | Read the snapshot, apply freshness and rebirth rules at the current time, return the view model. Never touches keys or the network. |
 | `record_claude_limits` | allowances | Claude Code status line hook | Parse the status line JSON from stdin, keep only `rate_limits`, merge them with the kept signal so replays never rewind it, write the Claude signal file only when something is newer (§3.1); print nothing, or a summary line with `--print`. Must finish in a few milliseconds and never fail the status line. |
-| `declare_balance` | allowances | owner | Record a top-up or current balance for a balance-only subscription. |
+| `declare_balance` | allowances | owner (`balance declare`) | Read the spending to date through the `RecordedSpend` port, record a top-up or the current balance of a balance-only subscription with that spend baseline, refuse mixed currencies (§3.4). |
 | `seal_key` | keys | owner (`keys set`) | Read the key from stdin, seal it under the master key with the provider id as associated data, write `keys.json` atomically. |
 | `forget_key` | keys | owner | Remove a sealed key. |
 | `list_keys` | keys | owner | List providers that have a sealed key, with the date set; never the key. |
