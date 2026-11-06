@@ -8,6 +8,11 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+### Added
+
+- `SECURITY.md` (how to report a vulnerability and what Ataecina promises)
+  and `CONTRIBUTING.md` (how a change is made, tested and committed).
+
 ## [0.16.0-unstable] - 2026-11-06
 
 ### Added

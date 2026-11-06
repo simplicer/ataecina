@@ -304,6 +304,9 @@ msgmerge --update translate/es.po translate/template.pot
 The suite never calls a real provider and never touches your real keys or your home:
 every test runs in a throw-away `HOME` and XDG tree.
 
+How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md); how to report a
+vulnerability, and what Ataecina promises, is in [SECURITY.md](SECURITY.md).
+
 ## Versioning
 
 Semantic Versioning with the Simplicer policy: `VERSION` is the single source
