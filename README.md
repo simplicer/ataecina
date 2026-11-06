@@ -145,17 +145,22 @@ KWallet uses — so it gets the master key without any window. Over SSH or on a
 text console there is no desktop session, so you unlock with your passphrase
 (or rely on the systemd credential for the background collector).
 
-## Install (planned)
+## Install
 
-| Distribution | Package |
-|---|---|
-| Debian, Ubuntu, KDE neon, Kubuntu | `.deb` |
-| Fedora, openSUSE | `.rpm` |
-| Arch, Manjaro, EndeavourOS | Arch package and an AUR `PKGBUILD` |
-| Anything else | static binary, or `make install-user` from source |
+No packages are published yet; build them from a checkout with
+`make package` (they land in `dist/` with a `SHA256SUMS`):
 
-Packages install the `ataecina` binary, the collector's systemd user timer
-(`infra/systemd/`), the Plasma widget and the tray launcher. Then:
+| Distribution | Package | Install |
+|---|---|---|
+| Debian, Ubuntu, KDE neon, Kubuntu | `.deb` | `sudo apt install ./dist/ataecina_*_amd64.deb` |
+| Fedora, openSUSE | `.rpm` | `sudo dnf install ./dist/ataecina-*.x86_64.rpm` (or `zypper install`) |
+| Arch, Manjaro, EndeavourOS | Arch package, AUR `PKGBUILD` (`infra/packaging/arch/`) | `sudo pacman -U dist/ataecina-*-x86_64.pkg.tar.zst` |
+| Anything else, or no root | your home | `make install-user` (into `~/.local`; `make uninstall-user` removes it) |
+
+Packages install the `ataecina` binary, the collector's systemd user units,
+the Plasma widget, the icon and the docs; nothing is enabled for you.
+`make install-user` puts the same files under `~/.local` (make sure
+`~/.local/bin` is on your `PATH`). Then:
 
 ```sh
 ataecina init                      # create ~/.config/ataecina with safe permissions
@@ -175,7 +180,8 @@ systemctl --user daemon-reload
 Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,
 LXQt or GNOME (with the AppIndicator extension) start `ataecina tray`.
 
-Until the packages exist, install the widget from a checkout (Plasma 6):
+Packages and `make install-user` install the widget; to try only the
+widget from a checkout (Plasma 6):
 
 ```sh
 make widget          # stages var/build/plasmoid/org.simplicer.ataecina with its translations
@@ -245,8 +251,9 @@ and decisions in [docs/adrs/](docs/adrs/).
 
 ## Development
 
-Go 1.27 or later; nothing else is needed (`govulncheck` is fetched at a
-pinned version by `make check`).
+Go 1.27 or later and gettext (`msgfmt`); the build-time tools are fetched at
+pinned versions (`govulncheck` by `make check`, nfpm by `make package`) and
+never linked.
 
 ```sh
 make check      # format, vet, unit (100 % of use cases), integration, acceptance, benchmarks, widget lint, vulnerabilities, build, widget, version
@@ -254,7 +261,20 @@ make e2e        # the built binary end to end against fake providers
 make fuzz       # explore the decoders further (FUZZ_TIME=30s)
 make build      # var/build/ataecina, static and reproducible
 make widget     # var/build/plasmoid/org.simplicer.ataecina with compiled translations
+make package    # dist/: .deb, .rpm and Arch packages for amd64 and arm64, SHA256SUMS, verified
+make install-user / make uninstall-user   # into ~/.local (PREFIX=…, DESTDIR=… to change)
 ```
+
+Packages are reproducible: the same commit gives byte-identical files. To
+publish a release, sign the checksums and let users verify them:
+
+```sh
+gpg --armor --detach-sign dist/SHA256SUMS            # maintainer: writes SHA256SUMS.asc
+gpg --verify SHA256SUMS.asc && sha256sum --check --ignore-missing SHA256SUMS   # users
+```
+
+The AUR `PKGBUILD` (`infra/packaging/arch/PKGBUILD`) builds from the release
+tag; run `updpkgsums` on it before publishing to replace its `SKIP` checksum.
 
 The widget needs `msgfmt` (gettext); `qmllint` (Qt 6 declarative tools) is
 used when installed. `tests/widget` checks the widget without a QML runtime.
@@ -271,8 +291,7 @@ xgettext --from-code=UTF-8 --language=JavaScript --kde \
 msgmerge --update translate/es.po translate/template.pot
 ```
 
-`make package` (`.deb`, `.rpm`, Arch) arrives with milestone 7. The suite
-never calls a real provider and never touches your real keys or your home:
+The suite never calls a real provider and never touches your real keys or your home:
 every test runs in a throw-away `HOME` and XDG tree.
 
 ## Versioning

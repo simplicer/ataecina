@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Prints the package version of a Simplicer version for one package format,
+# so that a pre-release always sorts before its release (ADR 0008):
+#
+#   VERSION            deb, rpm          arch
+#   0.12.0-unstable    0.12.0~unstable   0.12.0unstable
+#   1.0.0-rc.2         1.0.0~rc.2        1.0.0rc2
+#   1.2.0-lts, 1.2.0   1.2.0             1.2.0
+#
+# Usage: bin/package-version deb|rpm|arch [VERSION]   (default: ./VERSION)
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+format=${1:?usage: bin/package-version deb|rpm|arch [VERSION]}
+case $format in
+deb | rpm | arch) ;;
+*) echo "package-version: unknown format $format" >&2; exit 2 ;;
+esac
+version=${2:-$(tr -d '[:space:]' <VERSION)}
+core=${version%%-*}
+prerelease=${version#"$core"}
+prerelease=${prerelease#-}
+if [ "$prerelease" = lts ] || [ -z "$prerelease" ]; then
+	echo "$core"
+	exit 0
+fi
+if [ "$format" = arch ]; then
+	echo "$core${prerelease//./}"
+else
+	echo "$core~$prerelease"
+fi

@@ -1,0 +1,68 @@
+# One manifest for the .deb, .rpm and Arch packages (ADR 0008).
+# `make package` stages the files with bin/install-files and runs nfpm
+# from that staged root (so every src is relative to it), setting the
+# variables below; bin/check-packages then verifies that every package
+# holds exactly the staged files.
+name: ataecina
+arch: ${ATAECINA_ARCH}
+platform: linux
+version: ${ATAECINA_VERSION}  # already mapped by bin/package-version
+version_schema: none
+release: "1"
+section: utils
+priority: optional
+maintainer: Antonio Villamarin <anvius@noreply.codeberg.org>
+vendor: Simplicer
+homepage: https://codeberg.org/simplicer/ataecina
+description: |-
+  How much is left of each AI subscription, and when it is reborn.
+  Ataecina reads the allowances of AI subscriptions and balances from the
+  signals their official tools write locally, their official CLIs or the
+  owner's own API keys (sealed at rest), and shows them in the terminal,
+  as JSON, in a KDE Plasma widget and as desktop alerts. A hardened systemd
+  user timer runs the collector; nothing is enabled until the user asks.
+depends:
+  - systemd
+umask: 0o022
+
+contents:
+  - src: ./usr/bin/ataecina
+    dst: /usr/bin/ataecina
+    file_info:
+      mode: 0755
+  - src: ./usr/lib/systemd/user/ataecina-collect.service
+    dst: /usr/lib/systemd/user/ataecina-collect.service
+    file_info:
+      mode: 0644
+  - src: ./usr/lib/systemd/user/ataecina-collect.timer
+    dst: /usr/lib/systemd/user/ataecina-collect.timer
+    file_info:
+      mode: 0644
+  - src: ./usr/share/plasma/plasmoids/org.simplicer.ataecina
+    dst: /usr/share/plasma/plasmoids/org.simplicer.ataecina
+    type: tree
+  - src: ./usr/share/icons/hicolor/scalable/apps/ataecina.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/ataecina.svg
+    file_info:
+      mode: 0644
+  - src: ./usr/share/doc/ataecina/README.md
+    dst: /usr/share/doc/ataecina/README.md
+    file_info:
+      mode: 0644
+  - src: ./usr/share/doc/ataecina/CHANGELOG.md
+    dst: /usr/share/doc/ataecina/CHANGELOG.md
+    file_info:
+      mode: 0644
+  - src: ./usr/share/doc/ataecina/ataecina.example.json
+    dst: /usr/share/doc/ataecina/ataecina.example.json
+    file_info:
+      mode: 0644
+
+deb:
+  compression: xz
+rpm:
+  summary: How much is left of each AI subscription, and when it is reborn
+  group: Applications/System
+  compression: xz
+archlinux:
+  packager: Antonio Villamarin <anvius@noreply.codeberg.org>

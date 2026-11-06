@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fails when the version drifts (AGENTS.md, "Versioning"): VERSION must be
-# a valid Simplicer version, stated in README.md, CHANGELOG.md and the
-# Plasma widget metadata, and must follow the Conventional Commit history
+# a valid Simplicer version, stated in README.md, CHANGELOG.md, the
+# Plasma widget metadata and the Arch PKGBUILD, and must follow the Conventional Commit history
 # (equal to the version derived at HEAD, or one step ahead of it: the
 # change being committed).
 set -euo pipefail
@@ -23,6 +23,12 @@ grep -q "^## \[$version\]" CHANGELOG.md || fail "CHANGELOG.md has no [$version] 
 metadata=share/plasma/plasmoids/org.simplicer.ataecina/metadata.json
 if [ -f "$metadata" ]; then
 	grep -Eq "\"Version\": *\"$version\"" "$metadata" || fail "$metadata does not state version $version"
+fi
+pkgbuild=infra/packaging/arch/PKGBUILD
+if [ -f "$pkgbuild" ]; then
+	pkgver=$(bin/package-version arch "$version")
+	grep -qx "_tag=v$version" "$pkgbuild" || fail "$pkgbuild does not build tag v$version"
+	grep -qx "pkgver=$pkgver" "$pkgbuild" || fail "$pkgbuild does not state pkgver $pkgver"
 fi
 
 if ! git rev-parse --git-dir >/dev/null 2>&1; then

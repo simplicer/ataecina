@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Builds the .deb, .rpm and Arch packages of each architecture into dist/
+# with nfpm (ADR 0008). Called by `make package`, which has already built
+# var/build/package/<arch>/ataecina and the widget, and exports NFPM (the
+# pinned nfpm command) and SOURCE_DATE_EPOCH (the last commit's time, so
+# that the same commit always gives the same packages).
+#
+# Usage: bin/build-packages ARCH...      (Go architecture names: amd64 arm64)
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+: "${NFPM:?NFPM must name the pinned nfpm command (make package sets it)}"
+: "${SOURCE_DATE_EPOCH:?SOURCE_DATE_EPOCH must be set (make package sets it)}"
+[ $# -gt 0 ] || { echo "usage: bin/build-packages ARCH..." >&2; exit 2; }
+export SOURCE_DATE_EPOCH
+
+repository=$PWD
+mkdir -p dist
+rm -f dist/ataecina[-_]* dist/SHA256SUMS
+for arch in "$@"; do
+	work=var/build/package/$arch
+	if [ -d "$work/root" ]; then
+		rm -r "$work/root"
+	fi
+	bin/install-files --prefix /usr --destdir "$work/root" --binary "$work/ataecina" >/dev/null
+	# nfpm keeps the files' own mtimes inside a tree; pin them to the commit.
+	find "$work/root" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
+	for packager in deb rpm archlinux; do
+		version=$(bin/package-version "${packager%linux}")
+		(cd "$work/root" && ATAECINA_ARCH=$arch ATAECINA_VERSION=$version \
+			$NFPM package --config "$repository/infra/packaging/nfpm.yaml" --packager "$packager" \
+			--target "$repository/dist/")
+	done
+done
+
+(cd dist && sha256sum ataecina[-_]* >SHA256SUMS)
+echo "build-packages: $(grep -c . dist/SHA256SUMS) packages of $(tr -d '[:space:]' <VERSION) in dist/ (SHA256SUMS written)"

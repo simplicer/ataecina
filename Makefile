@@ -7,8 +7,13 @@ VERSION := $(shell tr -d '[:space:]' < VERSION)
 export CGO_ENABLED := 0
 BUILD_FLAGS := -trimpath -buildvcs=false -ldflags "-s -w -X main.version=$(VERSION)"
 
-# Build-time tool, pinned and never linked (ADR 0009).
+# Build-time tools, pinned and never linked (ADR 0008, ADR 0009).
 GOVULNCHECK := golang.org/x/vuln/cmd/govulncheck@v1.9.0
+NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.48.0
+
+PACKAGE_ARCHES := amd64 arm64
+# A command-line PREFIX=… overrides this; a PREFIX in the environment does not.
+PREFIX := $(HOME)/.local
 
 BUILD_DIR := var/build
 E2E_DIR := var/e2e
@@ -36,7 +41,7 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/commandcodeapi:FuzzDecodeCredits
 FUZZ_TIME ?= 30s
 
-.PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz clean
+.PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz package install-user uninstall-user clean
 
 check: fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version
 
@@ -97,7 +102,7 @@ widget:
 check-version:
 	bin/check-version
 
-e2e: build
+e2e: build widget
 	$(GO) build -tags e2e $(BUILD_FLAGS) -o $(E2E_DIR)/ataecina ./cmd/ataecina
 	ATAECINA_E2E_BINARY=$(abspath $(E2E_DIR)/ataecina) \
 	ATAECINA_PRODUCTION_BINARY=$(abspath $(BUILD_DIR)/ataecina) \
@@ -110,5 +115,24 @@ fuzz:
 		$(GO) test -run '^$$' -fuzz "^$$name$$" -fuzztime $(FUZZ_TIME) $$package; \
 	done
 
+# .deb, .rpm and Arch packages of each architecture in dist/ (ADR 0008).
+package: widget
+	@set -e; for arch in $(PACKAGE_ARCHES); do \
+		echo "go build GOARCH=$$arch"; \
+		GOARCH=$$arch $(GO) build $(BUILD_FLAGS) -o var/build/package/$$arch/ataecina ./cmd/ataecina; \
+	done
+	NFPM="$(NFPM)" SOURCE_DATE_EPOCH=$$(git log -1 --format=%ct) bin/build-packages $(PACKAGE_ARCHES)
+	bin/check-packages $(PACKAGE_ARCHES)
+
+# Into ~/.local (or PREFIX=…, DESTDIR=…); units are installed, not enabled.
+USER_INSTALL = --prefix $(PREFIX) --systemd-user-dir $(PREFIX)/share/systemd/user $(if $(DESTDIR),--destdir $(DESTDIR))
+
+install-user: build widget
+	bin/install-files $(USER_INSTALL)
+	@echo "next: systemctl --user daemon-reload && systemctl --user enable --now ataecina-collect.timer"
+
+uninstall-user:
+	bin/install-files --uninstall $(USER_INSTALL)
+
 clean:
-	rm -rf $(BUILD_DIR) $(E2E_DIR) $(COVERAGE_DIR)
+	rm -rf $(BUILD_DIR) $(E2E_DIR) $(COVERAGE_DIR) dist

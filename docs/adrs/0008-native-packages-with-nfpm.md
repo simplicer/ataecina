@@ -27,6 +27,18 @@ tray and with the Secret Service, and would add no protection here.
 
 - No distribution-specific build machines are needed.
 - Packages declare no runtime dependency beyond systemd.
+- One script, `bin/install-files`, describes the installed layout; the
+  packages, `make install-user` and the `PKGBUILD` all go through it, and
+  `bin/check-packages` fails when a package does not hold exactly the
+  staged files.
+- nfpm v2.48.0 keeps the pre-release in Debian and RPM versions but drops it
+  from the Arch `pkgver`, so `bin/build-packages` folds it into the Arch
+  version itself (`0.12.0unstable`, `1.0.0rc2`), which pacman sorts before
+  the release.
+- Reproducible packages: file times are pinned to the last commit's time
+  (`SOURCE_DATE_EPOCH`), so the same commit gives byte-identical packages.
+- The package `license` field stays empty (`LicenseRef-unknown` in the
+  `PKGBUILD`) until the maintainer chooses a license (milestone 10).
 
 ## Alternatives
 

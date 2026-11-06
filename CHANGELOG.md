@@ -8,6 +8,19 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+### Added
+
+- `make package`: `.deb`, `.rpm` and Arch packages for amd64 and arm64 built
+  with nfpm (pinned, never linked) from `infra/packaging/nfpm.yaml`,
+  byte-reproducible from the same commit, listed in `dist/SHA256SUMS` and
+  verified by `bin/check-packages` (contents, modes, unit path, versions).
+- `make install-user` and `make uninstall-user` (into `~/.local`, units in
+  `~/.local/share/systemd/user`); `bin/install-files` is the single
+  description of the installed layout, shared with the packages and the
+  AUR `PKGBUILD` (`infra/packaging/arch/`).
+- `bin/set-version` and `bin/check-version` keep the `PKGBUILD` tag and
+  `pkgver` in step with `VERSION`.
+
 ## [0.12.0-unstable] - 2026-11-06
 
 ### Added

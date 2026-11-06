@@ -1,0 +1,43 @@
+# Maintainer: Antonio Villamarin <anvius at noreply dot codeberg dot org>
+#
+# AUR source build of Ataecina from its release tag (ADR 0008).
+# bin/set-version keeps _tag and pkgver in step with VERSION; before
+# publishing, run `updpkgsums` to replace the SKIP checksum with the tag's.
+
+pkgname=ataecina
+_tag=v0.12.0-unstable
+pkgver=0.12.0unstable
+pkgrel=1
+pkgdesc='How much is left of each AI subscription, and when it is reborn'
+arch=('x86_64' 'aarch64')
+url='https://codeberg.org/simplicer/ataecina'
+license=('LicenseRef-unknown') # pending the maintainer's decision
+depends=('systemd')
+makedepends=('go>=2:1.27' 'gettext')
+optdepends=('plasma-workspace: the Ataecina panel widget')
+options=('!lto' '!debug')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/$_tag.tar.gz")
+sha256sums=('SKIP')
+
+prepare() {
+	cd "$pkgname"
+	export GOPATH="$srcdir/gopath" GOFLAGS='-modcacherw -mod=readonly'
+	go mod download
+}
+
+build() {
+	cd "$pkgname"
+	export GOPATH="$srcdir/gopath" GOFLAGS='-modcacherw -mod=readonly'
+	make build widget
+}
+
+check() {
+	cd "$pkgname"
+	export GOPATH="$srcdir/gopath" GOFLAGS='-modcacherw -mod=readonly'
+	make unit
+}
+
+package() {
+	cd "$pkgname"
+	bin/install-files --prefix /usr --destdir "$pkgdir"
+}

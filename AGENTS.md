@@ -323,9 +323,11 @@ further. `govulncheck` runs in `make check`.
 - Go-native first: `go build`, `go test`, `go vet`, `gofmt`, `govulncheck`.
   The `Makefile` orchestrates: `make check` (fmt-check, vet, unit,
   coverage of the application packages, integration, acceptance,
-  bench-smoke, qmllint from milestone 6, govulncheck, build,
-  check-version), `make e2e`, `make fuzz`, `make package` (deb, rpm, Arch),
-  `make install-user` (binary, units, widget into `~/.local`).
+  bench-smoke, widget-lint — `qmllint` when installed, `msgfmt --check` —,
+  govulncheck, build, widget, check-version), `make e2e`, `make fuzz`,
+  `make package` (deb, rpm, Arch, verified by `bin/check-packages`),
+  `make install-user` (binary, units, widget into `~/.local`). The installed
+  layout lives only in `bin/install-files`.
 - Builds are reproducible: `CGO_ENABLED=0`, `-trimpath`, `-buildvcs=false`,
   pinned toolchain, `-ldflags "-s -w -X main.version=$(VERSION)"`.
 - Dependencies: the standard library and `github.com/godbus/dbus/v5` only

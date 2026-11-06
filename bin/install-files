@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Installs (or removes) everything Ataecina ships, laid out as on the target
+# system. The single description of that layout: `make install-user`,
+# `make package` and the Arch PKGBUILD all go through it (ADR 0008).
+#
+# Usage: bin/install-files [--uninstall] --prefix PREFIX [--destdir DIR]
+#                          [--systemd-user-dir DIR] [--binary FILE]
+#
+#   PREFIX/bin/ataecina
+#   SYSTEMD_USER_DIR/ataecina-collect.{service,timer}   (default PREFIX/lib/systemd/user)
+#   PREFIX/share/plasma/plasmoids/org.simplicer.ataecina/
+#   PREFIX/share/icons/hicolor/scalable/apps/ataecina.svg
+#   PREFIX/share/doc/ataecina/{README.md,CHANGELOG.md,ataecina.example.json}
+#
+# It expects `make build widget` to have run (var/build/ataecina and
+# var/build/plasmoid). Nothing outside DESTDIR+PREFIX and the units
+# directory is touched; units are installed, never enabled.
+set -euo pipefail
+umask 022
+cd "$(dirname "$0")/.."
+
+uninstall=false
+prefix=
+destdir=
+units=
+binary=var/build/ataecina
+while [ $# -gt 0 ]; do
+	case $1 in
+	--uninstall) uninstall=true ;;
+	--prefix) prefix=${2:?--prefix needs a directory}; shift ;;
+	--destdir) destdir=${2:?--destdir needs a directory}; shift ;;
+	--systemd-user-dir) units=${2:?--systemd-user-dir needs a directory}; shift ;;
+	--binary) binary=${2:?--binary needs a file}; shift ;;
+	*) echo "install-files: unknown argument $1" >&2; exit 2 ;;
+	esac
+	shift
+done
+case $prefix in
+/*) ;;
+*) echo "install-files: --prefix must be an absolute path" >&2; exit 2 ;;
+esac
+units=${units:-$prefix/lib/systemd/user}
+
+plasmoid=org.simplicer.ataecina
+widget=var/build/plasmoid/$plasmoid
+bindir=$prefix/bin
+plasmoids=$prefix/share/plasma/plasmoids
+icons=$prefix/share/icons/hicolor/scalable/apps
+docs=$prefix/share/doc/ataecina
+
+remove_widget() {
+	if [ -d "$destdir$plasmoids/$plasmoid" ]; then
+		rm -r "${destdir}${plasmoids:?}/$plasmoid"
+	fi
+}
+
+if $uninstall; then
+	rm -f "$destdir$bindir/ataecina" \
+		"$destdir$units/ataecina-collect.service" \
+		"$destdir$units/ataecina-collect.timer" \
+		"$destdir$icons/ataecina.svg" \
+		"$destdir$docs/README.md" "$destdir$docs/CHANGELOG.md" "$destdir$docs/ataecina.example.json"
+	remove_widget
+	rmdir "$destdir$docs" 2>/dev/null || true
+	echo "install-files: removed Ataecina from $destdir$prefix"
+	exit 0
+fi
+
+for built in "$binary" "$widget/metadata.json"; do
+	if [ ! -f "$built" ]; then
+		echo "install-files: $built is missing; run make build widget first" >&2
+		exit 1
+	fi
+done
+
+install -D -m 0755 "$binary" "$destdir$bindir/ataecina"
+
+install -d -m 0755 "$destdir$units"
+sed "s|@BINDIR@|$bindir|g" infra/systemd/ataecina-collect.service.in >"$destdir$units/ataecina-collect.service"
+chmod 0644 "$destdir$units/ataecina-collect.service"
+install -m 0644 infra/systemd/ataecina-collect.timer "$destdir$units/ataecina-collect.timer"
+
+remove_widget
+install -d -m 0755 "$destdir$plasmoids"
+cp -r "$widget" "$destdir$plasmoids/$plasmoid"
+find "$destdir$plasmoids/$plasmoid" -type d -exec chmod 0755 {} +
+find "$destdir$plasmoids/$plasmoid" -type f -exec chmod 0644 {} +
+
+install -D -m 0644 share/icons/hicolor/scalable/apps/ataecina.svg "$destdir$icons/ataecina.svg"
+
+install -D -m 0644 README.md "$destdir$docs/README.md"
+install -m 0644 CHANGELOG.md etc/ataecina.example.json "$destdir$docs/"
+
+echo "install-files: installed Ataecina into $destdir$prefix (units in $destdir$units)"

@@ -13,7 +13,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 4 | API-key sources | `openrouter-api`, `vercel-api`, `zai-api`, `commandcode-api`, `minimax-api` (implemented against recorded, synthetic answers; live verification with the owner's keys before release); hardened HTTP client (ADR 0006) | done |
 | 5 | Collector service | hardened systemd user service and timer for `ataecina collect`; `systemd-creds` unlocker; `alerts` context with desktop notifications | done |
 | 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd, settings page, Spanish translation); static widget checks in `go test`, `qmllint` in `make check` when installed | done |
-| 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch), AUR `PKGBUILD`, `make install-user`; reproducible builds; signed checksums | planned |
+| 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch for amd64 and arm64, verified by `bin/check-packages`), AUR `PKGBUILD`, `make install-user`/`uninstall-user` through one layout script (`bin/install-files`); reproducible packages; checksums signed by the maintainer at release | done |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator | planned |
 | 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | planned |
 | 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | planned |

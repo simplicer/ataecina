@@ -715,6 +715,32 @@ errors. The snapshot file is internal (`version`, `taken_at`,
 `interval_seconds`, `readings` with the fields of §8.2 plus
 `retry_not_before`); only `status --json` is a contract.
 
+### 9.1 Installed files
+
+`bin/install-files` is the single description of the installed layout;
+the packages (`PREFIX=/usr`), `make install-user` (`PREFIX=~/.local`, units
+in `~/.local/share/systemd/user`) and the Arch `PKGBUILD` all use it.
+Nothing is enabled or started by an installation.
+
+| Path (`PREFIX=/usr`) | Content | Mode |
+|---|---|---|
+| `/usr/bin/ataecina` | the static binary | `0755` |
+| `/usr/lib/systemd/user/ataecina-collect.service` | collector unit, `ExecStart` pointing at the installed binary | `0644` |
+| `/usr/lib/systemd/user/ataecina-collect.timer` | collector timer | `0644` |
+| `/usr/share/plasma/plasmoids/org.simplicer.ataecina/` | Plasma widget with compiled translations in `contents/locale/` | `0755` / `0644` |
+| `/usr/share/icons/hicolor/scalable/apps/ataecina.svg` | icon | `0644` |
+| `/usr/share/doc/ataecina/` | `README.md`, `CHANGELOG.md`, `ataecina.example.json` | `0644` |
+
+Packages: `ataecina_X.Y.Z~unstable-1_<arch>.deb`,
+`ataecina-X.Y.Z~unstable-1.<arch>.rpm` and
+`ataecina-X.Y.Zunstable-1-<arch>.pkg.tar.zst` for `amd64`/`x86_64` and
+`arm64`/`aarch64`; they depend only on `systemd`. A pre-release suffix sorts
+before its release in every format (`~unstable`, `~rc.N` for Debian and
+RPM; `unstable`, `rcN` for pacman); an LTS release ships as plain `X.Y.Z`.
+The same commit always gives byte-identical packages (file times are the
+commit's time, `SOURCE_DATE_EPOCH`). `dist/SHA256SUMS` lists them; the
+maintainer signs it for a release.
+
 ## 10. Constraints
 
 - Display path: no network, no decryption, < 50 ms.

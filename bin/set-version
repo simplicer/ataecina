@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Sets the project version everywhere it lives, in one go (AGENTS.md,
 # "Versioning"): VERSION, the README "Current version" line, a CHANGELOG
-# section made from [Unreleased], and the Plasma widget metadata when it
-# exists. Usage: bin/set-version X.Y.Z[-unstable|-rc.N|-lts]
+# section made from [Unreleased], the Plasma widget metadata and the Arch
+# PKGBUILD. Usage: bin/set-version X.Y.Z[-unstable|-rc.N|-lts]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -30,6 +30,12 @@ fi
 metadata=share/plasma/plasmoids/org.simplicer.ataecina/metadata.json
 if [ -f "$metadata" ]; then
 	sed -i -E "s/(\"Version\": *\")[^\"]*\"/\1$new\"/" "$metadata"
+fi
+
+pkgbuild=infra/packaging/arch/PKGBUILD
+if [ -f "$pkgbuild" ]; then
+	pkgver=$(bin/package-version arch "$new")
+	sed -i -E -e "s/^_tag=.*/_tag=v$new/" -e "s/^pkgver=.*/pkgver=$pkgver/" -e "s/^pkgrel=.*/pkgrel=1/" "$pkgbuild"
 fi
 
 echo "set-version: $old -> $new"
