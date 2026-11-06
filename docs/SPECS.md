@@ -177,11 +177,30 @@ Codex performs the network call with its own login.
   information only).
 - Used only when the `codex-logs` reading is older than
   `app_server_after_minutes` (default 60) and the owner enabled it.
-- **Method allowlist**: `initialize`, `account/rateLimits/read` (and later
-  `account/usage/read` for history). Never `account/rateLimitResetCredit/consume`,
-  login, logout, config writes or any method that changes state.
+- **Method allowlist**, enforced in code before anything is written to the
+  process: the `initialize` request, the `initialized` notification that the
+  protocol requires right after it (an acknowledgement; it reads and changes
+  nothing), and `account/rateLimits/read` (later `account/usage/read` for
+  history). Never `account/rateLimitResetCredit/consume`, login, logout,
+  config writes or any method that changes state. Server notifications and
+  server requests are read and ignored; Ataecina never answers them.
 - Codex marks the protocol experimental: any surprise is `CONTRACT_CHANGED`
   and the logs remain the source.
+- `codex` is looked up in the absolute directories of the collector's
+  `PATH` (relative entries are ignored) and started with the collector's
+  environment, so it finds its own login; its stderr is discarded. Messages
+  are JSONL; a line over 1 MiB is skipped and a session reads at most
+  4 MiB. After the answer stdin is closed and the process gets `SIGTERM`
+  (`SIGKILL` 2 s later); the whole session is bounded by 15 s and by the
+  collector's deadline.
+- Failures: `codex` not on `PATH` → `UNREADABLE`; no answer, or a JSON-RPC
+  error (for example Codex not logged in) → `UNAVAILABLE`; an unknown
+  method (`-32601`) or an unexpected result → `CONTRACT_CHANGED`. With
+  `app_server: true` on a `codex-logs` subscription, the logs are read
+  first; the app server is asked only when they fail or are older than
+  `app_server_after_minutes`, and whenever it fails the logs' reading (or
+  their failure) stands. A `codex-app-server` subscription asks the app
+  server alone. The reading's `source` says which one answered.
 
 ### 3.3 Other sources in detail (researched 2026-11-06, not yet verified live)
 

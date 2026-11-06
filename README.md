@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.2.0-unstable` — early development: the core, the
+**Current version:** `0.3.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -67,7 +67,8 @@ For each subscription you configure:
 | Gemini (AI Studio keys), NVIDIA, Groq, Kilo Gateway, LLM7 | cooldowns and resets seen while serving | [Heimdall](https://codeberg.org/simplicer/heimdall), optional | Heimdall admin token | observed |
 | Gemini CLI (Google account), Qwen Code (Qwen OAuth) | nothing readable without the tool's login token | — | — | unsupported |
 
-Available in this version: **ChatGPT / Codex** from its session logs. The
+Available in this version: **ChatGPT / Codex** from its session logs, and
+from the official `codex app-server` when the logs are stale (opt-in). The
 other sources arrive as listed in [docs/ROADMAP.md](docs/ROADMAP.md) and read
 as `UNSUPPORTED` until then.
 

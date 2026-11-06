@@ -1,0 +1,18 @@
+#!/bin/sh
+# Fake `codex` for end-to-end and acceptance tests: it speaks just enough
+# of the app-server protocol (JSONL on stdio) and records every method it
+# receives in $FAKE_CODEX_JOURNAL. The real Codex is never started.
+[ "$#" -eq 1 ] && [ "$1" = "app-server" ] || exit 2
+while IFS= read -r line; do
+	method=$(printf '%s' "$line" | sed -n 's/.*"method":"\([^"]*\)".*/\1/p')
+	printf '%s\n' "$method" >>"${FAKE_CODEX_JOURNAL:-/dev/null}"
+	case "$method" in
+	initialize)
+		printf '%s\n' '{"method":"account/updated","params":{}}'
+		printf '%s\n' '{"id":1,"result":{"userAgent":"codex/fake"}}'
+		;;
+	account/rateLimits/read)
+		printf '{"id":2,"result":%s}\n' "$(cat "$FAKE_CODEX_RESULT")"
+		;;
+	esac
+done

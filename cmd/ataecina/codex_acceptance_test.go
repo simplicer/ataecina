@@ -61,6 +61,37 @@ func TestCodexLimitsFromTheSessionLogs(t *testing.T) {
 	}
 }
 
+func TestStaleCodexLogsFallBackToTheAppServer(t *testing.T) {
+	w := newWorld(t, `{"version": 1, "subscriptions": [{"id": "codex", "source": "codex-logs", "app_server": true, "app_server_after_minutes": 60}]}`)
+	w.codexLog(codexEvent(w.clock.Now().Add(-2*time.Hour), 300, 70, 10080, 41))
+	script, err := os.ReadFile(filepath.Join("..", "..", "tests", "e2e", "testdata", "fake-codex"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bin := filepath.Join(w.root, "bin")
+	if err := os.MkdirAll(bin, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(bin, "codex"), script, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	result := filepath.Join(w.root, "rate-limits.json")
+	answer := fmt.Sprintf(`{"rateLimits":{"limitId":"codex","primary":{"usedPercent":12,"windowDurationMins":300,"resetsAt":%d}},"rateLimitResetCredits":{"availableCount":1}}`,
+		w.clock.Now().Add(time.Hour).Unix())
+	if err := os.WriteFile(result, []byte(answer), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	// The fake script itself runs with the process environment.
+	t.Setenv("FAKE_CODEX_RESULT", result)
+	w.vars["PATH"] = bin + ":/usr/bin:/bin"
+	w.collect()
+
+	_, out, _ := w.run("status", "--json")
+	if !strings.Contains(out, `"source": "CODEX_APP_SERVER"`) || !strings.Contains(out, `"banked_resets": {`) || !strings.Contains(out, `"used_percent": 12`) {
+		t.Fatalf("status:\n%s", out)
+	}
+}
+
 func TestCodexWithoutLogsIsUnavailableNotBroken(t *testing.T) {
 	w := newWorld(t, `{"version": 1, "subscriptions": [{"id": "codex", "source": "codex-logs"}]}`)
 	w.vars["CODEX_HOME"] = filepath.Join(w.root, "no-codex-here")

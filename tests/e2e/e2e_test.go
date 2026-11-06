@@ -67,6 +67,17 @@ func mustPrivateDir(t *testing.T, dir string) {
 	}
 }
 
+// setenv replaces or adds one variable of the tree's environment.
+func (tr *tree) setenv(key, value string) {
+	for i, entry := range tr.env {
+		if strings.HasPrefix(entry, key+"=") {
+			tr.env[i] = key + "=" + value
+			return
+		}
+	}
+	tr.env = append(tr.env, key+"="+value)
+}
+
 func (tr *tree) run(bin string, args ...string) (int, string, string) {
 	tr.t.Helper()
 	cmd := exec.Command(bin, args...)

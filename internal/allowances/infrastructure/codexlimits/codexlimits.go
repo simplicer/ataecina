@@ -7,6 +7,7 @@ package codexlimits
 import (
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"time"
 
@@ -34,6 +35,18 @@ type Window struct {
 	Minutes     int       `json:"minutes"`
 	UsedPercent float64   `json:"used_percent"`
 	ResetsAt    time.Time `json:"resets_at"`
+}
+
+// errInvalidWindow reports a window that cannot exist.
+var errInvalidWindow = errors.New("invalid Codex window")
+
+// NewWindow validates a window as Codex reported it: a positive length and
+// a finite, non-negative percentage. A zero resetsAt means unknown.
+func NewWindow(minutes int, usedPercent float64, resetsAt time.Time) (Window, error) {
+	if minutes <= 0 || math.IsNaN(usedPercent) || math.IsInf(usedPercent, 0) || usedPercent < 0 {
+		return Window{}, errInvalidWindow
+	}
+	return Window{Minutes: minutes, UsedPercent: usedPercent, ResetsAt: resetsAt.UTC()}, nil
 }
 
 // Credits are Codex credits; Balance is a decimal string.

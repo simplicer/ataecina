@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.3.0-unstable] - 2026-11-06
+
+### Added
+
+- `codex-app-server` source and the `app_server` option of `codex-logs`:
+  when the logs fail or are older than `app_server_after_minutes`, the
+  official `codex app-server` is asked over stdio JSON-RPC with a method
+  allowlist enforced in code (`initialize`, its `initialized`
+  acknowledgement, `account/rateLimits/read`); banked resets are shown as
+  information only. The logs remain the source whenever it fails.
+
 ## [0.2.0-unstable] - 2026-11-06
 
 ### Added

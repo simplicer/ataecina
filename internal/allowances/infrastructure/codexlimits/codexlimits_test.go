@@ -2,6 +2,7 @@ package codexlimits_test
 
 import (
 	"errors"
+	"math"
 	"testing"
 	"time"
 
@@ -73,6 +74,21 @@ func TestCreditsWithoutBalanceOrUnlimited(t *testing.T) {
 	reading, _ = codexlimits.Reading(codex(), "codex-logs", latest, nil)
 	if _, ok := reading.Credits(); ok {
 		t.Fatal("a plan without credits shows none")
+	}
+}
+
+func TestWindowsAreValidated(t *testing.T) {
+	window, err := codexlimits.NewWindow(300, 120, time.Time{})
+	if err != nil || window.Minutes != 300 || !window.ResetsAt.IsZero() {
+		t.Fatalf("NewWindow = %+v, %v", window, err)
+	}
+	for _, bad := range []struct {
+		minutes int
+		used    float64
+	}{{0, 1}, {-5, 1}, {300, -1}, {300, math.NaN()}, {300, math.Inf(1)}} {
+		if _, err := codexlimits.NewWindow(bad.minutes, bad.used, time.Time{}); err == nil {
+			t.Fatalf("NewWindow(%d, %v) accepted", bad.minutes, bad.used)
+		}
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexappserver"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlogs"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
@@ -50,10 +51,22 @@ func (r sourceRegistry) build(settings configfile.Settings, paths xdg.Paths, env
 // standardSources is the production registry.
 func standardSources() sourceRegistry {
 	return sourceRegistry{catalog: catalog.Standard(), factories: map[domain.SourceID]sourceFactory{
-		codexlogs.SourceID: func(_ configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
-			return codexlogs.New(codexHome(paths, env), filepath.Join(paths.StateDir(), "codex-logs"), env.clock.Now)
+		codexlogs.SourceID: func(settings configfile.SubscriptionSettings, paths xdg.Paths, env environment) domain.Source {
+			logs := codexlogs.New(codexHome(paths, env), filepath.Join(paths.StateDir(), "codex-logs"), env.clock.Now)
+			if !settings.AppServer {
+				return logs
+			}
+			return codexappserver.NewFallback(logs, appServer(env), settings.AppServerAfter, env.clock.Now)
+		},
+		codexappserver.SourceID: func(_ configfile.SubscriptionSettings, _ xdg.Paths, env environment) domain.Source {
+			return appServer(env)
 		},
 	}}
+}
+
+// appServer runs the official `codex` found on the collector's PATH.
+func appServer(env environment) codexappserver.Source {
+	return codexappserver.New(codexappserver.FindOnPath(env.getenv("PATH")), version, env.clock.Now)
 }
 
 // codexHome is $CODEX_HOME when absolute, as Codex itself reads it, else ~/.codex.

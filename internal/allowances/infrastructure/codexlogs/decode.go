@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"math"
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/codexlimits"
@@ -99,17 +98,20 @@ func DecodeLine(line []byte) (limits codexlimits.Limits, ok bool, err error) {
 }
 
 func decodeWindow(w loggedWindow, observedAt time.Time) (codexlimits.Window, error) {
-	if w.UsedPercent == nil || w.WindowMinutes == nil || *w.WindowMinutes <= 0 ||
-		math.IsNaN(*w.UsedPercent) || math.IsInf(*w.UsedPercent, 0) || *w.UsedPercent < 0 {
+	if w.UsedPercent == nil || w.WindowMinutes == nil {
 		return codexlimits.Window{}, errMalformed
 	}
-	window := codexlimits.Window{Minutes: *w.WindowMinutes, UsedPercent: *w.UsedPercent}
+	var resetsAt time.Time
 	switch {
 	case w.ResetsAt != nil && *w.ResetsAt > 0:
-		window.ResetsAt = time.Unix(*w.ResetsAt, 0).UTC()
+		resetsAt = time.Unix(*w.ResetsAt, 0)
 	case w.ResetsInSeconds != nil && *w.ResetsInSeconds >= 0:
 		// Older Codex versions logged the reset relative to the event.
-		window.ResetsAt = observedAt.Add(time.Duration(*w.ResetsInSeconds) * time.Second)
+		resetsAt = observedAt.Add(time.Duration(*w.ResetsInSeconds) * time.Second)
+	}
+	window, err := codexlimits.NewWindow(*w.WindowMinutes, *w.UsedPercent, resetsAt)
+	if err != nil {
+		return codexlimits.Window{}, errMalformed
 	}
 	return window, nil
 }

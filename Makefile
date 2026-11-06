@@ -17,7 +17,8 @@ APPLICATION_PACKAGES = $(shell $(GO) list ./internal/... | grep '/application$$'
 
 # package:FuzzTarget pairs explored by `make fuzz`; their seed corpus runs in every `go test`.
 FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
-	./internal/allowances/infrastructure/codexlogs:FuzzDecodeLine
+	./internal/allowances/infrastructure/codexlogs:FuzzDecodeLine \
+	./internal/allowances/infrastructure/codexappserver:FuzzDecodeRateLimits
 FUZZ_TIME ?= 30s
 
 .PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke vulncheck build check-version e2e fuzz clean
