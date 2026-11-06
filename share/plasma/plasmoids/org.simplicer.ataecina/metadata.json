@@ -1,0 +1,19 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Antonio Villamarin"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "How much is left of each AI subscription, and when it is reborn",
+        "Description[es]": "Cuánto queda de cada suscripción de IA y cuándo renace",
+        "Icon": "ataecina",
+        "Id": "org.simplicer.ataecina",
+        "Name": "Ataecina",
+        "Version": "0.12.0-unstable",
+        "Website": "https://codeberg.org/simplicer/ataecina"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

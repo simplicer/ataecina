@@ -15,6 +15,14 @@ E2E_DIR := var/e2e
 COVERAGE_DIR := var/coverage
 APPLICATION_PACKAGES = $(shell $(GO) list ./internal/... | grep '/application$$')
 
+# The Plasma widget (ADR 0007), staged in var/build/plasmoid with its
+# compiled translations.
+WIDGET_ID := org.simplicer.ataecina
+WIDGET_SOURCE := share/plasma/plasmoids/$(WIDGET_ID)
+WIDGET_BUILD := var/build/plasmoid/$(WIDGET_ID)
+QML_IMPORTS := /usr/lib/x86_64-linux-gnu/qt6/qml /usr/lib/qt6/qml /usr/lib64/qt6/qml
+QMLLINT ?= $(firstword $(shell command -v qmllint qmllint6 /usr/lib/qt6/bin/qmllint /usr/lib64/qt6/bin/qmllint 2>/dev/null))
+
 # package:FuzzTarget pairs explored by `make fuzz`; their seed corpus runs in every `go test`.
 FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/codexlogs:FuzzDecodeLine \
@@ -28,9 +36,9 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/commandcodeapi:FuzzDecodeCredits
 FUZZ_TIME ?= 30s
 
-.PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke vulncheck build check-version e2e fuzz clean
+.PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz clean
 
-check: fmt-check vet unit coverage integration acceptance bench-smoke vulncheck build check-version
+check: fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version
 
 fmt-check:
 	@unformatted=$$(gofmt -l cmd internal tests); \
@@ -59,11 +67,32 @@ acceptance:
 bench-smoke:
 	$(GO) test -count=1 -tags integration -run '^$$' -bench . -benchtime 1x ./internal/...
 
+# qmllint is optional on a developer machine: tests/widget always checks
+# the widget statically, and msgfmt always checks its translations.
+widget-lint:
+	@if [ -n "$(QMLLINT)" ]; then \
+		$(QMLLINT) $(addprefix -I ,$(wildcard $(QML_IMPORTS))) $(WIDGET_SOURCE)/contents/*/*.qml; \
+	else \
+		echo "warning: qmllint not found; the widget was only checked by tests/widget"; \
+	fi
+	@for po in $(WIDGET_SOURCE)/translate/*.po; do msgfmt --check -o /dev/null "$$po" || exit 1; done
+
 vulncheck:
 	$(GO) run $(GOVULNCHECK) ./...
 
 build:
 	$(GO) build $(BUILD_FLAGS) -o $(BUILD_DIR)/ataecina ./cmd/ataecina
+
+widget:
+	rm -rf var/build/plasmoid
+	@mkdir -p var/build/plasmoid
+	cp -r $(WIDGET_SOURCE) $(WIDGET_BUILD)
+	rm -r $(WIDGET_BUILD)/translate
+	@for po in $(WIDGET_SOURCE)/translate/*.po; do \
+		locale=$(WIDGET_BUILD)/contents/locale/$$(basename "$$po" .po)/LC_MESSAGES; \
+		mkdir -p "$$locale"; \
+		msgfmt --check -o "$$locale/plasma_applet_$(WIDGET_ID).mo" "$$po" || exit 1; \
+	done
 
 check-version:
 	bin/check-version

@@ -29,7 +29,12 @@ menu.
 - On Plasma there is no extra resident process: the widget lives in
   `plasmashell`.
 - The JSON contract (ADR 0010) is the only interface between the widget and
-  the binary, so both evolve independently.
+  the binary, so both evolve independently. `tests/widget` (plain `go test`)
+  fails when the QML reads a name outside that contract.
+- `qmllint` is not part of a Plasma desktop installation, so `make check`
+  runs it only when it is installed and otherwise warns; the static checks of
+  `tests/widget` and `msgfmt --check` always run, and the widget is checked
+  by hand in Plasma before releases.
 
 ## Alternatives
 

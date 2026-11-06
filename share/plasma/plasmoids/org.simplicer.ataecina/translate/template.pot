@@ -1,0 +1,220 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the plasma_applet_org.simplicer.ataecina package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
+"POT-Creation-Date: 2026-11-06 23:19+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: contents/ui/CompactRepresentation.qml:75 contents/ui/main.qml:270
+#: contents/ui/SubscriptionDelegate.qml:63
+msgid "%1 %"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show the percentage in the panel"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:25 contents/ui/main.qml:68
+msgid "Ataecina"
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:30
+msgid "updated %1"
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:37 contents/ui/main.qml:78
+msgid "Refresh now"
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:61 contents/ui/main.qml:268
+msgid "No snapshot yet"
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:62
+msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
+msgstr ""
+
+#: contents/ui/main.qml:124
+msgid "ataecina status failed: %1"
+msgstr ""
+
+#: contents/ui/main.qml:133
+msgid "ataecina status gave something the widget cannot read"
+msgstr ""
+
+#: contents/ui/main.qml:142
+msgid "5 h"
+msgstr ""
+
+#: contents/ui/main.qml:144
+msgid "day"
+msgstr ""
+
+#: contents/ui/main.qml:146
+msgid "week"
+msgstr ""
+
+#: contents/ui/main.qml:148
+msgid "month"
+msgstr ""
+
+#: contents/ui/main.qml:150
+msgid "cycle"
+msgstr ""
+
+#: contents/ui/main.qml:154
+msgid "%1 d"
+msgstr ""
+
+#: contents/ui/main.qml:157
+msgid "%1 h"
+msgstr ""
+
+#: contents/ui/main.qml:159
+msgid "%1 min"
+msgstr ""
+
+#: contents/ui/main.qml:176
+msgid "%1 d %2 h"
+msgstr ""
+
+#: contents/ui/main.qml:179
+msgid "%1 h %2 m"
+msgstr ""
+
+#: contents/ui/main.qml:181
+msgid "%1 m"
+msgstr ""
+
+#: contents/ui/main.qml:190
+msgid "just now"
+msgstr ""
+
+#: contents/ui/main.qml:193
+msgid "%1 min ago"
+msgid_plural "%1 min ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: contents/ui/main.qml:196
+msgid "%1 hour ago"
+msgid_plural "%1 hours ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: contents/ui/main.qml:198
+msgid "%1 day ago"
+msgid_plural "%1 days ago"
+msgstr[0] ""
+msgstr[1] ""
+
+#: contents/ui/main.qml:212
+msgid "%1 left"
+msgstr ""
+
+#: contents/ui/main.qml:215
+msgid "%1 spent"
+msgstr ""
+
+#: contents/ui/main.qml:218
+msgid "unlimited credits"
+msgstr ""
+
+#: contents/ui/main.qml:218
+msgid "%1 credits"
+msgstr ""
+
+#: contents/ui/main.qml:221
+msgid "%1 banked reset"
+msgid_plural "%1 banked resets"
+msgstr[0] ""
+msgstr[1] ""
+
+#: contents/ui/main.qml:229
+msgid "partial"
+msgstr ""
+
+#: contents/ui/main.qml:231
+msgid "broken"
+msgstr ""
+
+#: contents/ui/main.qml:233
+msgid "unavailable"
+msgstr ""
+
+#: contents/ui/main.qml:235
+msgid "key missing"
+msgstr ""
+
+#: contents/ui/main.qml:237
+msgid "locked"
+msgstr ""
+
+#: contents/ui/main.qml:239
+msgid "unsupported"
+msgstr ""
+
+#: contents/ui/main.qml:247
+msgid "derived"
+msgstr ""
+
+#: contents/ui/main.qml:249
+msgid "observed"
+msgstr ""
+
+#: contents/ui/main.qml:251
+msgid "declared"
+msgstr ""
+
+#: contents/ui/main.qml:268
+msgid "No windows to show"
+msgstr ""
+
+#: contents/ui/SubscriptionDelegate.qml:63
+msgid "0 % (reborn)"
+msgstr ""
+
+#: contents/ui/SubscriptionDelegate.qml:94
+msgid "stale"
+msgstr ""
+
+#: contents/ui/SubscriptionDelegate.qml:94
+msgid "observed %1"
+msgstr ""
+
+#: contents/config/config.qml:6
+msgid "General"
+msgstr ""

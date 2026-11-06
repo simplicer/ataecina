@@ -12,7 +12,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 3 | Sealed keys | `keys` context: `init`, sealed `keys.json`, `keys set/list/forget` from stdin without echo; unlockers `secret-service` (D-Bus, ADR 0009) and `passphrase`; `doctor` | done |
 | 4 | API-key sources | `openrouter-api`, `vercel-api`, `zai-api`, `commandcode-api`, `minimax-api` (implemented against recorded, synthetic answers; live verification with the owner's keys before release); hardened HTTP client (ADR 0006) | done |
 | 5 | Collector service | hardened systemd user service and timer for `ataecina collect`; `systemd-creds` unlocker; `alerts` context with desktop notifications | done |
-| 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd); `qmllint` in `make check` | planned |
+| 6 | Plasma widget | `org.simplicer.ataecina` plasmoid (compact ring, full list, refresh through systemd, settings page, Spanish translation); static widget checks in `go test`, `qmllint` in `make check` when installed | done |
 | 7 | Packages | `make package` with nfpm (`.deb`, `.rpm`, Arch), AUR `PKGBUILD`, `make install-user`; reproducible builds; signed checksums | planned |
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator | planned |
 | 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | planned |
@@ -27,6 +27,8 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 - History of readings (daily usage per subscription) kept locally, and token
   history from Codex `account/usage/read` and Claude Code transcripts.
 - Waybar and XFCE Generic Monitor output formats.
+- Thresholds in the `status --json` contract, so the widget colours follow
+  each subscription's own thresholds instead of the defaults.
 
 ## Design principles
 

@@ -603,14 +603,20 @@ Kirigami components, so it follows the Breeze theme, light and dark colour
 schemes and the accent colour like the battery or network widgets.
 
 - **Compact form (panel):** a ring drawn around the Ataecina icon showing
-  the worst meter, optionally with its percentage. Colours: normal; warning
-  from the first threshold; critical from the second; grey when the figure is
-  stale or broken. Tooltip: worst subscription, window and time to rebirth.
+  the worst meter, optionally with its percentage. Colours: the accent
+  colour; warning from 90 %; critical from 95 % (the default thresholds — the
+  contract carries no thresholds, so a subscription's own thresholds change
+  its alerts only); grey when no shown subscription is both `FRESH` and `OK`.
+  The widget asks for attention from 90 %. Tooltip: worst subscription,
+  window, percentage and time to rebirth. Left click opens the popup; middle
+  click refreshes.
 - **Full form (popup):** one block per subscription with its plan, a bar per
-  window, the percentage, the countdown to rebirth (`↻ 2 h 10 m`), the
-  balance when there is one, a fidelity badge for anything not `REPORTED`,
-  and the outcome when not `OK`. A footer shows when the snapshot was taken
-  and a refresh button.
+  window, the percentage (`0 % (reborn)` for an estimated rebirth), the
+  countdown to rebirth (`↻ 2 h 10 m`), the balance, credits and banked resets
+  when there are some, a fidelity badge for anything not `REPORTED`, the
+  outcome when not `OK`, the hint, and the reading's age when it is not
+  `FRESH`. A header shows when the snapshot was taken and a refresh button;
+  the context menu also offers "Refresh now".
 
 ```text
 ┌──────────────────────────────────────────────────┐
@@ -630,14 +636,26 @@ schemes and the accent colour like the battery or network widgets.
 └──────────────────────────────────────────────────┘
 ```
 
-- It runs `ataecina status --json` on a timer (default 60 s) through the
-  Plasma 5 support executable engine; "refresh now" starts
-  `ataecina-collect.service` through systemd. It never collects, never reads
-  keys and has no network code.
-- Settings page: which subscriptions to show and in which order, show the
-  percentage in the panel, widget refresh interval.
-- Translatable through KDE i18n: English source strings, Spanish shipped from
-  the first release.
+- It runs `ataecina status --json` on a timer (default 60 s, 10–3600 s)
+  through the Plasma 5 support executable engine; "refresh now" runs
+  `systemctl --user start ataecina-collect.service` and reads the snapshot
+  again four seconds later. It never collects, never reads keys and has no
+  network code. A failing command or an unreadable answer is shown as a
+  message in the popup and the tooltip.
+- Settings page (`contents/config/main.xml`): the command (`ataecina`, or a
+  full path when it is not on `plasmashell`'s `PATH`), the refresh interval,
+  whether the percentage shows in the panel, and which subscriptions to show
+  in which order (comma-separated ids; empty shows all in configuration
+  order).
+- Translatable through KDE i18n (domain `plasma_applet_org.simplicer.ataecina`):
+  English source strings in `translate/template.pot`, Spanish in
+  `translate/es.po`; `make widget` compiles them into `contents/locale/` of the
+  staged package. Symbols (`↻`, `·`, `≈`) stay outside the translated strings.
+- Checks: `tests/widget` (run by `go test`) keeps `metadata.json` at
+  `VERSION`, the settings schema in step with the QML, every string in the
+  template and translated, and every field the QML reads inside this
+  contract; `make check` runs `qmllint` when it is installed and `msgfmt
+  --check` always.
 
 ### 8.4 Tray (`ataecina tray`)
 

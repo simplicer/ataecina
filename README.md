@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.11.0-unstable` — early development: the core, the
+**Current version:** `0.12.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -175,6 +175,19 @@ systemctl --user daemon-reload
 Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,
 LXQt or GNOME (with the AppIndicator extension) start `ataecina tray`.
 
+Until the packages exist, install the widget from a checkout (Plasma 6):
+
+```sh
+make widget          # stages var/build/plasmoid/org.simplicer.ataecina with its translations
+kpackagetool6 --type Plasma/Applet --install var/build/plasmoid/org.simplicer.ataecina
+# later: --upgrade instead of --install; then right-click the panel, "Add Widgets…", "Ataecina"
+```
+
+The widget only runs `ataecina status --json`; if `ataecina` is not on the
+`PATH` that `plasmashell` sees, give its full path in the widget's settings.
+Left click opens the list, middle click (or "Refresh now") starts
+`ataecina-collect.service`.
+
 ## Commands
 
 ```text
@@ -236,10 +249,26 @@ Go 1.27 or later; nothing else is needed (`govulncheck` is fetched at a
 pinned version by `make check`).
 
 ```sh
-make check      # format, vet, unit (100 % of use cases), integration, acceptance, benchmarks, vulnerabilities, build, version
+make check      # format, vet, unit (100 % of use cases), integration, acceptance, benchmarks, widget lint, vulnerabilities, build, widget, version
 make e2e        # the built binary end to end against fake providers
 make fuzz       # explore the decoders further (FUZZ_TIME=30s)
 make build      # var/build/ataecina, static and reproducible
+make widget     # var/build/plasmoid/org.simplicer.ataecina with compiled translations
+```
+
+The widget needs `msgfmt` (gettext); `qmllint` (Qt 6 declarative tools) is
+used when installed. `tests/widget` checks the widget without a QML runtime.
+After changing a translatable string, regenerate the template and update
+`es.po`:
+
+```sh
+cd share/plasma/plasmoids/org.simplicer.ataecina
+xgettext --from-code=UTF-8 --language=JavaScript --kde \
+  -ki18n:1 -ki18nc:1c,2 -ki18np:1,2 -ki18ncp:1c,2,3 \
+  --package-name=plasma_applet_org.simplicer.ataecina \
+  --msgid-bugs-address=https://codeberg.org/simplicer/ataecina \
+  -o translate/template.pot contents/ui/*.qml contents/config/*.qml
+msgmerge --update translate/es.po translate/template.pot
 ```
 
 `make package` (`.deb`, `.rpm`, Arch) arrives with milestone 7. The suite

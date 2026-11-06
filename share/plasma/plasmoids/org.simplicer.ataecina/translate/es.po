@@ -1,0 +1,215 @@
+# Spanish translation of the Ataecina Plasma widget.
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
+"POT-Creation-Date: 2026-11-06 23:19+0100\n"
+"PO-Revision-Date: 2026-11-06 00:00+0000\n"
+"Last-Translator: Antonio Villamarin\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: contents/ui/CompactRepresentation.qml:75 contents/ui/main.qml:270
+#: contents/ui/SubscriptionDelegate.qml:63
+msgid "%1 %"
+msgstr "%1 %"
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr "Orden:"
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr "Leer la instantánea cada (segundos):"
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show the percentage in the panel"
+msgstr "Mostrar el porcentaje en el panel"
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr "Suscripciones que mostrar:"
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr "todas, en el orden de la configuración"
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr "Identificadores separados por comas, en el orden en que se muestran."
+
+#: contents/ui/FullRepresentation.qml:25 contents/ui/main.qml:68
+msgid "Ataecina"
+msgstr "Ataecina"
+
+#: contents/ui/FullRepresentation.qml:30
+msgid "updated %1"
+msgstr "actualizado %1"
+
+#: contents/ui/FullRepresentation.qml:37 contents/ui/main.qml:78
+msgid "Refresh now"
+msgstr "Actualizar ahora"
+
+#: contents/ui/FullRepresentation.qml:61 contents/ui/main.qml:268
+msgid "No snapshot yet"
+msgstr "Aún no hay instantánea"
+
+#: contents/ui/FullRepresentation.qml:62
+msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
+msgstr "Ejecuta `ataecina collect` o activa ataecina-collect.timer."
+
+#: contents/ui/main.qml:124
+msgid "ataecina status failed: %1"
+msgstr "ataecina status ha fallado: %1"
+
+#: contents/ui/main.qml:133
+msgid "ataecina status gave something the widget cannot read"
+msgstr "ataecina status ha devuelto algo que el widget no sabe leer"
+
+#: contents/ui/main.qml:142
+msgid "5 h"
+msgstr "5 h"
+
+#: contents/ui/main.qml:144
+msgid "day"
+msgstr "día"
+
+#: contents/ui/main.qml:146
+msgid "week"
+msgstr "semana"
+
+#: contents/ui/main.qml:148
+msgid "month"
+msgstr "mes"
+
+#: contents/ui/main.qml:150
+msgid "cycle"
+msgstr "ciclo"
+
+#: contents/ui/main.qml:154
+msgid "%1 d"
+msgstr "%1 d"
+
+#: contents/ui/main.qml:157
+msgid "%1 h"
+msgstr "%1 h"
+
+#: contents/ui/main.qml:159
+msgid "%1 min"
+msgstr "%1 min"
+
+#: contents/ui/main.qml:176
+msgid "%1 d %2 h"
+msgstr "%1 d %2 h"
+
+#: contents/ui/main.qml:179
+msgid "%1 h %2 m"
+msgstr "%1 h %2 m"
+
+#: contents/ui/main.qml:181
+msgid "%1 m"
+msgstr "%1 m"
+
+#: contents/ui/main.qml:190
+msgid "just now"
+msgstr "ahora mismo"
+
+#: contents/ui/main.qml:193
+msgid "%1 min ago"
+msgid_plural "%1 min ago"
+msgstr[0] "hace %1 min"
+msgstr[1] "hace %1 min"
+
+#: contents/ui/main.qml:196
+msgid "%1 hour ago"
+msgid_plural "%1 hours ago"
+msgstr[0] "hace %1 hora"
+msgstr[1] "hace %1 horas"
+
+#: contents/ui/main.qml:198
+msgid "%1 day ago"
+msgid_plural "%1 days ago"
+msgstr[0] "hace %1 día"
+msgstr[1] "hace %1 días"
+
+#: contents/ui/main.qml:212
+msgid "%1 left"
+msgstr "quedan %1"
+
+#: contents/ui/main.qml:215
+msgid "%1 spent"
+msgstr "%1 gastados"
+
+#: contents/ui/main.qml:218
+msgid "unlimited credits"
+msgstr "créditos ilimitados"
+
+#: contents/ui/main.qml:218
+msgid "%1 credits"
+msgstr "%1 créditos"
+
+#: contents/ui/main.qml:221
+msgid "%1 banked reset"
+msgid_plural "%1 banked resets"
+msgstr[0] "%1 reinicio guardado"
+msgstr[1] "%1 reinicios guardados"
+
+#: contents/ui/main.qml:229
+msgid "partial"
+msgstr "parcial"
+
+#: contents/ui/main.qml:231
+msgid "broken"
+msgstr "roto"
+
+#: contents/ui/main.qml:233
+msgid "unavailable"
+msgstr "no disponible"
+
+#: contents/ui/main.qml:235
+msgid "key missing"
+msgstr "falta la clave"
+
+#: contents/ui/main.qml:237
+msgid "locked"
+msgstr "bloqueado"
+
+#: contents/ui/main.qml:239
+msgid "unsupported"
+msgstr "no soportado"
+
+#: contents/ui/main.qml:247
+msgid "derived"
+msgstr "derivado"
+
+#: contents/ui/main.qml:249
+msgid "observed"
+msgstr "observado"
+
+#: contents/ui/main.qml:251
+msgid "declared"
+msgstr "declarado"
+
+#: contents/ui/main.qml:268
+msgid "No windows to show"
+msgstr "No hay ventanas que mostrar"
+
+#: contents/ui/SubscriptionDelegate.qml:63
+msgid "0 % (reborn)"
+msgstr "0 % (renacida)"
+
+#: contents/ui/SubscriptionDelegate.qml:94
+msgid "stale"
+msgstr "desactualizado"
+
+#: contents/ui/SubscriptionDelegate.qml:94
+msgid "observed %1"
+msgstr "observado %1"
+
+#: contents/config/config.qml:6
+msgid "General"
+msgstr "General"

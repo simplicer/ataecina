@@ -8,6 +8,24 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.12.0-unstable] - 2026-11-06
+
+### Added
+
+- Plasma 6 widget `org.simplicer.ataecina`: a ring around the icon in the
+  panel showing the worst meter (accent, warning from 90 %, critical from
+  95 %, grey when nothing is fresh), a popup with a bar and a countdown to
+  rebirth per window, balances, credits, fidelity and outcome badges, and
+  "refresh now" through `ataecina-collect.service`; a settings page for the
+  command, the refresh interval, the panel percentage and which
+  subscriptions to show in which order.
+- Spanish translation of the widget; `make widget` stages it with compiled
+  translations, `make check` lints it with `qmllint` when installed and
+  checks the translations with `msgfmt`.
+- `tests/widget`: static checks that keep the widget's metadata at
+  `VERSION`, its settings schema in step with the QML, every string
+  translated and every field it reads inside the `status --json` contract.
+
 ## [0.11.0-unstable] - 2026-11-06
 
 ### Added

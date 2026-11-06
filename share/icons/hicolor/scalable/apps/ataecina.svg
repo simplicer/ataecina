@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Ataecina</title>
+  <!-- A quota ring that is almost spent, and the sprout of its rebirth. -->
+  <circle cx="32" cy="32" r="26" fill="none" stroke="#2f7d6d" stroke-opacity="0.25" stroke-width="6"/>
+  <path d="M32 6 A26 26 0 1 1 9.5 45" fill="none" stroke="#2f7d6d" stroke-width="6" stroke-linecap="round"/>
+  <path d="M32 46 C32 38 32 32 32 28" fill="none" stroke="#4caf50" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M32 33 C26 33 22 29 21 23 C27 23 31 26 32 33 Z" fill="#4caf50"/>
+  <path d="M32 30 C37 30 41 26 43 20 C37 20 33 23 32 30 Z" fill="#66bb6a"/>
+</svg>
