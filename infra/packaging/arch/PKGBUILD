@@ -1,4 +1,4 @@
-# Maintainer: Antonio Villamarin <anvius at noreply dot codeberg dot org>
+# Maintainer: Antonio Villamarín <anvius at noreply dot codeberg dot org>
 #
 # AUR source build of Ataecina from its release tag (ADR 0008).
 # bin/set-version keeps _tag and pkgver in step with VERSION; before

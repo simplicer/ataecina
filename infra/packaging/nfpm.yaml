@@ -11,7 +11,7 @@ version_schema: none
 release: "1"
 section: utils
 priority: optional
-maintainer: Antonio Villamarin <anvius@noreply.codeberg.org>
+maintainer: Antonio Villamarín <anvius@noreply.codeberg.org>
 vendor: Simplicer
 homepage: https://codeberg.org/simplicer/ataecina
 license: GPL-3.0-or-later
@@ -74,4 +74,4 @@ rpm:
   group: Applications/System
   compression: xz
 archlinux:
-  packager: Antonio Villamarin <anvius@noreply.codeberg.org>
+  packager: Antonio Villamarín <anvius@noreply.codeberg.org>
