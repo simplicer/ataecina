@@ -35,15 +35,6 @@ func installFakeCLI(t *testing.T, tr *tree, name, variable, answer string) strin
 	return journal
 }
 
-func fixture(t *testing.T, path string) string {
-	t.Helper()
-	data, err := os.ReadFile(filepath.Join("..", "..", "internal", "allowances", "infrastructure", path))
-	if err != nil {
-		t.Fatal(err)
-	}
-	return string(data)
-}
-
 // The production binary reads Copilot and the Alibaba Token Plan through
 // fake `gh` and `bl`; the real CLIs, GitHub and Alibaba are never reached.
 func TestOfficialCLIsAreRunWithAFixedArgv(t *testing.T) {

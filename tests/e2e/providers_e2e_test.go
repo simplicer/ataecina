@@ -31,10 +31,14 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
 		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
 	}
+	bodies := make(map[string]string, len(routes))
+	for path, name := range routes {
+		bodies[path] = fixture(t, name)
+	}
 	var mu sync.Mutex
 	seen := map[string]string{}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fixture, ok := routes[r.URL.Path]
+		body, ok := bodies[r.URL.Path]
 		if !ok {
 			http.NotFound(w, r)
 			return
@@ -42,12 +46,7 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		mu.Lock()
 		seen[r.URL.Path] = r.Header.Get("Authorization") + " | " + r.Header.Get("User-Agent")
 		mu.Unlock()
-		body, err := os.ReadFile(filepath.Join("..", "..", "internal", "allowances", "infrastructure", fixture))
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		w.Write(body)
+		w.Write([]byte(body))
 	}))
 	t.Cleanup(server.Close)
 	return server.URL, func() map[string]string {

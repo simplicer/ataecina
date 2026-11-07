@@ -17,6 +17,7 @@ import (
 // allowed there, and only there (ADR 0013).
 func TestHeimdallIsReadOnLoopback(t *testing.T) {
 	bin := binary(t, "ATAECINA_PRODUCTION_BINARY")
+	plans := fixture(t, "heimdallplans/testdata/plans.json")
 	var mu sync.Mutex
 	var authorization string
 	heimdall := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +28,7 @@ func TestHeimdallIsReadOnLoopback(t *testing.T) {
 		mu.Lock()
 		authorization = r.Header.Get("Authorization")
 		mu.Unlock()
-		w.Write([]byte(fixture(t, "heimdallplans/testdata/plans.json")))
+		w.Write([]byte(plans))
 	}))
 	t.Cleanup(heimdall.Close)
 	port := heimdall.Listener.Addr().(*net.TCPAddr).Port
