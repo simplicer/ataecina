@@ -14,9 +14,10 @@ TimeoutStartSec=60
 Nice=10
 IOSchedulingClass=idle
 
-# The official CLIs some sources run (codex, opencode) live here; a drop-in
-# can extend PATH.
-Environment=PATH=%h/.local/bin:%h/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin
+# The official CLIs some sources run (codex, opencode) live here; pnpm puts
+# global CLIs in $PNPM_HOME or, in recent versions, $PNPM_HOME/bin. A
+# drop-in can extend PATH.
+Environment=PATH=%h/.local/bin:%h/.local/share/pnpm:%h/.local/share/pnpm/bin:/usr/local/bin:/usr/bin:/bin
 
 # Ataecina's own state ($XDG_STATE_HOME/ataecina) and snapshot
 # ($XDG_RUNTIME_DIR/ataecina, kept between runs), created 0700.

@@ -8,6 +8,14 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.17.1-unstable] - 2026-11-07
+
+### Fixed
+
+- OpenCode Zen is read under the collector timer too: the unit's `PATH`
+  now includes `~/.local/share/pnpm/bin`, where recent pnpm versions put
+  `opencode`; before, every timed run said "opencode is not on PATH".
+
 ## [0.17.0-unstable] - 2026-11-07
 
 ### Added

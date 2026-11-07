@@ -53,8 +53,10 @@ the keys. Merging them gives the most exposed code the most privileges.
   `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`,
   `SystemCallFilter=@system-service`, `NoNewPrivileges`, an empty
   capability set and `UMask=0077` are.
-- `PATH` is set to `~/.local/bin`, `~/.local/share/pnpm` and the system
-  directories so the collector finds `codex` and `opencode`.
+- `PATH` is set to `~/.local/bin`, `~/.local/share/pnpm`,
+  `~/.local/share/pnpm/bin` (where recent pnpm versions put global CLIs;
+  added 2026-11-07 after `opencode` was not found under the timer) and the
+  system directories so the collector finds `codex` and `opencode`.
 - The units pass `systemd-analyze --user verify` in `make e2e`. Options
   that need unprivileged user namespaces must still be checked by hand on
   distributions that restrict them.

@@ -5,8 +5,8 @@
 # publishing, run `updpkgsums` to replace the SKIP checksum with the tag's.
 
 pkgname=ataecina
-_tag=v0.17.0-unstable
-pkgver=0.17.0unstable
+_tag=v0.17.1-unstable
+pkgver=0.17.1unstable
 pkgrel=1
 pkgdesc='How much is left of each AI subscription, and when it is reborn'
 arch=('x86_64' 'aarch64')
