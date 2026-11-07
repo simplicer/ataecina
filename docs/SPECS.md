@@ -419,6 +419,19 @@ declarations and those records:
   records were cleared). `remaining` may go negative when a top-up was not
   declared. Fidelity `DERIVED`. Without any declaration the reading is
   `PARTIAL`, shows only the spending to date and hints at the command.
+- **Researched 2026-11-07 (opencode 2.2.5), not implemented:** OpenCode's
+  local server documents `experimental.usage.limits` (`GET
+  /api/experimental/usage/limits`, reachable with the official CLI as
+  `opencode api experimental.usage.limits`). It returns, for the OpenCode
+  Console workspace OpenCode is signed in to, the **OpenCode Go** allowance
+  (`go.rolling`, `go.weekly`, `go.monthly`: `percent`, `limited`,
+  `resetsAt` in epoch milliseconds) and the **Console budgets** (`budgets[]`:
+  `limit` and `spent` in USD, `resetsAt`, `scope`, `per`, `coverage`,
+  models), or `data: null` when OpenCode is not signed in to the Console
+  (`opencode auth login`). It gives what is left of a budget the owner set,
+  not the prepaid Zen balance, and the operation is marked experimental. A
+  future source could read it with that fixed argv when the owner signs
+  OpenCode in to the Console; until then the balance stays declared.
 - Spending sums the `cost` of every entry `{ "model": { "providerID":
   "opencode", … }, "cost": <number> }` wherever it sits in the JSON
   output; other providers are ignored. An output with no model entry and no
