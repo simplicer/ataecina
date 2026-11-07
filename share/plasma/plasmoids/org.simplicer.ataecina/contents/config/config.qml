@@ -7,4 +7,9 @@ ConfigModel {
         icon: "configure"
         source: "configGeneral.qml"
     }
+    ConfigCategory {
+        name: i18n("Keys")
+        icon: "dialog-password"
+        source: "configKeys.qml"
+    }
 }

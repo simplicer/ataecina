@@ -8,6 +8,24 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.20.0-unstable] - 2026-11-07
+
+### Added
+
+- A **Keys** page in the Plasma widget's settings lists every subscription
+  that needs a key and whether it works, no key, rejected or not
+  understood; "Set key…" opens KDE's masked password dialog, whose answer
+  goes through a pipe straight to `ataecina keys set` (ADR 0014), and
+  "Declare balance…" records the OpenCode Zen balance. The page then
+  collects and reads the status again.
+
+### Security
+
+- ADR 0014: the widget's settings may start `ataecina keys set` fed by a
+  masked dialog through an anonymous pipe; the key never passes through
+  argv, the environment, QML or `plasmashell`. `AGENTS.md` and
+  `SECURITY.md` state the exception.
+
 ## [0.19.0-unstable] - 2026-11-07
 
 ### Added

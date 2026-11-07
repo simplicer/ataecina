@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-07 12:11+0100\n"
+"POT-Creation-Date: 2026-11-07 12:24+0100\n"
 "PO-Revision-Date: 2026-11-06 00:00+0000\n"
 "Last-Translator: Antonio Villamarin\n"
 "Language-Team: Spanish\n"
@@ -41,24 +41,105 @@ msgstr "todas, en el orden de la configuración"
 msgid "Comma-separated ids, in the order to show them."
 msgstr "Identificadores separados por comas, en el orden en que se muestran."
 
-#: contents/ui/FullRepresentation.qml:28
+#: contents/ui/configKeys.qml:45
+msgid "key rejected"
+msgstr "clave rechazada"
+
+#: contents/ui/configKeys.qml:48
+msgid "no key"
+msgstr "sin clave"
+
+#: contents/ui/configKeys.qml:51
+msgid "works"
+msgstr "funciona"
+
+#: contents/ui/configKeys.qml:54
+msgid "key accepted, answer not understood"
+msgstr "clave aceptada, respuesta no entendida"
+
+#: contents/ui/configKeys.qml:56
+msgid "not read yet"
+msgstr "aún sin leer"
+
+#: contents/ui/configKeys.qml:75 contents/ui/Snapshot.qml:239
+#: contents/ui/Snapshot.qml:377
+msgid "%1 left"
+msgstr "quedan %1"
+
+#: contents/ui/configKeys.qml:75
+msgid "no balance declared"
+msgstr "sin saldo declarado"
+
+#: contents/ui/configKeys.qml:82
+msgid "API key for %1. It is sealed at once and never shown."
+msgstr "Clave API de %1. Se sella al momento y nunca se muestra."
+
+#: contents/ui/configKeys.qml:90
+msgid "Current balance of %1, in US dollars:"
+msgstr "Saldo actual de %1, en dólares estadounidenses:"
+
+#: contents/ui/configKeys.qml:125
+msgid "Saved. Reading the subscriptions again…"
+msgstr "Guardado. Leyendo de nuevo las suscripciones…"
+
+#: contents/ui/configKeys.qml:149
+msgid "API keys"
+msgstr "Claves API"
+
+#: contents/ui/configKeys.qml:153
+msgid "Keys go from a masked dialog straight to `ataecina keys set`."
+msgstr "Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
+"Las claves se escriben en un diálogo enmascarado y van directas a `ataecina "
+"keys set`; el widget nunca las ve."
+
+#: contents/ui/configKeys.qml:153
+msgid "The widget never sees them."
+msgstr "El widget nunca las ve."
+
+#: contents/ui/configKeys.qml:160
+msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
+msgstr "Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
+"kdialog no está instalado: pon las claves en una terminal con `ataecina keys "
+"set <nombre>`."
+
+#: contents/ui/configKeys.qml:166
+msgid "No subscription needs a key."
+msgstr "Ninguna suscripción necesita clave."
+
+#: contents/ui/configKeys.qml:190
+msgid "Replace key…"
+msgstr "Cambiar clave…"
+
+#: contents/ui/configKeys.qml:190
+msgid "Set key…"
+msgstr "Poner clave…"
+
+#: contents/ui/configKeys.qml:198
+msgid "Balances"
+msgstr "Saldos"
+
+#: contents/ui/configKeys.qml:220
+msgid "Declare balance…"
+msgstr "Declarar saldo…"
+
+#: contents/ui/FullRepresentation.qml:36
 msgid "Checked %1"
 msgstr "Comprobado a las %1"
 
-#: contents/ui/FullRepresentation.qml:35 contents/ui/FullRepresentation.qml:38
+#: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
 #: contents/ui/main.qml:37
 msgid "Refresh now"
 msgstr "Actualizar ahora"
 
-#: contents/ui/FullRepresentation.qml:44 contents/ui/FullRepresentation.qml:47
+#: contents/ui/FullRepresentation.qml:52 contents/ui/FullRepresentation.qml:55
 msgid "Configure Ataecina…"
 msgstr "Configurar Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:128 contents/ui/Snapshot.qml:420
+#: contents/ui/FullRepresentation.qml:130 contents/ui/Snapshot.qml:420
 msgid "No snapshot yet"
 msgstr "Aún no hay instantánea"
 
-#: contents/ui/FullRepresentation.qml:129
+#: contents/ui/FullRepresentation.qml:131
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr "Ejecuta `ataecina collect` o activa ataecina-collect.timer."
 
@@ -77,10 +158,6 @@ msgstr "ataecina status ha devuelto algo que el widget no sabe leer"
 #: contents/ui/Snapshot.qml:237
 msgid "%1 of %2"
 msgstr "%1 de %2"
-
-#: contents/ui/Snapshot.qml:239 contents/ui/Snapshot.qml:377
-msgid "%1 left"
-msgstr "quedan %1"
 
 #: contents/ui/Snapshot.qml:266
 msgid "5 h"
@@ -222,11 +299,11 @@ msgstr "declarado"
 msgid "No windows to show"
 msgstr "No hay ventanas que mostrar"
 
-#: contents/ui/Snapshot.qml:422 contents/ui/SubscriptionRow.qml:191
+#: contents/ui/Snapshot.qml:422 contents/ui/SubscriptionRow.qml:192
 msgid "%1 % left"
 msgstr "quedan %1 %"
 
-#: contents/ui/SubscriptionRow.qml:226
+#: contents/ui/SubscriptionRow.qml:227
 msgid "observed %1"
 msgstr "observado %1"
 
@@ -239,3 +316,7 @@ msgstr[1] "%1 avisos"
 #: contents/config/config.qml:6
 msgid "General"
 msgstr "General"
+
+#: contents/config/config.qml:11
+msgid "Keys"
+msgstr "Claves"

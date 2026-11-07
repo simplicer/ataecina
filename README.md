@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.19.0-unstable` — early development: the core, the
+**Current version:** `0.20.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -188,6 +188,11 @@ ataecina keys set zai              # paste the key; it is read without echo and 
 systemctl --user enable --now ataecina-collect.timer
 ataecina                           # the table
 ```
+
+On Plasma you can also set keys from the widget: right-click it,
+"Configure Ataecina…", **Keys**. Each key is typed in KDE's masked dialog
+and goes through a pipe straight to `ataecina keys set`; the widget never
+sees it (ADR 0014). The same page declares the OpenCode Zen balance.
 
 On a headless machine, hold the master key with the TPM-bound systemd
 credential so the timer needs no passphrase:

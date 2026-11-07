@@ -569,7 +569,9 @@ not implement yet shows `UNSUPPORTED`.
 - `ataecina keys set <name>` reads the key from the terminal without echo,
   or from a pipe: 1 to 4096 printable ASCII characters without spaces, one
   trailing newline removed. It prints only `sealed key <name>`. `keys list`
-  prints names and dates; `keys forget` needs no unlocking.
+  prints names and dates; `keys forget` needs no unlocking. The Plasma
+  widget's Keys settings page feeds it from `kdialog --password` through a
+  pipe (§8.3, ADR 0014).
 - `ataecina unlockers add <kind>` opens the master key with an existing
   unlocker and wraps it for the new one; `remove` refuses to drop the last
   one and asks the removed unlocker to forget its copy when it can.
@@ -779,6 +781,18 @@ schemes and the accent colour like the battery or network widgets.
   whether what is left shows in the panel, and which subscriptions to show
   in which order (comma-separated ids; empty shows all in configuration
   order).
+- **Keys** settings page (ADR 0014), read from `ataecina status --json`:
+  every subscription whose source needs a key, with `works`, `no key`,
+  `key rejected` (`error_class` `KEY_REJECTED`, which also reads
+  `KEY_MISSING`), `key accepted, answer not understood` (`BROKEN`) or `not
+  read yet`, and "Set key…" / "Replace key…": `kdialog --password` piped
+  into `ataecina keys set '<id>'`. OpenCode Zen is listed with its balance
+  and "Declare balance…": `kdialog --inputbox`, then `ataecina balance
+  declare '<id>' --balance "$amount"` with the collector unit's `PATH`
+  directories first. After either, the page starts the collector and reads
+  the status again four seconds later; errors (such as a passphrase
+  unlocker, which needs a terminal) show on the page. Without `kdialog` the
+  buttons are disabled and the terminal command is shown.
 - Translatable through KDE i18n (domain `plasma_applet_org.simplicer.ataecina`):
   English source strings in `translate/template.pot`, Spanish in
   `translate/es.po`; `make widget` compiles them into `contents/locale/` of the

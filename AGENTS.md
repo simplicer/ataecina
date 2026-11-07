@@ -124,7 +124,10 @@ feature (ADRs 0003–0006).
 - **Never imitate a client.** The `User-Agent` is `ataecina/<version>`; no
   foreign headers, no TLS fingerprint tricks.
 - **Keys** enter only through `ataecina keys set <provider>` reading stdin
-  without echo. They never appear in argv, environment dumps, logs, the
+  without echo. The Plasma widget's Keys settings page may feed it from
+  KDE's masked password dialog through an anonymous pipe, on an explicit
+  click (ADR 0014); the widget's own code never reads or holds the key.
+  They never appear in argv, environment dumps, logs, the
   snapshot, error messages, fixtures, test names, commits or issue reports.
   The key type redacts itself in `String()`, `GoString()`, `Format` and
   `MarshalJSON`.
@@ -140,7 +143,9 @@ feature (ADRs 0003–0006).
   and unseals keys. The display paths (`status`, `--json`, tray, Plasma
   widget) only read the snapshot, and hooks (`hook claude-statusline`) only
   write a signal file; none of them unseals a key or opens a socket other
-  than the session D-Bus.
+  than the session D-Bus. The widget's settings page only starts
+  `ataecina keys set` or `balance declare` as separate processes when the
+  owner asks (ADR 0014).
 - **Snapshot** holds only non-secret figures (percentages, amounts, dates,
   states) in `$XDG_RUNTIME_DIR/ataecina/snapshot.json` (`0600`, tmpfs).
 - **Outbound network** (ADR 0006): each adapter has a fixed HTTPS host

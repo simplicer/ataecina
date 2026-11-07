@@ -34,7 +34,9 @@ These are the properties a report can break; the reasons live in
   login and never scrapes a web console. Official CLIs keep their own
   login.
 - **Sealed keys** (ADR 0004): keys enter only through `ataecina keys set`
-  from stdin without echo and rest only in `~/.config/ataecina/keys.json`,
+  from stdin without echo — typed in a terminal, or in KDE's masked dialog
+  from the Plasma widget's settings, piped straight to it (ADR 0014) — and
+  rest only in `~/.config/ataecina/keys.json`,
   each sealed with AES-256-GCM under a random master key held by an
   unlocker (Secret Service, passphrase, systemd credentials). The key type
   redacts itself everywhere (ADR 0012).
