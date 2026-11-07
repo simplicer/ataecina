@@ -44,3 +44,24 @@ menu.
 
 - One Qt or GTK GUI: heavy dependencies and CGO. Rejected.
 - Tray only: poor experience on the reference desktop. Rejected.
+
+## Update (2026-11-07): the widget in the system tray, its popup redrawn
+
+- The menu of `ataecina tray` is a DBusMenu that the desktop draws: labels,
+  icons and separators only, with no colours, rings or layout of our own. On
+  Plasma the owner found it poor and asked for a popup with one card,
+  concentric rings per window, what is left in large figures and the
+  countdown to the reset, in Ataecina's own colours.
+- The plasmoid now declares `X-Plasma-NotificationArea` (category
+  `SystemServices`): Plasma's system tray lists it among its entries and
+  opens its popup from the tray icon. On Plasma the widget in the tray
+  replaces `ataecina tray`; the StatusNotifierItem stays for other desktops.
+- The popup is redrawn with QtQuick, Kirigami and Plasma components only (no
+  new dependency), in Ataecina's palette (greens, amber, coral) rather than
+  any provider's brand colours, and its figures show what is left
+  (SPECS §8.3).
+- The state and its wording live in `Snapshot.qml`, a `QtObject` with no
+  Plasma type, so the popup loads outside `plasmashell`. While it was
+  designed it was rendered offscreen with the system Qt, in light and dark
+  schemes, and every QML file was compiled against the installed Plasma
+  modules. The hand check in Plasma before releases stays.

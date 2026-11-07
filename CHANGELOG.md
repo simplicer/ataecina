@@ -8,6 +8,30 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.17.0-unstable] - 2026-11-07
+
+### Added
+
+- The Plasma widget can live in the system tray: Plasma lists it among the
+  tray's entries and opens its popup from the tray icon, so on Plasma it
+  replaces `ataecina tray`, whose menu the desktop draws as plain text.
+
+### Changed
+
+- The widget's popup is redrawn in Ataecina's own colours:
+  one card with a row per subscription — growth rings for each window, the
+  name and plan, when the closest window is reborn and what is left in large
+  figures — that unfolds into every window, the balance and the hint on a
+  click, and a footer with when the snapshot was taken, "Refresh now" and
+  the settings.
+- The widget shows what is left (100 − used) instead of what is used, in
+  the popup, the panel ring and the tooltip. The JSON contract is unchanged.
+
+### Fixed
+
+- The widget never prints a balance as "-0.00", and a billing cycle with no
+  length is drawn as the outer, longest ring.
+
 ## [0.16.2-unstable] - 2026-11-07
 
 ### Fixed

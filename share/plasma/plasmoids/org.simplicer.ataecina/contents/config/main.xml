@@ -15,7 +15,7 @@
       <max>3600</max>
     </entry>
     <entry name="showPercentage" type="Bool">
-      <label>Show the worst percentage next to the panel icon.</label>
+      <label>Show what is left of the closest window next to the panel icon.</label>
       <default>true</default>
     </entry>
     <entry name="subscriptions" type="String">

@@ -105,6 +105,9 @@ func TestTheWidgetPackageIsInStepWithTheProject(t *testing.T) {
 			Version string `json:"Version"`
 		} `json:"KPlugin"`
 		MinimumAPI string `json:"X-Plasma-API-Minimum-Version"`
+		// The system tray offers the widget among its entries.
+		NotificationArea         string `json:"X-Plasma-NotificationArea"`
+		NotificationAreaCategory string `json:"X-Plasma-NotificationAreaCategory"`
 	}
 	if err := json.Unmarshal([]byte(read(t, plasmoid+"/metadata.json")), &metadata); err != nil {
 		t.Fatal(err)
@@ -119,6 +122,8 @@ func TestTheWidgetPackageIsInStepWithTheProject(t *testing.T) {
 		t.Fatalf("KPlugin.Version = %q, VERSION = %q", metadata.Plugin.Version, version)
 	case metadata.MinimumAPI != "6.0":
 		t.Fatalf("X-Plasma-API-Minimum-Version = %q", metadata.MinimumAPI)
+	case metadata.NotificationArea != "true" || metadata.NotificationAreaCategory != "SystemServices":
+		t.Fatalf("the system tray cannot offer the widget: %q %q", metadata.NotificationArea, metadata.NotificationAreaCategory)
 	}
 	for _, path := range []string{
 		plasmoid + "/contents/ui/main.qml",
@@ -282,7 +287,7 @@ var platformMembers = []string{
 	"name", "parse", "push", "restart", "round", "split", "trim", "weight",
 	"view", "width", "height", "button", "expanded", "icon", "configuration",
 	"text", "value", "checked", "r", "g", "b", "fill", "margins",
-	"arc", "reset", "stroke",
+	"arc", "reset", "stroke", "slice", "visible", "small",
 }
 
 func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {

@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.16.2-unstable` — early development: the core, the
+**Current version:** `0.17.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -110,10 +110,12 @@ Ataecina never opens `~/.claude/.credentials.json` or `~/.codex/auth.json`.
 
 Everything is **one binary**, `ataecina`, with subcommands: the timer runs
 `ataecina collect`, you type `ataecina` in a terminal, and on non-Plasma
-desktops `ataecina tray` is the tray icon. On **KDE Plasma** the panel icon
-and its popup are a native Plasma widget — a few QML files that Plasma itself
-draws, themed like the battery or network widgets — which asks
-`ataecina status --json` for the figures. The same package installs both.
+desktops `ataecina tray` is the tray icon. On **KDE Plasma** the tray or
+panel icon and its popup are a native Plasma widget — a few QML files that
+Plasma itself draws, following your light or dark colour scheme — which asks
+`ataecina status --json` for the figures. Its popup, in Ataecina's own greens, shows one card with a row per subscription: growth rings for each
+window, when the closest one is reborn and what is left in large figures; a
+click unfolds the rest. The same package installs both.
 
 ## How your keys are kept safe
 
@@ -193,7 +195,10 @@ ataecina unlockers add systemd-creds   # asks the passphrase once
 systemctl --user daemon-reload
 ```
 
-Add the **Ataecina** widget to your Plasma panel. On XFCE, Cinnamon, MATE,
+On Plasma, put the **Ataecina** widget in the system tray (right-click the
+tray's arrow, "Configure System Tray…", "Entries", Ataecina: "Always shown")
+or in a panel ("Add Widgets…"); you do not need `ataecina tray` there. On
+XFCE, Cinnamon, MATE,
 LXQt, Budgie, Waybar or GNOME (with the AppIndicator extension) start
 **Ataecina** from the applications menu, or `ataecina tray`; its menu lists
 every subscription, "Refresh now" (or a middle click) starts the collector,

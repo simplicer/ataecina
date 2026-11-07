@@ -8,18 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-06 23:19+0100\n"
+"POT-Creation-Date: 2026-11-07 09:24+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: contents/ui/CompactRepresentation.qml:75 contents/ui/main.qml:270
-#: contents/ui/SubscriptionDelegate.qml:63
+#: contents/ui/CompactRepresentation.qml:57
 msgid "%1 %"
 msgstr ""
 
@@ -32,7 +31,7 @@ msgid "Read the snapshot every (seconds):"
 msgstr ""
 
 #: contents/ui/configGeneral.qml:26
-msgid "Show the percentage in the panel"
+msgid "Show what is left in the panel"
 msgstr ""
 
 #: contents/ui/configGeneral.qml:30
@@ -47,171 +46,208 @@ msgstr ""
 msgid "Comma-separated ids, in the order to show them."
 msgstr ""
 
-#: contents/ui/FullRepresentation.qml:25 contents/ui/main.qml:68
-msgid "Ataecina"
+#: contents/ui/FullRepresentation.qml:28
+msgid "Checked %1"
 msgstr ""
 
-#: contents/ui/FullRepresentation.qml:30
-msgid "updated %1"
-msgstr ""
-
-#: contents/ui/FullRepresentation.qml:37 contents/ui/main.qml:78
+#: contents/ui/FullRepresentation.qml:35 contents/ui/FullRepresentation.qml:38
+#: contents/ui/main.qml:37
 msgid "Refresh now"
 msgstr ""
 
-#: contents/ui/FullRepresentation.qml:61 contents/ui/main.qml:268
+#: contents/ui/FullRepresentation.qml:44 contents/ui/FullRepresentation.qml:47
+msgid "Configure Ataecina…"
+msgstr ""
+
+#: contents/ui/FullRepresentation.qml:105 contents/ui/Snapshot.qml:405
 msgid "No snapshot yet"
 msgstr ""
 
-#: contents/ui/FullRepresentation.qml:62
+#: contents/ui/FullRepresentation.qml:106
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr ""
 
-#: contents/ui/main.qml:124
+#: contents/ui/main.qml:27
+msgid "Ataecina"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:77
 msgid "ataecina status failed: %1"
 msgstr ""
 
-#: contents/ui/main.qml:133
+#: contents/ui/Snapshot.qml:86
 msgid "ataecina status gave something the widget cannot read"
 msgstr ""
 
-#: contents/ui/main.qml:142
+#: contents/ui/Snapshot.qml:190
 msgid "5 h"
 msgstr ""
 
-#: contents/ui/main.qml:144
+#: contents/ui/Snapshot.qml:192
 msgid "day"
 msgstr ""
 
-#: contents/ui/main.qml:146
+#: contents/ui/Snapshot.qml:194
 msgid "week"
 msgstr ""
 
-#: contents/ui/main.qml:148
+#: contents/ui/Snapshot.qml:196
 msgid "month"
 msgstr ""
 
-#: contents/ui/main.qml:150
+#: contents/ui/Snapshot.qml:198
 msgid "cycle"
 msgstr ""
 
-#: contents/ui/main.qml:154
+#: contents/ui/Snapshot.qml:202
 msgid "%1 d"
 msgstr ""
 
-#: contents/ui/main.qml:157
+#: contents/ui/Snapshot.qml:205
 msgid "%1 h"
 msgstr ""
 
-#: contents/ui/main.qml:159
+#: contents/ui/Snapshot.qml:207
 msgid "%1 min"
 msgstr ""
 
-#: contents/ui/main.qml:176
+#: contents/ui/Snapshot.qml:214
+msgid "5-hour"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:216
+msgid "Daily"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:218
+msgid "Weekly"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:220
+msgid "Monthly"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:222
+msgid "Billing cycle"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:238
 msgid "%1 d %2 h"
 msgstr ""
 
-#: contents/ui/main.qml:179
+#: contents/ui/Snapshot.qml:241
 msgid "%1 h %2 m"
 msgstr ""
 
-#: contents/ui/main.qml:181
+#: contents/ui/Snapshot.qml:243
 msgid "%1 m"
 msgstr ""
 
-#: contents/ui/main.qml:190
+#: contents/ui/Snapshot.qml:256
 msgid "just now"
 msgstr ""
 
-#: contents/ui/main.qml:193
+#: contents/ui/Snapshot.qml:259
 msgid "%1 min ago"
 msgid_plural "%1 min ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: contents/ui/main.qml:196
+#: contents/ui/Snapshot.qml:262
 msgid "%1 hour ago"
 msgid_plural "%1 hours ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: contents/ui/main.qml:198
+#: contents/ui/Snapshot.qml:264
 msgid "%1 day ago"
 msgid_plural "%1 days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: contents/ui/main.qml:212
-msgid "%1 left"
+#: contents/ui/Snapshot.qml:291
+msgid "Stale, observed %1"
 msgstr ""
 
-#: contents/ui/main.qml:215
+#: contents/ui/Snapshot.qml:295 contents/ui/Snapshot.qml:362
 msgid "%1 spent"
 msgstr ""
 
-#: contents/ui/main.qml:218
+#: contents/ui/Snapshot.qml:299
+msgid "%1 resets in %2"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:301 contents/ui/SubscriptionRow.qml:166
+msgid "reborn"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:305 contents/ui/Snapshot.qml:359
+msgid "%1 left"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:336
+msgid "spent"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:365
 msgid "unlimited credits"
 msgstr ""
 
-#: contents/ui/main.qml:218
+#: contents/ui/Snapshot.qml:365
 msgid "%1 credits"
 msgstr ""
 
-#: contents/ui/main.qml:221
+#: contents/ui/Snapshot.qml:368
 msgid "%1 banked reset"
 msgid_plural "%1 banked resets"
 msgstr[0] ""
 msgstr[1] ""
 
-#: contents/ui/main.qml:229
+#: contents/ui/Snapshot.qml:376
 msgid "partial"
 msgstr ""
 
-#: contents/ui/main.qml:231
+#: contents/ui/Snapshot.qml:378
 msgid "broken"
 msgstr ""
 
-#: contents/ui/main.qml:233
+#: contents/ui/Snapshot.qml:380
 msgid "unavailable"
 msgstr ""
 
-#: contents/ui/main.qml:235
+#: contents/ui/Snapshot.qml:382
 msgid "key missing"
 msgstr ""
 
-#: contents/ui/main.qml:237
+#: contents/ui/Snapshot.qml:384
 msgid "locked"
 msgstr ""
 
-#: contents/ui/main.qml:239
+#: contents/ui/Snapshot.qml:386
 msgid "unsupported"
 msgstr ""
 
-#: contents/ui/main.qml:247
+#: contents/ui/Snapshot.qml:394
 msgid "derived"
 msgstr ""
 
-#: contents/ui/main.qml:249
+#: contents/ui/Snapshot.qml:396
 msgid "observed"
 msgstr ""
 
-#: contents/ui/main.qml:251
+#: contents/ui/Snapshot.qml:398
 msgid "declared"
 msgstr ""
 
-#: contents/ui/main.qml:268
+#: contents/ui/Snapshot.qml:405
 msgid "No windows to show"
 msgstr ""
 
-#: contents/ui/SubscriptionDelegate.qml:63
-msgid "0 % (reborn)"
+#: contents/ui/Snapshot.qml:407 contents/ui/SubscriptionRow.qml:166
+msgid "%1 % left"
 msgstr ""
 
-#: contents/ui/SubscriptionDelegate.qml:94
-msgid "stale"
-msgstr ""
-
-#: contents/ui/SubscriptionDelegate.qml:94
+#: contents/ui/SubscriptionRow.qml:201
 msgid "observed %1"
 msgstr ""
 

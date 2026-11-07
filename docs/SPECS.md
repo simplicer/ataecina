@@ -676,38 +676,67 @@ A native Plasma 6 widget (`org.simplicer.ataecina`) built with Plasma and
 Kirigami components, so it follows the Breeze theme, light and dark colour
 schemes and the accent colour like the battery or network widgets.
 
-- **Compact form (panel):** a ring drawn around the Ataecina icon showing
-  the worst meter, optionally with its percentage. Colours: the accent
-  colour; warning from 90 %; critical from 95 % (the default thresholds — the
-  contract carries no thresholds, so a subscription's own thresholds change
-  its alerts only); grey when no shown subscription is both `FRESH` and `OK`.
-  The widget asks for attention from 90 %. Tooltip: worst subscription,
-  window, percentage and time to rebirth. Left click opens the popup; middle
-  click refreshes.
-- **Full form (popup):** one block per subscription with its plan, a bar per
-  window, the percentage (`0 % (reborn)` for an estimated rebirth), the
-  countdown to rebirth (`↻ 2 h 10 m`), the balance, credits and banked resets
-  when there are some, a fidelity badge for anything not `REPORTED`, the
-  outcome when not `OK`, the hint, and the reading's age when it is not
-  `FRESH`. A header shows when the snapshot was taken and a refresh button;
-  the context menu also offers "Refresh now".
+- **Where it lives:** in a panel, or inside the system tray among its
+  entries (`X-Plasma-NotificationArea`, category `SystemServices`), where
+  Plasma shows it when relevant and in plain view while it asks for
+  attention. On Plasma the widget in the tray replaces `ataecina tray`.
+- **Figures show what is left** (`100 − used_percent`), as the question is
+  "how much is left"; the JSON contract keeps `used_percent`.
+- **Colours:** Ataecina's own palette, not the providers' brands. Growth
+  rings are teal `#2e8b74` (outer, longest window), green `#4caf50` and light
+  green `#9ccc65` (inner); a window turns amber `#e0a13a` from 90 % used and
+  coral `#e2604a` from 95 % used (the default thresholds — the contract
+  carries no thresholds, so a subscription's own thresholds change its
+  alerts only); grey when the reading is not both `FRESH` and `OK` or
+  `PARTIAL`. Text and backgrounds follow the Plasma colour scheme, light or
+  dark.
+- **Compact form (panel or tray icon):** one ring around the Ataecina icon
+  showing what is left of the window closest to running out; in a panel,
+  optionally that percentage beside it. The widget asks for attention from
+  90 % used. Tooltip: that subscription, window, what is left and the time
+  to rebirth. Left click opens the popup; middle click refreshes.
+- **Full form (popup):** one rounded card with a row per
+  subscription:
+  - growth rings, one per window of the first bucket, longest outside, each
+    filled with what is left; a balance without windows gets one faint ring
+    with its currency inside, and a source that failed a `!`;
+  - the name (the provider's, or the subscription id when two share a
+    source) and the plan in grey;
+  - a second line: when the closest window is reborn (`Weekly resets in
+    4 d 16 h`, `5-hour · reborn` for an estimated rebirth), plus the balance
+    left when there is one; for a balance without windows, what was spent
+    when the large figure shows what is left, else the hint; the outcome and
+    hint when the source failed; or `Stale, observed 2 hours ago`;
+  - the large figure: what is left of the closest window in percent, or the
+    balance left, or what was spent (`0,00 $ spent`), `≈` before anything not
+    `REPORTED`;
+  - a click unfolds every window (label, bar of what is left, `% left`,
+    `↻ 3 d 17 h`), the balance, credits and banked resets, fidelity and
+    outcome, the hint and the reading's age.
+
+  A footer shows when the snapshot was taken (`Checked 11:12`), "Refresh
+  now" and the settings; the context menu also offers "Refresh now".
 
 ```text
-┌──────────────────────────────────────────────────┐
-│  Ataecina                       updated 2 min ago ⟳ │
-├──────────────────────────────────────────────────┤
-│  Claude · Pro                                    │
-│  5 h    ███████░░░░░░░░░░░░░  23 %   ↻ 2 h 10 m  │
-│  week   ████████░░░░░░░░░░░░  41 %   ↻ 4 d 12 h  │
-│  Codex · Plus                                    │
-│  5 h    █░░░░░░░░░░░░░░░░░░░   4 %   ↻ 3 h 02 m  │
-│  week   ░░░░░░░░░░░░░░░░░░░░   1 %   ↻ 6 d 01 h  │
-│  Z.ai GLM · Lite                                 │
-│  5 h    ██████████████████░░  92 % ⚠ ↻ 0 h 41 m  │
-│  OpenRouter              $8.42 left · $11.58 used │
-│  OpenCode Zen            ≈ $3.10 left   derived  │
-│  MiniMax                 ✕ contract changed      │
-└──────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│ ╭───────────────────────────────────────────────────╮ │
+│ │ ◎  Claude  Pro                               76 % ⌄│ │
+│ │    5-hour resets in 2 h 10 m                      │ │
+│ │ ───────────────────────────────────────────────── │ │
+│ │ ◎  Command Code  Pro                          9 % ⌃│ │
+│ │    Billing cycle resets in 10 d 7 h · $6.80 left  │ │
+│ │      5 h    ████████████████  100 % left          │ │
+│ │      week   ███████████████░   96 % left ↻ 2 d 0 h│ │
+│ │      cycle  █░░░░░░░░░░░░░░░    9 % left ↻ 10 d 7 h│ │
+│ │ ───────────────────────────────────────────────── │ │
+│ │ ($) OpenCode Zen                  ≈ $14.20 left   ⌄│ │
+│ │     $5.80 spent                                   │ │
+│ │ ───────────────────────────────────────────────── │ │
+│ │ (!) Ollama Cloud                                — ⌄│ │
+│ │     broken · ollama.com answered in an unexpected… │ │
+│ ╰───────────────────────────────────────────────────╯ │
+│ Checked 11:12                                   ⟳  ⚙ │
+└───────────────────────────────────────────────────────┘
 ```
 
 - It runs `ataecina status --json` on a timer (default 60 s, 10–3600 s)
@@ -718,7 +747,7 @@ schemes and the accent colour like the battery or network widgets.
   message in the popup and the tooltip.
 - Settings page (`contents/config/main.xml`): the command (`ataecina`, or a
   full path when it is not on `plasmashell`'s `PATH`), the refresh interval,
-  whether the percentage shows in the panel, and which subscriptions to show
+  whether what is left shows in the panel, and which subscriptions to show
   in which order (comma-separated ids; empty shows all in configuration
   order).
 - Translatable through KDE i18n (domain `plasma_applet_org.simplicer.ataecina`):

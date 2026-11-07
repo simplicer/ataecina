@@ -23,7 +23,7 @@ KCM.SimpleKCM {
         }
         QQC2.CheckBox {
             id: percentage
-            text: i18n("Show the percentage in the panel")
+            text: i18n("Show what is left in the panel")
         }
         QQC2.TextField {
             id: subscriptions

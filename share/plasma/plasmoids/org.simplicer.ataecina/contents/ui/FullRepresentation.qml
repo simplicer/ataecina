@@ -1,9 +1,10 @@
 /*
- * Popup form: one block per subscription with a bar per window, the
- * countdown to rebirth, the balance, fidelity and outcome; a header with
- * the snapshot's age and "refresh now" (SPECS §8.3).
+ * Popup form: one rounded card with a row per subscription
+ * and a footer with when the snapshot was taken, "refresh now" and the
+ * settings (SPECS §8.3).
  */
 import QtQuick
+import QtQuick.Controls as QQC2
 import QtQuick.Layouts
 import org.kde.plasma.components as PlasmaComponents3
 import org.kde.plasma.extras as PlasmaExtras
@@ -12,43 +13,86 @@ import org.kde.kirigami as Kirigami
 PlasmaExtras.Representation {
     id: full
 
+    readonly property color ink: Kirigami.Theme.textColor
+
     Layout.minimumWidth: Kirigami.Units.gridUnit * 20
     Layout.minimumHeight: Kirigami.Units.gridUnit * 10
-    Layout.preferredWidth: Kirigami.Units.gridUnit * 24
-    Layout.preferredHeight: Kirigami.Units.gridUnit * 22
+    Layout.preferredWidth: Kirigami.Units.gridUnit * 23
+    Layout.preferredHeight: Math.min(Kirigami.Units.gridUnit * 34, card.implicitHeight + Kirigami.Units.gridUnit * 5)
 
-    header: PlasmaExtras.PlasmoidHeading {
-        RowLayout {
-            anchors.fill: parent
+    footer: PlasmaExtras.PlasmoidHeading {
+        position: QQC2.ToolBar.Footer
 
-            Kirigami.Heading {
-                text: i18n("Ataecina")
-                level: 3
-                Layout.fillWidth: true
-            }
+        contentItem: RowLayout {
             PlasmaComponents3.Label {
-                text: root.meta.snapshot_taken_at ? i18n("updated %1", root.age(root.meta.snapshot_taken_at)) : ""
+                text: snapshot.meta.snapshot_taken_at ? i18n("Checked %1", snapshot.clock(snapshot.meta.snapshot_taken_at)) : ""
                 opacity: 0.7
+                Layout.fillWidth: true
             }
             PlasmaComponents3.ToolButton {
                 icon.name: "view-refresh"
+                display: QQC2.AbstractButton.IconOnly
+                text: i18n("Refresh now")
                 onClicked: root.refresh()
                 PlasmaComponents3.ToolTip {
                     text: i18n("Refresh now")
+                }
+            }
+            PlasmaComponents3.ToolButton {
+                icon.name: "configure"
+                display: QQC2.AbstractButton.IconOnly
+                text: i18n("Configure Ataecina…")
+                onClicked: root.configure()
+                PlasmaComponents3.ToolTip {
+                    text: i18n("Configure Ataecina…")
                 }
             }
         }
     }
 
     PlasmaComponents3.ScrollView {
+        id: scroll
         anchors.fill: parent
+        visible: snapshot.problem === "" && snapshot.shown.length > 0
+        contentWidth: availableWidth
 
-        ListView {
-            model: root.shown
-            spacing: Kirigami.Units.largeSpacing
-            clip: true
-            delegate: SubscriptionDelegate {
-                width: ListView.view.width
+        Rectangle {
+            id: card
+            width: scroll.availableWidth
+            implicitHeight: rows.implicitHeight + Kirigami.Units.largeSpacing * 2
+            height: implicitHeight
+            radius: Kirigami.Units.gridUnit * 0.75
+            color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.04)
+            border.color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.08)
+
+            ColumnLayout {
+                id: rows
+                anchors.fill: parent
+                anchors.margins: Kirigami.Units.largeSpacing
+                spacing: Kirigami.Units.largeSpacing
+
+                Repeater {
+                    model: snapshot.shown
+
+                    ColumnLayout {
+                        id: entry
+                        required property var modelData
+                        required property int index
+                        Layout.fillWidth: true
+                        spacing: Kirigami.Units.largeSpacing
+
+                        Rectangle {
+                            visible: entry.index > 0
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 1
+                            color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.08)
+                        }
+                        SubscriptionRow {
+                            modelData: entry.modelData
+                            Layout.fillWidth: true
+                        }
+                    }
+                }
             }
         }
     }
@@ -56,9 +100,9 @@ PlasmaExtras.Representation {
     PlasmaExtras.PlaceholderMessage {
         anchors.centerIn: parent
         width: parent.width - Kirigami.Units.gridUnit * 4
-        visible: root.problem !== "" || root.shown.length === 0
-        iconName: root.problem !== "" ? "dialog-warning" : "ataecina"
-        text: root.problem !== "" ? root.problem : i18n("No snapshot yet")
-        explanation: root.problem !== "" ? "" : i18n("Run `ataecina collect`, or enable ataecina-collect.timer.")
+        visible: !scroll.visible
+        iconName: snapshot.problem !== "" ? "dialog-warning" : "ataecina"
+        text: snapshot.problem !== "" ? snapshot.problem : i18n("No snapshot yet")
+        explanation: snapshot.problem !== "" ? "" : i18n("Run `ataecina collect`, or enable ataecina-collect.timer.")
     }
 }
