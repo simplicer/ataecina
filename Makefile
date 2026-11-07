@@ -12,6 +12,10 @@ GOVULNCHECK := golang.org/x/vuln/cmd/govulncheck@v1.9.0
 NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.48.0
 
 PACKAGE_ARCHES := amd64 arm64
+PACKAGE_FORMATS := deb rpm archlinux
+# This machine's architecture, for `make deb`.
+HOST_ARCH := $(shell $(GO) env GOARCH)
+DEB_FILE = dist/ataecina_$(shell bin/package-version deb)-1_$(HOST_ARCH).deb
 # A command-line PREFIX=… overrides this; a PREFIX in the environment does not.
 PREFIX := $(HOME)/.local
 
@@ -47,7 +51,11 @@ FUZZ_TARGETS := ./internal/allowances/infrastructure/configfile:FuzzDecode \
 	./internal/allowances/infrastructure/heimdallplans:FuzzDecodePlans
 FUZZ_TIME ?= 30s
 
-.PHONY: check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz package install-user uninstall-user clean
+.PHONY: all check fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version e2e fuzz package deb install-deb uninstall-deb install-user uninstall-user clean
+
+# `make` alone compiles the binary and stages the widget.
+.DEFAULT_GOAL := all
+all: build widget
 
 check: fmt-check vet unit coverage integration acceptance bench-smoke widget-lint vulncheck build widget check-version
 
@@ -127,8 +135,22 @@ package: widget
 		echo "go build GOARCH=$$arch"; \
 		GOARCH=$$arch $(GO) build $(BUILD_FLAGS) -o var/build/package/$$arch/ataecina ./cmd/ataecina; \
 	done
-	NFPM="$(NFPM)" SOURCE_DATE_EPOCH=$$(git log -1 --format=%ct) bin/build-packages $(PACKAGE_ARCHES)
-	bin/check-packages $(PACKAGE_ARCHES)
+	NFPM="$(NFPM)" PACKAGE_FORMATS="$(PACKAGE_FORMATS)" SOURCE_DATE_EPOCH=$$(git log -1 --format=%ct) \
+		bin/build-packages $(PACKAGE_ARCHES)
+	PACKAGE_FORMATS="$(PACKAGE_FORMATS)" bin/check-packages $(PACKAGE_ARCHES)
+
+# Only the .deb of this machine, verified and test-installed in a fake root.
+deb:
+	$(MAKE) package PACKAGE_ARCHES=$(HOST_ARCH) PACKAGE_FORMATS=deb
+	@echo "deb: $(DEB_FILE)"
+
+# Installs (or reinstalls) that .deb system-wide with apt; asks for sudo.
+install-deb: deb
+	sudo apt install --reinstall ./$(DEB_FILE)
+	@echo "next, as yourself: ataecina init, then see README \"Install\" (config.json, keys, timer, widget or tray)"
+
+uninstall-deb:
+	sudo apt remove ataecina
 
 # Into ~/.local (or PREFIX=…, DESTDIR=…); units are installed, not enabled.
 USER_INSTALL = --prefix $(PREFIX) --systemd-user-dir $(PREFIX)/share/systemd/user $(if $(DESTDIR),--destdir $(DESTDIR))

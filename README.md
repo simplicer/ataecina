@@ -154,8 +154,17 @@ text console there is no desktop session, so you unlock with your passphrase
 
 ## Install
 
-No packages are published yet; build them from a checkout with
-`make package` (they land in `dist/` with a `SHA256SUMS`):
+No packages are published yet. On Debian, Ubuntu, KDE neon or Kubuntu,
+build and install the `.deb` of your machine from a checkout (Go 1.27 and
+gettext needed):
+
+```sh
+make deb            # dist/ataecina_<version>-1_<arch>.deb, verified and test-installed in a fake root
+make install-deb    # sudo apt install --reinstall ./dist/…deb   (make uninstall-deb removes it)
+```
+
+`make package` builds every format for amd64 and arm64 (into `dist/`, with
+a `SHA256SUMS`):
 
 | Distribution | Package | Install |
 |---|---|---|
@@ -266,12 +275,14 @@ pinned versions (`govulncheck` by `make check`, nfpm by `make package`) and
 never linked.
 
 ```sh
+make            # compile: var/build/ataecina and the staged widget
 make check      # format, vet, unit (100 % of use cases), integration, acceptance, benchmarks, widget lint, vulnerabilities, build, widget, version
 make e2e        # the built binary end to end against fake providers
 make fuzz       # explore the decoders further (FUZZ_TIME=30s)
 make build      # var/build/ataecina, static and reproducible
 make widget     # var/build/plasmoid/org.simplicer.ataecina with compiled translations
 make package    # dist/: .deb, .rpm and Arch packages for amd64 and arm64, SHA256SUMS, verified
+make deb        # only the .deb of this machine; make install-deb installs it with apt
 make install-user / make uninstall-user   # into ~/.local (PREFIX=…, DESTDIR=… to change)
 ```
 

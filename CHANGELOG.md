@@ -10,6 +10,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ### Added
 
+- `make` alone compiles the binary and stages the widget; `make deb` builds
+  only the `.deb` of this machine; `make install-deb` installs it with apt
+  and `make uninstall-deb` removes it.
+- Every `.deb` of the host's architecture is now installed, run and purged
+  in a throw-away root (`fakeroot dpkg`) and its dependencies are checked
+  with `apt-get --simulate` before it is accepted.
+
+### Added
+
 - `SECURITY.md` (how to report a vulnerability and what Ataecina promises)
   and `CONTRIBUTING.md` (how a change is made, tested and committed).
 - Forgejo Actions workflow running `make check`, `make e2e` and

@@ -840,7 +840,11 @@ before its release in every format (`~unstable`, `~rc.N` for Debian and
 RPM; `unstable`, `rcN` for pacman); an LTS release ships as plain `X.Y.Z`.
 The same commit always gives byte-identical packages (file times are the
 commit's time, `SOURCE_DATE_EPOCH`). `dist/SHA256SUMS` lists them; the
-maintainer signs it for a release.
+maintainer signs it for a release. `make deb` builds only the host's `.deb`;
+`bin/check-packages` installs every `.deb` of the host's architecture into a
+throw-away root with `fakeroot dpkg`, runs the installed binary, purges it,
+and asks `apt-get --simulate` whether its dependencies resolve on the
+machine; `make install-deb` then installs it with `apt`.
 
 ## 10. Constraints
 

@@ -6,6 +6,7 @@
 # that the same commit always gives the same packages).
 #
 # Usage: bin/build-packages ARCH...      (Go architecture names: amd64 arm64)
+# PACKAGE_FORMATS chooses the formats (default "deb rpm archlinux").
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -25,7 +26,7 @@ for arch in "$@"; do
 	bin/install-files --prefix /usr --destdir "$work/root" --binary "$work/ataecina" >/dev/null
 	# nfpm keeps the files' own mtimes inside a tree; pin them to the commit.
 	find "$work/root" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
-	for packager in deb rpm archlinux; do
+	for packager in ${PACKAGE_FORMATS:-deb rpm archlinux}; do
 		version=$(bin/package-version "${packager%linux}")
 		(cd "$work/root" && ATAECINA_ARCH=$arch ATAECINA_VERSION=$version \
 			$NFPM package --config "$repository/infra/packaging/nfpm.yaml" --packager "$packager" \

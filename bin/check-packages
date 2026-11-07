@@ -2,11 +2,13 @@
 # Verifies the packages bin/build-packages wrote into dist/: each one holds
 # exactly the files bin/install-files staged for its architecture, with the
 # binary executable, the unit pointing at /usr/bin, and the version mapped
-# for its format. Debian packages are read with dpkg-deb, Arch packages with
-# tar; RPMs are read with rpm when it is installed and otherwise only
-# checked against SHA256SUMS.
+# for its format. A Debian package of this machine's architecture is also
+# installed, run and purged in a throw-away root with fakeroot (no real
+# root, nothing outside the temporary directory). Arch packages are read
+# with tar; RPMs with rpm when it is installed, otherwise only checked
+# against SHA256SUMS.
 #
-# Usage: bin/check-packages ARCH...
+# Usage: bin/check-packages ARCH...   (PACKAGE_FORMATS: default "deb rpm archlinux")
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -15,6 +17,7 @@ fail() {
 	exit 1
 }
 [ $# -gt 0 ] || fail "usage: bin/check-packages ARCH..."
+formats=" ${PACKAGE_FORMATS:-deb rpm archlinux} "
 
 version=$(tr -d '[:space:]' <VERSION)
 debian=$(bin/package-version deb)
@@ -22,8 +25,28 @@ arch_version=$(bin/package-version arch)
 
 (cd dist && sha256sum --quiet --check SHA256SUMS) || fail "dist/SHA256SUMS does not match the packages"
 
-listing=$(mktemp -d)
-trap 'rm -r "$listing"' EXIT
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+# installs the .deb into a fake root, runs the binary, purges it.
+try_install() {
+	local deb=$1 fake=$work/fake-root
+	mkdir -p "$fake/var/lib/dpkg/info" "$fake/var/lib/dpkg/updates" "$fake/var/lib/dpkg/triggers"
+	: >"$fake/var/lib/dpkg/status"
+	: >"$fake/var/lib/dpkg/available"
+	# The empty root knows no systemd; apt checks the dependencies below.
+	fakeroot dpkg --root="$fake" --force-not-root --force-depends --log=/dev/null -i "$deb" >/dev/null ||
+		fail "$deb does not install"
+	"$fake/usr/bin/ataecina" version | grep -qx "ataecina $version" || fail "$deb: the installed binary is not $version"
+	fakeroot dpkg --root="$fake" --force-not-root --log=/dev/null --purge ataecina >/dev/null ||
+		fail "$deb does not purge"
+	[ ! -e "$fake/usr" ] || fail "$deb leaves files behind after purge"
+	if command -v apt-get >/dev/null; then
+		apt-get install --simulate --no-install-recommends "./$deb" >/dev/null 2>&1 ||
+			fail "$deb: apt cannot satisfy its dependencies on this machine"
+	fi
+	echo "check-packages: $deb installs, runs and purges"
+}
 
 for arch in "$@"; do
 	case $arch in
@@ -32,33 +55,42 @@ for arch in "$@"; do
 	*) fail "unknown architecture $arch" ;;
 	esac
 	root=var/build/package/$arch/root
-	(cd "$root" && find . -type f | sed 's|^\./|/|' | sort) >"$listing/staged"
-	grep -qx /usr/bin/ataecina "$listing/staged" || fail "nothing staged for $arch"
+	(cd "$root" && find . -type f | sed 's|^\./|/|' | sort) >"$work/staged"
+	grep -qx /usr/bin/ataecina "$work/staged" || fail "nothing staged for $arch"
 
-	deb=dist/ataecina_${debian}-1_${arch}.deb
-	[ -f "$deb" ] || fail "$deb is missing"
-	[ "$(dpkg-deb --field "$deb" Version)" = "${debian}-1" ] || fail "$deb has version $(dpkg-deb --field "$deb" Version)"
-	dpkg-deb --fsys-tarfile "$deb" | tar -t | grep -v '/$' | sed 's|^\./|/|' | sort >"$listing/deb"
-	diff -u "$listing/staged" "$listing/deb" || fail "$deb does not hold the staged files"
-	dpkg-deb --fsys-tarfile "$deb" | tar -tv ./usr/bin/ataecina | grep -q '^-rwxr-xr-x root/root' ||
-		fail "$deb: /usr/bin/ataecina is not 0755 root:root"
-	dpkg-deb --fsys-tarfile "$deb" | tar -xO ./usr/lib/systemd/user/ataecina-collect.service |
-		grep -qx 'ExecStart=/usr/bin/ataecina collect' || fail "$deb: the unit does not run /usr/bin/ataecina"
+	if [[ $formats == *" deb "* ]]; then
+		deb=dist/ataecina_${debian}-1_${arch}.deb
+		[ -f "$deb" ] || fail "$deb is missing"
+		[ "$(dpkg-deb --field "$deb" Version)" = "${debian}-1" ] || fail "$deb has version $(dpkg-deb --field "$deb" Version)"
+		dpkg-deb --fsys-tarfile "$deb" | tar -t | grep -v '/$' | sed 's|^\./|/|' | sort >"$work/deb"
+		diff -u "$work/staged" "$work/deb" || fail "$deb does not hold the staged files"
+		dpkg-deb --fsys-tarfile "$deb" | tar -tv ./usr/bin/ataecina | grep -q '^-rwxr-xr-x root/root' ||
+			fail "$deb: /usr/bin/ataecina is not 0755 root:root"
+		dpkg-deb --fsys-tarfile "$deb" | tar -xO ./usr/lib/systemd/user/ataecina-collect.service |
+			grep -qx 'ExecStart=/usr/bin/ataecina collect' || fail "$deb: the unit does not run /usr/bin/ataecina"
+		if [ "$(dpkg --print-architecture 2>/dev/null)" = "$arch" ] && command -v fakeroot >/dev/null; then
+			try_install "$deb"
+		fi
+	fi
 
-	pkg=dist/ataecina-${arch_version}-1-${pacman_arch}.pkg.tar.zst
-	[ -f "$pkg" ] || fail "$pkg is missing"
-	tar --zstd -xOf "$pkg" .PKGINFO | grep -qx "pkgver = ${arch_version}-1" || fail "$pkg has the wrong pkgver"
-	tar --zstd -tf "$pkg" | grep -v '/$' | grep -v '^\.' | sed 's|^|/|' | sort >"$listing/arch"
-	diff -u "$listing/staged" "$listing/arch" || fail "$pkg does not hold the staged files"
+	if [[ $formats == *" archlinux "* ]]; then
+		pkg=dist/ataecina-${arch_version}-1-${pacman_arch}.pkg.tar.zst
+		[ -f "$pkg" ] || fail "$pkg is missing"
+		tar --zstd -xOf "$pkg" .PKGINFO | grep -qx "pkgver = ${arch_version}-1" || fail "$pkg has the wrong pkgver"
+		tar --zstd -tf "$pkg" | grep -v '/$' | grep -v '^\.' | sed 's|^|/|' | sort >"$work/arch"
+		diff -u "$work/staged" "$work/arch" || fail "$pkg does not hold the staged files"
+	fi
 
-	rpm=dist/ataecina-${debian}-1.${rpm_arch}.rpm
-	[ -f "$rpm" ] || fail "$rpm is missing"
-	if command -v rpm >/dev/null; then
-		[ "$(rpm -qp --queryformat '%{VERSION}' "$rpm")" = "$debian" ] || fail "$rpm has the wrong version"
-		rpm -qlp "$rpm" | sort >"$listing/rpm"
-		grep -Fxf "$listing/staged" "$listing/rpm" | diff -u "$listing/staged" - || fail "$rpm does not hold the staged files"
-	else
-		echo "check-packages: rpm not installed; $rpm only checked against SHA256SUMS"
+	if [[ $formats == *" rpm "* ]]; then
+		rpm=dist/ataecina-${debian}-1.${rpm_arch}.rpm
+		[ -f "$rpm" ] || fail "$rpm is missing"
+		if command -v rpm >/dev/null; then
+			[ "$(rpm -qp --queryformat '%{VERSION}' "$rpm")" = "$debian" ] || fail "$rpm has the wrong version"
+			rpm -qlp "$rpm" | sort >"$work/rpm"
+			grep -Fxf "$work/staged" "$work/rpm" | diff -u "$work/staged" - || fail "$rpm does not hold the staged files"
+		else
+			echo "check-packages: rpm not installed; $rpm only checked against SHA256SUMS"
+		fi
 	fi
 done
 echo "check-packages: $(grep -c . dist/SHA256SUMS) packages of $version verified"
