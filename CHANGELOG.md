@@ -8,6 +8,25 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.16.2-unstable] - 2026-11-07
+
+### Fixed
+
+- The collector timer runs on Ubuntu: its unit set five options that drop
+  capabilities (`CapabilityBoundingSet=`, `PrivateDevices=`,
+  `ProtectKernelModules=`, `ProtectKernelLogs=`, `ProtectClock=`), which a
+  user manager refuses when unprivileged user namespaces are forbidden, so
+  every run stopped with `218/CAPABILITIES`. They are removed; the collector
+  holds no capability and the system call filter already covers them.
+
+### Security
+
+- ADR 0005 and `SECURITY.md` now say which hardening applies where: on
+  Ubuntu the read-only home and private `/tmp` are skipped by systemd, while
+  `NoNewPrivileges` and the seccomp filters apply on every distribution.
+- `make e2e` starts the built binary under the user manager with the unit's
+  hardening, so a refused option fails the suite instead of the timer.
+
 ## [0.16.1-unstable] - 2026-11-07
 
 ### Fixed

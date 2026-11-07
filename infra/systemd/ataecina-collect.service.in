@@ -27,19 +27,18 @@ RuntimeDirectoryMode=0700
 RuntimeDirectoryPreserve=yes
 
 # Hardening. Home is read-only except what the official CLIs write while
-# answering (Codex and OpenCode keep their own state).
+# answering (Codex and OpenCode keep their own state). The mount and
+# hostname options need unprivileged user namespaces: where they are
+# forbidden (Ubuntu's AppArmor policy) systemd skips them, while
+# NoNewPrivileges and the seccomp filters apply everywhere (ADR 0005).
 UMask=0077
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=read-only
 ReadWritePaths=-%h/.codex -%h/.local/share/opencode -%h/.local/state/opencode -%h/.cache/opencode
 PrivateTmp=yes
-PrivateDevices=yes
 ProtectKernelTunables=yes
-ProtectKernelModules=yes
-ProtectKernelLogs=yes
 ProtectControlGroups=yes
-ProtectClock=yes
 ProtectHostname=yes
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 RestrictNamespaces=yes
@@ -48,7 +47,12 @@ RestrictSUIDSGID=yes
 LockPersonality=yes
 SystemCallArchitectures=native
 SystemCallFilter=@system-service
-CapabilityBoundingSet=
+# Not set: CapabilityBoundingSet=, PrivateDevices=, ProtectKernelModules=,
+# ProtectKernelLogs= and ProtectClock= drop capabilities, which a user
+# manager can do only inside a user namespace; without one the unit stops
+# with 218/CAPABILITIES. The collector holds no capability, NoNewPrivileges
+# keeps it so, and @system-service already denies the clock, module, raw
+# I/O and kernel log system calls (ADR 0005).
 # MemoryDenyWriteExecute= is not set: opencode runs on a JIT (ADR 0005).
 
 # The systemd-creds unlocker adds LoadCredentialEncrypted= in a drop-in:

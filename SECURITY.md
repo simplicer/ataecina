@@ -41,7 +41,9 @@ These are the properties a report can break; the reasons live in
 - **Strict files**: `~/.config/ataecina` is `0700`, `config.json` and
   `keys.json` are `0600` and owned by the user, or Ataecina refuses to run.
 - **Two halves** (ADR 0005): only the collector (`ataecina collect`, run by
-  a hardened systemd user unit) unseals keys and opens network connections;
+  a systemd user unit with `NoNewPrivileges` and seccomp filters everywhere,
+  and a read-only home only where unprivileged user namespaces are allowed,
+  which Ubuntu forbids) unseals keys and opens network connections;
   `status`, `--json`, the tray and the Plasma widget read a snapshot of
   figures and talk to nothing but the session bus.
 - **Short leash on the network** (ADR 0006): one fixed HTTPS host per

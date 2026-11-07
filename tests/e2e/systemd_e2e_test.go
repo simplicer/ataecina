@@ -7,9 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 )
+
+// serviceTemplate is the shipped collector unit, before @BINDIR@ is replaced.
+const serviceTemplate = "../../infra/systemd/ataecina-collect.service.in"
 
 // TestTheSystemdUnitsAreValid checks the shipped units with
 // `systemd-analyze --user verify`, pointing them at the built binary.
@@ -21,7 +25,7 @@ func TestTheSystemdUnitsAreValid(t *testing.T) {
 		t.Skip("systemd-analyze is not installed")
 	}
 	dir := t.TempDir()
-	service, err := os.ReadFile(filepath.Join("..", "..", "infra", "systemd", "ataecina-collect.service.in"))
+	service, err := os.ReadFile(serviceTemplate)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,6 +50,55 @@ func TestTheSystemdUnitsAreValid(t *testing.T) {
 		if !strings.Contains(unit, hardening) {
 			t.Fatalf("the service lacks %s", hardening)
 		}
+	}
+	// A user manager drops capabilities only inside a user namespace, which
+	// Ubuntu forbids to unprivileged users: these options stop the collector
+	// with 218/CAPABILITIES there (ADR 0005).
+	for _, refused := range []string{"CapabilityBoundingSet=", "PrivateDevices=", "ProtectKernelModules=", "ProtectKernelLogs=", "ProtectClock="} {
+		if strings.Contains(unit, "\n"+refused) {
+			t.Fatalf("the service sets %s, which a user manager without user namespaces refuses", refused)
+		}
+	}
+}
+
+// TestTheCollectorStartsUnderTheUserManager runs the built binary as a
+// transient user unit with every hardening option of the shipped service,
+// so a host that refuses one fails here and not on the owner's timer. It
+// starts only `ataecina version`, and skips without a user manager.
+func TestTheCollectorStartsUnderTheUserManager(t *testing.T) {
+	bin := binary(t, "ATAECINA_PRODUCTION_BINARY")
+	run, err := exec.LookPath("systemd-run")
+	if err != nil {
+		t.Skip("systemd-run is not installed")
+	}
+	if err := exec.Command("systemctl", "--user", "show", "--property=Version").Run(); err != nil {
+		t.Skip("no systemd user manager to start a unit under")
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := os.ReadFile(serviceTemplate)
+	if err != nil {
+		t.Fatal(err)
+	}
+	args := []string{"--user", "--wait", "--collect", "--unit=ataecina-e2e-" + strconv.Itoa(os.Getpid())}
+	inHardening := false
+	for _, line := range strings.Split(string(service), "\n") {
+		if strings.HasPrefix(line, "# Hardening.") {
+			inHardening = true
+		}
+		if !inHardening || line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		args = append(args, "--property="+strings.ReplaceAll(line, "%h", home))
+	}
+	if !inHardening {
+		t.Fatal(`the service has no "# Hardening." section`)
+	}
+	out, err := exec.Command(run, append(args, bin, "version")...).CombinedOutput()
+	if err != nil {
+		t.Fatalf("the hardened unit does not start under this user manager: %v\n%s", err, out)
 	}
 }
 

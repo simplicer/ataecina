@@ -59,3 +59,34 @@ the keys. Merging them gives the most exposed code the most privileges.
   that need unprivileged user namespaces must still be checked by hand on
   distributions that restrict them.
 
+## Update (2026-11-07): what applies where unprivileged user namespaces are forbidden
+
+Checked by hand on Ubuntu with KDE Plasma 6.6 and systemd 259, where
+AppArmor forbids unprivileged user namespaces
+(`kernel.apparmor_restrict_unprivileged_userns=1`, Ubuntu's default):
+
+- A user manager drops capabilities only inside a user namespace. Without
+  one, `CapabilityBoundingSet=`, `PrivateDevices=`, `ProtectKernelModules=`,
+  `ProtectKernelLogs=` and `ProtectClock=` each stopped the collector with
+  `218/CAPABILITIES`, so the timer never ran. They are removed. Nothing is
+  lost: the collector holds no capability, `NoNewPrivileges` keeps it so,
+  and `@system-service` already denies the clock, module, raw I/O and
+  kernel log system calls they also filtered.
+- `ProtectSystem=strict`, `ProtectHome=read-only`, `PrivateTmp`,
+  `ProtectKernelTunables`, `ProtectControlGroups` and `ProtectHostname`
+  need a mount or UTS namespace. On Ubuntu systemd skips them (only
+  `ProtectHostname` says so in the journal): the collector can write to the
+  home and sees the real `/tmp`. They stay in the unit because they apply on
+  distributions that allow unprivileged user namespaces (the default on
+  Debian, Fedora and Arch; not checked by hand there).
+- `NoNewPrivileges`, `RestrictAddressFamilies`, `RestrictNamespaces`,
+  `RestrictRealtime`, `RestrictSUIDSGID`, `LockPersonality`,
+  `SystemCallArchitectures`, `SystemCallFilter` and `UMask` use no
+  namespace and apply everywhere.
+- `make e2e` now starts the built binary as a transient user unit with the
+  service's hardening (`TestTheCollectorStartsUnderTheUserManager`), so a
+  refused option fails the suite on any machine with a user manager instead
+  of the owner's timer.
+- The read-only home on Ubuntu is left to the Landlock self-sandbox already
+  listed in `docs/ROADMAP.md` ("Later"), which needs no user namespace.
+
