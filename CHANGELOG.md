@@ -135,9 +135,6 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 - Every `.deb` of the host's architecture is now installed, run and purged
   in a throw-away root (`fakeroot dpkg`) and its dependencies are checked
   with `apt-get --simulate` before it is accepted.
-
-### Added
-
 - `SECURITY.md` (how to report a vulnerability and what Ataecina promises)
   and `CONTRIBUTING.md` (how a change is made, tested and committed).
 - Forgejo Actions workflow running `make check`, `make e2e` and
@@ -199,9 +196,6 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 - Launcher `org.simplicer.ataecina.desktop` (hidden on Plasma), installed
   by the packages and `make install-user` with `Exec` naming the installed
   binary.
-
-### Added
-
 - `make package`: `.deb`, `.rpm` and Arch packages for amd64 and arm64 built
   with nfpm (pinned, never linked) from `infra/packaging/nfpm.yaml`,
   byte-reproducible from the same commit, listed in `dist/SHA256SUMS` and
