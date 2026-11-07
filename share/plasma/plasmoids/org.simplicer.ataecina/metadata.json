@@ -10,6 +10,7 @@
         "Description": "How much is left of each AI subscription, and when it is reborn",
         "Description[es]": "Cuánto queda de cada suscripción de IA y cuándo renace",
         "Icon": "ataecina",
+        "License": "GPL-3.0-or-later",
         "Id": "org.simplicer.ataecina",
         "Name": "Ataecina",
         "Version": "0.20.1-unstable",

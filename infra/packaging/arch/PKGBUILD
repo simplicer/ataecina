@@ -11,7 +11,7 @@ pkgrel=1
 pkgdesc='How much is left of each AI subscription, and when it is reborn'
 arch=('x86_64' 'aarch64')
 url='https://codeberg.org/simplicer/ataecina'
-license=('LicenseRef-unknown') # pending the maintainer's decision
+license=('GPL-3.0-or-later')
 depends=('systemd')
 makedepends=('go>=2:1.27' 'gettext')
 optdepends=('plasma-workspace: the Ataecina panel widget')

@@ -11,7 +11,7 @@
 #   PREFIX/share/plasma/plasmoids/org.simplicer.ataecina/
 #   PREFIX/share/icons/hicolor/scalable/apps/ataecina.svg
 #   PREFIX/share/applications/org.simplicer.ataecina.desktop   (the tray launcher)
-#   PREFIX/share/doc/ataecina/{README.md,CHANGELOG.md,ataecina.example.json}
+#   PREFIX/share/doc/ataecina/{README.md,CHANGELOG.md,ataecina.example.json,LICENSE}
 #
 # It expects `make build widget` to have run (var/build/ataecina and
 # var/build/plasmoid). Nothing outside DESTDIR+PREFIX and the units
@@ -63,7 +63,7 @@ if $uninstall; then
 		"$destdir$units/ataecina-collect.timer" \
 		"$destdir$icons/ataecina.svg" \
 		"$destdir$applications/$launcher" \
-		"$destdir$docs/README.md" "$destdir$docs/CHANGELOG.md" "$destdir$docs/ataecina.example.json"
+		"$destdir$docs/README.md" "$destdir$docs/CHANGELOG.md" "$destdir$docs/ataecina.example.json" "$destdir$docs/LICENSE"
 	remove_widget
 	rmdir "$destdir$docs" 2>/dev/null || true
 	echo "install-files: removed Ataecina from $destdir$prefix"
@@ -100,6 +100,6 @@ sed -e "s|^Exec=ataecina |Exec=$bindir/ataecina |" -e "s|^TryExec=ataecina\$|Try
 chmod 0644 "$destdir$applications/$launcher"
 
 install -D -m 0644 README.md "$destdir$docs/README.md"
-install -m 0644 CHANGELOG.md etc/ataecina.example.json "$destdir$docs/"
+install -m 0644 CHANGELOG.md etc/ataecina.example.json LICENSE "$destdir$docs/"
 
 echo "install-files: installed Ataecina into $destdir$prefix (units in $destdir$units)"

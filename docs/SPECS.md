@@ -917,7 +917,7 @@ Nothing is enabled or started by an installation.
 | `/usr/share/plasma/plasmoids/org.simplicer.ataecina/` | Plasma widget with compiled translations in `contents/locale/` | `0755` / `0644` |
 | `/usr/share/icons/hicolor/scalable/apps/ataecina.svg` | icon | `0644` |
 | `/usr/share/applications/org.simplicer.ataecina.desktop` | tray launcher (`Exec` names the installed binary) | `0644` |
-| `/usr/share/doc/ataecina/` | `README.md`, `CHANGELOG.md`, `ataecina.example.json` | `0644` |
+| `/usr/share/doc/ataecina/` | `README.md`, `CHANGELOG.md`, `ataecina.example.json`, `LICENSE` | `0644` |
 
 Packages: `ataecina_X.Y.Z~unstable-1_<arch>.deb`,
 `ataecina-X.Y.Z~unstable-1.<arch>.rpm` and

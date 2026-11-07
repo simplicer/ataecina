@@ -44,3 +44,11 @@ tray and with the Secret Service, and would add no protection here.
 
 - `dpkg-deb` and `rpmbuild` scripts: three toolchains to maintain. Rejected.
 - Flatpak/Snap: see context. Rejected.
+
+## Update (2026-11-07): the license
+
+The maintainer chose the GNU General Public License, version 3 or (at
+the user's option) any later version: `LICENSE` holds the official text,
+the nfpm manifest and the `PKGBUILD` say `GPL-3.0-or-later`, the widget's
+metadata carries the same SPDX id, and every package installs `LICENSE`
+with the docs (`/usr/share/doc/ataecina/LICENSE`).

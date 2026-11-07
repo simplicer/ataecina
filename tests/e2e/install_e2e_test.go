@@ -39,6 +39,7 @@ func TestTheUserInstallationPlacesEverythingUnderThePrefixAndRemovesIt(t *testin
 		prefix + "/share/plasma/plasmoids/org.simplicer.ataecina/contents/locale/es/LC_MESSAGES/plasma_applet_org.simplicer.ataecina.mo": 0o644,
 		prefix + "/share/applications/org.simplicer.ataecina.desktop":                                                                    0o644,
 		prefix + "/share/doc/ataecina/README.md":                                                                                         0o644,
+		prefix + "/share/doc/ataecina/LICENSE":                                                                                           0o644,
 		prefix + "/share/doc/ataecina/ataecina.example.json":                                                                             0o644,
 	}
 	for path, mode := range modes {

@@ -1,9 +1,11 @@
 # Contributing
 
-Thank you for your interest in Ataecina. Until a license is chosen (see
-[README.md](README.md#license)) outside contributions cannot be merged;
-issues, provider reports and discussion are welcome meanwhile. Security
-problems go through [SECURITY.md](SECURITY.md), never a public issue.
+Thank you for your interest in Ataecina. It is free software under the
+GNU General Public License, version 3 or any later version
+([LICENSE](LICENSE)); by sending a contribution you agree to license it
+under the same terms. Issues, provider reports and discussion are
+welcome. Security problems go through [SECURITY.md](SECURITY.md), never
+a public issue.
 
 ## Before you start
 

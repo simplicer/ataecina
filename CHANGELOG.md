@@ -8,6 +8,13 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+### Added
+
+- Ataecina is free software under the GNU General Public License,
+  version 3 or any later version (`GPL-3.0-or-later`): `LICENSE`, the
+  package metadata and the widget say so, and every package installs
+  `LICENSE` with the docs.
+
 ## [0.20.1-unstable] - 2026-11-07
 
 ### Fixed
