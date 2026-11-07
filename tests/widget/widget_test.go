@@ -287,7 +287,7 @@ var platformMembers = []string{
 	"name", "parse", "push", "restart", "round", "split", "trim", "weight",
 	"view", "width", "height", "button", "expanded", "icon", "configuration",
 	"text", "value", "checked", "r", "g", "b", "fill", "margins",
-	"arc", "reset", "stroke", "slice", "visible", "small",
+	"arc", "reset", "stroke", "slice", "visible", "small", "policy",
 }
 
 func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {

@@ -8,6 +8,13 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.20.1-unstable] - 2026-11-07
+
+### Fixed
+
+- The widget's popup no longer shows a horizontal scrollbar when a long
+  list makes it scroll: rows always fit the width.
+
 ## [0.20.0-unstable] - 2026-11-07
 
 ### Added

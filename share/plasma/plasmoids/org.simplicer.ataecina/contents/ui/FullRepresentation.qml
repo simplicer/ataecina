@@ -63,6 +63,8 @@ PlasmaExtras.Representation {
         anchors.fill: parent
         visible: snapshot.problem === "" && (snapshot.listed.length > 0 || snapshot.warnings.length > 0)
         contentWidth: availableWidth
+        // Rows fit the width; only a long list scrolls, vertically.
+        PlasmaComponents3.ScrollBar.horizontal.policy: PlasmaComponents3.ScrollBar.AlwaysOff
 
         ColumnLayout {
             id: content
