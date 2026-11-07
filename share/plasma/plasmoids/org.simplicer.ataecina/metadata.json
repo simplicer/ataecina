@@ -12,7 +12,7 @@
         "Icon": "ataecina",
         "Id": "org.simplicer.ataecina",
         "Name": "Ataecina",
-        "Version": "0.16.0-unstable",
+        "Version": "0.16.1-unstable",
         "Website": "https://codeberg.org/simplicer/ataecina"
     },
     "X-Plasma-API-Minimum-Version": "6.0"

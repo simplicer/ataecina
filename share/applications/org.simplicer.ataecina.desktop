@@ -12,4 +12,3 @@ Terminal=false
 Categories=System;Monitor;
 Keywords=AI;quota;subscription;limits;tray;
 StartupNotify=false
-NotShowIn=KDE;

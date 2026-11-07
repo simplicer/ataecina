@@ -8,6 +8,13 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.16.1-unstable] - 2026-11-07
+
+### Fixed
+
+- The tray launcher is offered on Plasma too: it was hidden there, so the
+  tray could only be started from a terminal on the reference desktop.
+
 ### Added
 
 - `make` alone compiles the binary and stages the widget; `make deb` builds

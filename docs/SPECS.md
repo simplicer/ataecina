@@ -754,9 +754,11 @@ extension.
 - It registers with `org.kde.StatusNotifierWatcher`, waits for one when the
   panel has none yet and registers again when the panel restarts. It ends on
   "Quit", `SIGINT` or `SIGTERM`.
-- Launcher `org.simplicer.ataecina.desktop` (`Exec=<bindir>/ataecina tray`,
-  hidden on Plasma where the widget is the display); copying it into
-  `~/.config/autostart/` starts the tray with the session.
+- Launcher `org.simplicer.ataecina.desktop` (`Exec=<bindir>/ataecina tray`),
+  offered on every desktop: on Plasma the widget is the main display, but
+  the tray works there too (Plasma's system tray speaks
+  StatusNotifierItem); copying it into `~/.config/autostart/` starts the
+  tray with the session.
 
 ## 9. Files and paths
 
@@ -829,7 +831,7 @@ Nothing is enabled or started by an installation.
 | `/usr/lib/systemd/user/ataecina-collect.timer` | collector timer | `0644` |
 | `/usr/share/plasma/plasmoids/org.simplicer.ataecina/` | Plasma widget with compiled translations in `contents/locale/` | `0755` / `0644` |
 | `/usr/share/icons/hicolor/scalable/apps/ataecina.svg` | icon | `0644` |
-| `/usr/share/applications/org.simplicer.ataecina.desktop` | tray launcher (`Exec` names the installed binary; hidden on Plasma) | `0644` |
+| `/usr/share/applications/org.simplicer.ataecina.desktop` | tray launcher (`Exec` names the installed binary) | `0644` |
 | `/usr/share/doc/ataecina/` | `README.md`, `CHANGELOG.md`, `ataecina.example.json` | `0644` |
 
 Packages: `ataecina_X.Y.Z~unstable-1_<arch>.deb`,
