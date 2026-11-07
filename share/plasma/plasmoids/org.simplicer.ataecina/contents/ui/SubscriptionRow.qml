@@ -1,7 +1,8 @@
 /*
- * One subscription in the popup: growth rings, the name and plan, when the
- * closest window is reborn, and what is left in large figures. A click
- * unfolds every window, the balance and the hint (SPECS §8.3).
+ * One subscription in the popup: growth rings for what is known, the name
+ * and plan, the money left of its total, and what is left of every window
+ * (5 h, week, month) with its rebirth. A click unfolds every bucket, the
+ * balance and the hint (SPECS §8.3).
  */
 import QtQuick
 import QtQuick.Layouts
@@ -14,7 +15,7 @@ ColumnLayout {
     required property var modelData
     readonly property var subscription: modelData
     readonly property bool lively: snapshot.lively(subscription)
-    readonly property color headlineColor: figureColor(snapshot.headlineUsed(subscription))
+    readonly property color moneyColor: figureColor(snapshot.moneyUsedPercent(subscription))
     property bool unfolded: false
 
     objectName: "row-" + subscription.id
@@ -25,16 +26,6 @@ ColumnLayout {
             return Kirigami.Theme.disabledTextColor;
         }
         return snapshot.toneColor(usedPercent, Kirigami.Theme.textColor);
-    }
-
-    function badgeColor() {
-        if (snapshot.failed(subscription)) {
-            return Kirigami.Theme.negativeTextColor;
-        }
-        if (!lively) {
-            return Kirigami.Theme.disabledTextColor;
-        }
-        return snapshot.toneColor(snapshot.headlineUsed(subscription), snapshot.growth[0]);
     }
 
     MouseArea {
@@ -49,26 +40,29 @@ ColumnLayout {
             anchors.fill: parent
             spacing: Kirigami.Units.largeSpacing
 
+            // Stale readings fade; unknown windows draw nothing.
             Rings {
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 2.4
                 Layout.preferredHeight: Kirigami.Units.gridUnit * 2.4
-                Layout.alignment: Qt.AlignVCenter
+                Layout.alignment: Qt.AlignTop
                 fractions: snapshot.ringFractions(row.subscription)
                 colors: snapshot.ringColors(row.subscription)
+                emptyRings: 0
                 muted: !row.lively
                 mutedColor: Kirigami.Theme.disabledTextColor
+                opacity: row.lively ? 1 : 0.5
 
                 PlasmaComponents3.Label {
                     anchors.centerIn: parent
-                    text: snapshot.badge(row.subscription)
+                    text: snapshot.currencyMark(row.subscription)
                     font.weight: Font.Bold
-                    color: row.badgeColor()
+                    color: row.moneyColor
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: 0
+                spacing: Kirigami.Units.smallSpacing / 2
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -85,51 +79,82 @@ ColumnLayout {
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
+                    PlasmaComponents3.Label {
+                        visible: text !== ""
+                        text: snapshot.moneyLine(row.subscription)
+                        color: row.moneyColor
+                        font.weight: Font.DemiBold
+                    }
+                    Kirigami.Icon {
+                        source: row.unfolded ? "arrow-up" : "arrow-down"
+                        Layout.preferredWidth: Kirigami.Units.iconSizes.small
+                        Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                        opacity: 0.4
+                    }
                 }
+
+                // What is left of every window, shortest first.
+                RowLayout {
+                    visible: windowColumns.count > 0
+                    Layout.fillWidth: true
+                    spacing: Kirigami.Units.gridUnit
+
+                    Repeater {
+                        id: windowColumns
+                        model: snapshot.windows(row.subscription)
+
+                        ColumnLayout {
+                            required property var modelData
+                            spacing: 0
+
+                            PlasmaComponents3.Label {
+                                text: snapshot.windowLabel(modelData)
+                                font: Kirigami.Theme.smallFont
+                                opacity: 0.6
+                            }
+                            RowLayout {
+                                spacing: 0
+
+                                PlasmaComponents3.Label {
+                                    text: snapshot.leftText(modelData)
+                                    color: row.figureColor(modelData.used_percent)
+                                    font.weight: Font.DemiBold
+                                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.45
+                                }
+                                PlasmaComponents3.Label {
+                                    text: "%"
+                                    color: row.figureColor(modelData.used_percent)
+                                    opacity: 0.7
+                                    Layout.alignment: Qt.AlignBottom
+                                    Layout.bottomMargin: Kirigami.Units.smallSpacing / 2
+                                }
+                            }
+                            PlasmaComponents3.Label {
+                                text: snapshot.resetText(modelData)
+                                font: Kirigami.Theme.smallFont
+                                opacity: 0.6
+                            }
+                        }
+                    }
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                }
+
                 PlasmaComponents3.Label {
-                    text: snapshot.subtitle(row.subscription)
-                    opacity: 0.7
+                    visible: text !== ""
+                    text: snapshot.note(row.subscription)
+                    font: Kirigami.Theme.smallFont
+                    opacity: 0.6
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
             }
-
-            RowLayout {
-                spacing: 0
-                Layout.alignment: Qt.AlignVCenter
-
-                PlasmaComponents3.Label {
-                    visible: text !== ""
-                    text: snapshot.approximate(row.subscription)
-                    opacity: 0.6
-                }
-                PlasmaComponents3.Label {
-                    text: snapshot.headline(row.subscription)
-                    color: row.headlineColor
-                    font.weight: Font.DemiBold
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * (snapshot.headlineIsPercent(row.subscription) ? 1.8 : 1.4)
-                }
-                PlasmaComponents3.Label {
-                    visible: text !== ""
-                    text: snapshot.headlineUnit(row.subscription)
-                    color: row.headlineColor
-                    opacity: 0.7
-                    Layout.alignment: Qt.AlignBottom
-                    Layout.leftMargin: text === "%" ? 0 : Kirigami.Units.smallSpacing
-                    Layout.bottomMargin: Kirigami.Units.smallSpacing / 2
-                }
-            }
-
-            Kirigami.Icon {
-                source: row.unfolded ? "arrow-up" : "arrow-down"
-                Layout.preferredWidth: Kirigami.Units.iconSizes.small
-                Layout.preferredHeight: Kirigami.Units.iconSizes.small
-                opacity: 0.4
-            }
         }
     }
 
-    // The unfolded detail: every window, then the balance and the hint.
+    // The unfolded detail: every bucket and window, then the balance and
+    // the hint.
     ColumnLayout {
         visible: row.unfolded
         Layout.fillWidth: true
@@ -164,13 +189,13 @@ ColumnLayout {
                     }
                 }
                 PlasmaComponents3.Label {
-                    text: modelData.estimated ? i18n("reborn") : i18n("%1 % left", Math.round(snapshot.leftOf(modelData)))
+                    text: i18n("%1 % left", snapshot.leftText(modelData))
                     color: row.figureColor(modelData.used_percent)
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: Kirigami.Units.gridUnit * 4
                 }
                 PlasmaComponents3.Label {
-                    text: snapshot.countdown(modelData.resets_at)
+                    text: snapshot.resetText(modelData)
                     opacity: 0.6
                     Layout.preferredWidth: Kirigami.Units.gridUnit * 4
                 }

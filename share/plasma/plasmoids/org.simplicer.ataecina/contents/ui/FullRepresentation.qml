@@ -15,10 +15,18 @@ PlasmaExtras.Representation {
 
     readonly property color ink: Kirigami.Theme.textColor
 
+    // A rounded, faintly tinted card.
+    component Card: Rectangle {
+        readonly property color ink: Kirigami.Theme.textColor
+        radius: Kirigami.Units.gridUnit * 0.75
+        color: Qt.rgba(ink.r, ink.g, ink.b, 0.04)
+        border.color: Qt.rgba(ink.r, ink.g, ink.b, 0.08)
+    }
+
     Layout.minimumWidth: Kirigami.Units.gridUnit * 20
     Layout.minimumHeight: Kirigami.Units.gridUnit * 10
     Layout.preferredWidth: Kirigami.Units.gridUnit * 23
-    Layout.preferredHeight: Math.min(Kirigami.Units.gridUnit * 34, card.implicitHeight + Kirigami.Units.gridUnit * 5)
+    Layout.preferredHeight: Math.min(Kirigami.Units.gridUnit * 34, content.implicitHeight + Kirigami.Units.gridUnit * 5)
 
     footer: PlasmaExtras.PlasmoidHeading {
         position: QQC2.ToolBar.Footer
@@ -53,45 +61,62 @@ PlasmaExtras.Representation {
     PlasmaComponents3.ScrollView {
         id: scroll
         anchors.fill: parent
-        visible: snapshot.problem === "" && snapshot.shown.length > 0
+        visible: snapshot.problem === "" && (snapshot.listed.length > 0 || snapshot.warnings.length > 0)
         contentWidth: availableWidth
 
-        Rectangle {
-            id: card
+        ColumnLayout {
+            id: content
             width: scroll.availableWidth
-            implicitHeight: rows.implicitHeight + Kirigami.Units.largeSpacing * 2
-            height: implicitHeight
-            radius: Kirigami.Units.gridUnit * 0.75
-            color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.04)
-            border.color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.08)
+            spacing: Kirigami.Units.largeSpacing
 
-            ColumnLayout {
-                id: rows
-                anchors.fill: parent
-                anchors.margins: Kirigami.Units.largeSpacing
-                spacing: Kirigami.Units.largeSpacing
+            // What is left, one row per subscription.
+            Card {
+                id: card
+                visible: snapshot.listed.length > 0
+                Layout.fillWidth: true
+                implicitHeight: rows.implicitHeight + Kirigami.Units.largeSpacing * 2
 
-                Repeater {
-                    model: snapshot.shown
+                ColumnLayout {
+                    id: rows
+                    anchors.fill: parent
+                    anchors.margins: Kirigami.Units.largeSpacing
+                    spacing: Kirigami.Units.largeSpacing
 
-                    ColumnLayout {
-                        id: entry
-                        required property var modelData
-                        required property int index
-                        Layout.fillWidth: true
-                        spacing: Kirigami.Units.largeSpacing
+                    Repeater {
+                        model: snapshot.listed
 
-                        Rectangle {
-                            visible: entry.index > 0
+                        ColumnLayout {
+                            id: entry
+                            required property var modelData
+                            required property int index
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 1
-                            color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.08)
-                        }
-                        SubscriptionRow {
-                            modelData: entry.modelData
-                            Layout.fillWidth: true
+                            spacing: Kirigami.Units.largeSpacing
+
+                            Rectangle {
+                                visible: entry.index > 0
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 1
+                                color: Qt.rgba(full.ink.r, full.ink.g, full.ink.b, 0.08)
+                            }
+                            SubscriptionRow {
+                                modelData: entry.modelData
+                                Layout.fillWidth: true
+                            }
                         }
                     }
+                }
+            }
+
+            // What failed or asks for something, folded.
+            Card {
+                visible: snapshot.warnings.length > 0
+                Layout.fillWidth: true
+                implicitHeight: warnings.implicitHeight + Kirigami.Units.largeSpacing * 2
+
+                Warnings {
+                    id: warnings
+                    anchors.fill: parent
+                    anchors.margins: Kirigami.Units.largeSpacing
                 }
             }
         }

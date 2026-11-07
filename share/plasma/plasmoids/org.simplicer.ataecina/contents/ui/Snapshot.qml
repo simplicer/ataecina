@@ -1,7 +1,8 @@
 /*
  * The snapshot as the widget sees it: what `ataecina status --json` said
- * (SPECS §8.2), the subscriptions to show and how to word and colour each
- * figure. No Plasma type here, so the popup can be drawn on its own.
+ * (SPECS §8.2), which subscriptions get a row, which a warning, and how to
+ * word and colour each figure. No Plasma type here, so the popup can be
+ * drawn on its own.
  */
 import QtQuick
 
@@ -56,11 +57,13 @@ QtObject {
         }
         return ids.map(id => subscriptions.find(s => s.id === id)).filter(s => s !== undefined);
     }
+    readonly property var listed: shown.filter(s => placement(s) === "row")
+    readonly property var warnings: shown.filter(s => placement(s) === "warning")
 
-    // The most used meter among the shown subscriptions, or null.
+    // The most used meter among the listed subscriptions, or null.
     readonly property var worst: {
         let found = null;
-        for (const s of shown) {
+        for (const s of listed) {
             const meter = closest(s);
             if (meter !== null && (found === null || meter.used_percent > found.meter.used_percent)) {
                 found = {subscription: s, meter: meter};
@@ -70,7 +73,7 @@ QtObject {
     }
     readonly property real worstPercent: worst === null ? -1 : worst.meter.used_percent
 
-    readonly property bool dimmed: problem !== "" || shown.length === 0 || shown.every(s => !lively(s))
+    readonly property bool dimmed: problem !== "" || listed.length === 0 || listed.every(s => !lively(s))
 
     function read(exitCode, stdout, stderr) {
         if (exitCode !== 0) {
@@ -87,12 +90,32 @@ QtObject {
         }
     }
 
-    // ----- what to show -----
+    // ----- where each subscription goes -----
+
+    function failed(subscription) {
+        return subscription.outcome !== "OK" && subscription.outcome !== "PARTIAL";
+    }
 
     // A fresh reading that a source answered, even in part.
     function lively(subscription) {
-        return subscription.freshness === "FRESH" && (subscription.outcome === "OK" || subscription.outcome === "PARTIAL");
+        return subscription.freshness === "FRESH" && !failed(subscription);
     }
+
+    // "row" when there is something left to show (windows, or money left),
+    // "warning" when the source failed or asks for something, and "hidden"
+    // when it answers but has nothing worth showing: a free credit used up,
+    // or only what was spent.
+    function placement(subscription) {
+        if (failed(subscription)) {
+            return "warning";
+        }
+        if (subscription.meters.length > 0 || moneyLeft(subscription) > 0) {
+            return "row";
+        }
+        return subscription.outcome === "PARTIAL" && subscription.hint ? "warning" : "hidden";
+    }
+
+    // ----- windows -----
 
     function leftOf(meter) {
         return Math.max(0, 100 - meter.used_percent);
@@ -117,44 +140,33 @@ QtObject {
         return meter.window === "MONTHLY" || meter.window === "BILLING_CYCLE" ? 43200 : 0;
     }
 
-    // The meters drawn as rings: the first bucket's windows, longest first.
-    function ringMeters(subscription) {
+    // The first bucket's windows, shortest first (5 h, week, month); other
+    // buckets show when the row unfolds.
+    function windows(subscription) {
         if (subscription.meters.length === 0) {
             return [];
         }
         const bucket = subscription.meters[0].bucket;
-        return subscription.meters.filter(m => m.bucket === bucket).sort((a, b) => windowLength(b) - windowLength(a)).slice(0, growth.length);
+        return subscription.meters.filter(m => m.bucket === bucket).sort((a, b) => windowLength(a) - windowLength(b)).slice(0, growth.length);
     }
 
+    // Rings, outer first: one per known window, longest outside; for money
+    // left of a known total, one ring; nothing when nothing is known.
     function ringFractions(subscription) {
-        return ringMeters(subscription).map(m => leftOf(m) / 100);
+        const outerFirst = windows(subscription).reverse();
+        if (outerFirst.length > 0) {
+            return outerFirst.map(m => leftOf(m) / 100);
+        }
+        const total = moneyTotal(subscription);
+        return total > 0 ? [moneyLeft(subscription) / total] : [];
     }
 
-    // A balance without windows gets one faint ring of the first growth
-    // colour, with its currency in the middle.
     function ringColors(subscription) {
-        if (subscription.meters.length === 0 && subscription.balance) {
-            return [toneColor(headlineUsed(subscription), growth[0])];
+        const outerFirst = windows(subscription).reverse();
+        if (outerFirst.length > 0) {
+            return outerFirst.map((m, index) => toneColor(m.used_percent, growth[index]));
         }
-        return ringMeters(subscription).map((m, index) => toneColor(m.used_percent, growth[index]));
-    }
-
-    function failed(subscription) {
-        return subscription.outcome !== "OK" && subscription.outcome !== "PARTIAL";
-    }
-
-    // What sits inside the rings: "!" when the source failed, the currency
-    // of a balance without windows, or nothing.
-    function badge(subscription) {
-        if (failed(subscription)) {
-            return "!";
-        }
-        if (subscription.meters.length > 0 || !subscription.balance) {
-            return "";
-        }
-        const value = subscription.balance.remaining || subscription.balance.spent;
-        const symbol = currencySymbols[value.currency];
-        return symbol === undefined ? value.currency : symbol;
+        return [toneColor(moneyUsedPercent(subscription), growth[0])];
     }
 
     function toneColor(usedPercent, healthy) {
@@ -165,6 +177,70 @@ QtObject {
             return lowColor;
         }
         return healthy;
+    }
+
+    // ----- money -----
+
+    function moneyLeft(subscription) {
+        return subscription.balance && subscription.balance.remaining ? Number(subscription.balance.remaining.amount) : 0;
+    }
+
+    // What was left plus what was spent, or 0 when either is unknown.
+    function moneyTotal(subscription) {
+        if (!subscription.balance || !subscription.balance.remaining || !subscription.balance.spent) {
+            return 0;
+        }
+        return Number(subscription.balance.remaining.amount) + Number(subscription.balance.spent.amount);
+    }
+
+    function moneyUsedPercent(subscription) {
+        const total = moneyTotal(subscription);
+        return total > 0 ? 100 * (1 - moneyLeft(subscription) / total) : 0;
+    }
+
+    function money(value) {
+        if (!value) {
+            return "";
+        }
+        // Rounding must not print "-0.00".
+        const amount = Math.abs(Number(value.amount)) < 0.005 ? 0 : Number(value.amount);
+        return amountText(amount, value.currency);
+    }
+
+    function amountText(amount, currency) {
+        const symbol = currencySymbols[currency];
+        if (symbol === undefined) {
+            return amount.toLocaleString(Qt.locale(), "f", 2) + " " + currency;
+        }
+        return amount.toLocaleCurrencyString(Qt.locale(), symbol);
+    }
+
+    // The currency inside a money ring.
+    function currencyMark(subscription) {
+        if (subscription.meters.length > 0 || moneyLeft(subscription) <= 0) {
+            return "";
+        }
+        const currency = subscription.balance.remaining.currency;
+        const symbol = currencySymbols[currency];
+        return symbol === undefined ? currency : symbol;
+    }
+
+    // "$6.80 of $70.00", or "$6.80 left" when the total is unknown; empty
+    // when nothing is left.
+    function moneyLine(subscription) {
+        if (moneyLeft(subscription) <= 0) {
+            return "";
+        }
+        const left = approximate(subscription) + money(subscription.balance.remaining);
+        const total = moneyTotal(subscription);
+        if (total > 0) {
+            return i18n("%1 of %2", left, amountText(total, subscription.balance.remaining.currency));
+        }
+        return i18n("%1 left", left);
+    }
+
+    function approximate(subscription) {
+        return subscription.fidelity === "REPORTED" ? "" : "≈ ";
     }
 
     // ----- wording -----
@@ -183,7 +259,7 @@ QtObject {
         return subscription.plan.split("_").map(word => word.charAt(0) + word.slice(1).toLowerCase()).join(" ");
     }
 
-    // Short label of a window inside a list of windows.
+    // Short label of a window.
     function windowLabel(meter) {
         switch (meter.window) {
         case "FIVE_HOURS":
@@ -207,27 +283,23 @@ QtObject {
         return i18n("%1 min", minutes);
     }
 
-    // Name of a window at the start of a sentence.
-    function windowName(meter) {
-        switch (meter.window) {
-        case "FIVE_HOURS":
-            return i18n("5-hour");
-        case "DAILY":
-            return i18n("Daily");
-        case "WEEKLY":
-            return i18n("Weekly");
-        case "MONTHLY":
-            return i18n("Monthly");
-        case "BILLING_CYCLE":
-            return i18n("Billing cycle");
-        }
-        return windowLabel(meter);
-    }
-
     function meterLabel(subscription, meter) {
         const first = subscription.meters.length > 0 ? subscription.meters[0].bucket : null;
         const label = windowLabel(meter);
         return meter.bucket && meter.bucket !== first ? meter.bucket + " " + label : label;
+    }
+
+    // What is left of a window, "≈" when estimated after a rebirth.
+    function leftText(meter) {
+        return (meter.estimated ? "≈ " : "") + Math.round(leftOf(meter));
+    }
+
+    // When a window is reborn, or that it already was.
+    function resetText(meter) {
+        if (meter.resets_at) {
+            return countdown(meter.resets_at);
+        }
+        return meter.estimated ? i18n("reborn") : "";
     }
 
     function duration(iso) {
@@ -268,91 +340,35 @@ QtObject {
         return iso ? Qt.formatTime(new Date(iso), Qt.locale().timeFormat(Locale.ShortFormat)) : "";
     }
 
-    function money(value) {
-        if (!value) {
-            return "";
-        }
-        // Rounding must not print "-0.00".
-        const amount = Math.abs(Number(value.amount)) < 0.005 ? 0 : Number(value.amount);
-        const symbol = currencySymbols[value.currency];
-        if (symbol === undefined) {
-            return amount.toLocaleString(Qt.locale(), "f", 2) + " " + value.currency;
-        }
-        return amount.toLocaleCurrencyString(Qt.locale(), symbol);
-    }
-
-    // The second line of a row: when the closest window is reborn, or what
-    // went wrong, or what was spent.
-    function subtitle(subscription) {
-        if (failed(subscription)) {
-            return subscription.hint ? outcomeText(subscription) + " · " + subscription.hint : outcomeText(subscription);
-        }
+    // The small line under a row: how a stale reading gets fresh again, and
+    // banked resets.
+    function note(subscription) {
+        const parts = [];
         if (subscription.freshness !== "FRESH") {
-            return i18n("Stale, observed %1", age(subscription.observed_at));
+            switch (subscription.source) {
+            case "CLAUDE_STATUSLINE":
+                parts.push(i18n("Updates when you use Claude Code"));
+                break;
+            case "CODEX_LOGS":
+                parts.push(i18n("Updates when you use Codex"));
+                break;
+            default:
+                parts.push(i18n("Stale, observed %1", age(subscription.observed_at)));
+            }
         }
-        const meter = closest(subscription);
-        if (meter === null) {
-            // The large figure already shows what was spent when nothing is left to show.
-            const both = subscription.balance && subscription.balance.remaining && subscription.balance.spent;
-            return both ? i18n("%1 spent", money(subscription.balance.spent)) : subscription.hint || "";
-        }
-        let when = windowName(meter);
-        if (meter.resets_at) {
-            when = i18n("%1 resets in %2", windowName(meter), duration(meter.resets_at));
-        } else if (meter.estimated) {
-            when = windowName(meter) + " · " + i18n("reborn");
-        }
-        const parts = [when];
-        if (subscription.balance && subscription.balance.remaining) {
-            parts.push(i18n("%1 left", approximate(subscription) + money(subscription.balance.remaining)));
+        if (subscription.banked_resets && subscription.banked_resets.available > 0) {
+            parts.push(i18np("%1 banked reset", "%1 banked resets", subscription.banked_resets.available));
         }
         return parts.join(" · ");
     }
 
-    // The large figure of a row: what is left of the closest window, or of
-    // the balance, or nothing.
-    function headline(subscription) {
-        const meter = closest(subscription);
-        if (meter !== null) {
-            return Math.round(leftOf(meter)).toString();
+    // Why a subscription is a warning.
+    function warningText(subscription) {
+        const reason = failed(subscription) ? outcomeText(subscription) : "";
+        if (!subscription.hint) {
+            return reason;
         }
-        if (subscription.balance && subscription.balance.remaining) {
-            return money(subscription.balance.remaining);
-        }
-        if (subscription.balance && subscription.balance.spent) {
-            return money(subscription.balance.spent);
-        }
-        return "—";
-    }
-
-    function headlineIsPercent(subscription) {
-        return closest(subscription) !== null;
-    }
-
-    // The small word after the large figure.
-    function headlineUnit(subscription) {
-        if (headlineIsPercent(subscription)) {
-            return "%";
-        }
-        const spentOnly = subscription.balance && !subscription.balance.remaining && subscription.balance.spent;
-        return spentOnly ? i18n("spent") : "";
-    }
-
-    // Used percent behind the large figure: an exhausted balance counts as
-    // fully used.
-    function headlineUsed(subscription) {
-        const meter = closest(subscription);
-        if (meter !== null) {
-            return meter.used_percent;
-        }
-        if (subscription.balance && subscription.balance.remaining) {
-            return Number(subscription.balance.remaining.amount) <= 0 ? 100 : 0;
-        }
-        return 0;
-    }
-
-    function approximate(subscription) {
-        return subscription.fidelity === "REPORTED" || headline(subscription) === "—" ? "" : "≈ ";
+        return reason === "" ? subscription.hint : reason + ": " + subscription.hint;
     }
 
     function balanceText(subscription) {
@@ -365,9 +381,6 @@ QtObject {
         }
         if (subscription.credits) {
             parts.push(subscription.credits.unlimited ? i18n("unlimited credits") : i18n("%1 credits", subscription.credits.available));
-        }
-        if (subscription.banked_resets && subscription.banked_resets.available > 0) {
-            parts.push(i18np("%1 banked reset", "%1 banked resets", subscription.banked_resets.available));
         }
         return parts.join(" · ");
     }

@@ -10,7 +10,7 @@ OpenCode Zen and more — and when each quota window resets. It works as a
 command-line tool, as a **KDE Plasma widget** and as a tray icon for other
 desktops.
 
-**Current version:** `0.17.1-unstable` — early development: the core, the
+**Current version:** `0.18.0-unstable` — early development: the core, the
 terminal table and the JSON contract work; sources arrive milestone by
 milestone (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -113,9 +113,11 @@ Everything is **one binary**, `ataecina`, with subcommands: the timer runs
 desktops `ataecina tray` is the tray icon. On **KDE Plasma** the tray or
 panel icon and its popup are a native Plasma widget — a few QML files that
 Plasma itself draws, following your light or dark colour scheme — which asks
-`ataecina status --json` for the figures. Its popup, in Ataecina's own greens, shows one card with a row per subscription: growth rings for each
-window, when the closest one is reborn and what is left in large figures; a
-click unfolds the rest. The same package installs both.
+`ataecina status --json` for the figures. Its popup, in Ataecina's own greens, shows one card with a row per subscription: growth rings for what is
+known, what is left of every window (5 h, week, month) and when each is
+reborn, and the money left of its total; sources that fail, or ask you for
+something, fold into warnings below. A click unfolds the rest. The same
+package installs both.
 
 ## How your keys are kept safe
 

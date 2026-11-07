@@ -8,6 +8,26 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.18.0-unstable] - 2026-11-07
+
+### Added
+
+- The widget's popup folds every subscription whose source failed, or that
+  asks for something (declaring the OpenCode Zen balance), into a warnings
+  block below the card instead of mixing them with what is left.
+
+### Changed
+
+- Every row shows what is left of each window (5 h, week, month or cycle)
+  with its rebirth, not only the closest one, and the money left of its
+  total (`$6.80 of $70.00`).
+- Rings show only what is known, and turn grey and half transparent when the
+  reading is stale; a stale Claude or Codex row says how it gets fresh
+  again ("Updates when you use Claude Code").
+- A subscription that answers with nothing worth showing — a free credit
+  used up, or only what was spent — leaves the popup, so free providers
+  without a plan show only when they report free-model limits.
+
 ## [0.17.1-unstable] - 2026-11-07
 
 ### Fixed
