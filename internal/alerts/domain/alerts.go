@@ -1,7 +1,8 @@
 // Package domain holds the alerts model: thresholds, the meters being
-// watched, the alerts raised once per threshold per window, and when that
-// memory is forgotten (SPECS §7). It knows nothing of how meters are read
-// or how a notification is shown.
+// watched, the alerts raised once per threshold per window, the sources
+// announced once when they start failing, and when that memory is
+// forgotten (SPECS §7). It knows nothing of how meters are read or how a
+// notification is shown.
 package domain
 
 import (
@@ -57,14 +58,17 @@ type RaisedAlert struct {
 	RaisedAt  time.Time
 }
 
-// AlertState is every alert already raised.
+// AlertState is every alert already raised and every source already
+// announced as failing.
 type AlertState struct {
-	raised []RaisedAlert
+	raised  []RaisedAlert
+	failing []FailingSource
 }
 
-// NewAlertState restores the alerts already raised.
-func NewAlertState(raised []RaisedAlert) AlertState {
-	return AlertState{raised: append([]RaisedAlert(nil), raised...)}
+// NewAlertState restores the alerts already raised and the sources already
+// announced as failing.
+func NewAlertState(raised []RaisedAlert, failing ...FailingSource) AlertState {
+	return AlertState{raised: append([]RaisedAlert(nil), raised...), failing: append([]FailingSource(nil), failing...)}
 }
 
 // Raised lists the alerts already raised, in a stable order.
@@ -97,7 +101,7 @@ func (w WindowInstance) Same(other WindowInstance) bool {
 // crossed at once only the highest is announced. The memory of windows no
 // longer watched (reborn, or gone) is forgotten.
 func (s AlertState) Evaluate(meters []WatchedMeter, now time.Time) (AlertState, []Alert) {
-	next := AlertState{}
+	next := AlertState{failing: s.failing}
 	for _, raised := range s.raised {
 		for _, meter := range meters {
 			if raised.Instance.Same(meter.Instance) {

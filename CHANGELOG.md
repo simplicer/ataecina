@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.19.0-unstable] - 2026-11-07
+
+### Added
+
+- A desktop notification tells once when a subscription's source starts
+  failing ("workers-ai · key missing", with the source's hint), and again
+  only if it fails for another reason; a source that recovers is forgotten.
+  A transient failure that keeps the last good reading is not announced.
+
 ## [0.18.0-unstable] - 2026-11-07
 
 ### Added

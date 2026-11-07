@@ -41,6 +41,27 @@ func TestAlertsReachTheDesktop(t *testing.T) {
 	}
 }
 
+func TestFailingSourcesReachTheDesktop(t *testing.T) {
+	address := dbustest.Start(t)
+	server := notifytest.Start(t, address)
+	notifier := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return dbus.Connect(address) })
+	alert := domain.SourceAlert{Subscription: "workers-ai", Failure: "KEY_MISSING", Hint: "the token needs Account Analytics: Read"}
+	if err := notifier.NotifySourceFailure(context.Background(), alert); err != nil {
+		t.Fatal(err)
+	}
+	shown := server.Shown()
+	if len(shown) != 1 || shown[0].Summary != "workers-ai · key missing" || shown[0].Body != "the token needs Account Analytics: Read" || shown[0].Urgency != 1 {
+		t.Fatalf("shown = %+v", shown)
+	}
+	if _, body := desktopnotify.FailureText(domain.SourceAlert{Subscription: "zai", Failure: "BROKEN"}); body != "Ataecina cannot read this subscription until it is fixed." {
+		t.Fatalf("no hint = %q", body)
+	}
+	broken := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return nil, errors.New("no bus") })
+	if err := broken.NotifySourceFailure(context.Background(), alert); err == nil {
+		t.Fatal("no bus must fail")
+	}
+}
+
 func TestWithoutADesktopTheNotificationFails(t *testing.T) {
 	address := dbustest.Start(t)
 	notifier := desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, time.Now)

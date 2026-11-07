@@ -1,6 +1,7 @@
 // Package alertfile keeps the alert state in
-// $XDG_STATE_HOME/ataecina/alerts.json (0600), keyed by subscription,
-// bucket, window and reset instant (SPECS §7).
+// $XDG_STATE_HOME/ataecina/alerts.json (0600): threshold alerts keyed by
+// subscription, bucket, window and reset instant, and the sources announced
+// as failing (SPECS §7).
 package alertfile
 
 import (
@@ -21,8 +22,17 @@ const (
 )
 
 type document struct {
-	Version int             `json:"version"`
-	Raised  []raisedElement `json:"raised"`
+	Version int              `json:"version"`
+	Raised  []raisedElement  `json:"raised"`
+	Failing []failingElement `json:"failing"`
+}
+
+// failingElement is a source announced as failing; files written before it
+// existed have no "failing" list and still load.
+type failingElement struct {
+	Subscription string    `json:"subscription"`
+	Failure      string    `json:"failure"`
+	Since        time.Time `json:"since"`
 }
 
 type raisedElement struct {
@@ -69,12 +79,22 @@ func (s Store) Load() (domain.AlertState, error) {
 			RaisedAt:  item.RaisedAt.UTC(),
 		})
 	}
-	return domain.NewAlertState(raised), nil
+	failing := make([]domain.FailingSource, 0, len(stored.Failing))
+	for _, item := range stored.Failing {
+		if item.Subscription == "" || item.Failure == "" {
+			return domain.AlertState{}, fmt.Errorf("%s: a failing source needs a subscription and a failure", s.path())
+		}
+		failing = append(failing, domain.FailingSource{Subscription: item.Subscription, Failure: item.Failure, Since: item.Since.UTC()})
+	}
+	return domain.NewAlertState(raised, failing...), nil
 }
 
 // Save writes the state atomically.
 func (s Store) Save(state domain.AlertState) error {
-	stored := document{Version: formatVersion, Raised: []raisedElement{}}
+	stored := document{Version: formatVersion, Raised: []raisedElement{}, Failing: []failingElement{}}
+	for _, failing := range state.Failing() {
+		stored.Failing = append(stored.Failing, failingElement{Subscription: failing.Subscription, Failure: failing.Failure, Since: failing.Since})
+	}
 	for _, raised := range state.Raised() {
 		stored.Raised = append(stored.Raised, raisedElement{
 			Subscription: raised.Instance.Subscription,

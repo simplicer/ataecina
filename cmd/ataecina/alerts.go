@@ -21,10 +21,14 @@ import (
 // alerts read meters, never sources) and logs what it announced.
 func raiseAlerts(ctx context.Context, snapshot domain.Snapshot, settings configfile.Settings, paths xdg.Paths, env environment, logger *slog.Logger) {
 	notifier := alertsdomain.Notifier(noDesktop{})
+	failureNotifier := alertsdomain.SourceNotifier(noDesktop{})
 	if address := sessionBusAddress(env); address != "" {
-		notifier = desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, env.clock.Now)
+		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
+		notifier = desktopnotify.New(connect, env.clock.Now)
+		failureNotifier = desktopnotify.NewFailureNotifier(connect)
 	}
-	raise := alertsapp.NewRaiseThresholdAlerts(alertfile.NewStore(paths.StateDir()), notifier, env.clock)
+	store := alertfile.NewStore(paths.StateDir())
+	raise := alertsapp.NewRaiseThresholdAlerts(store, notifier, env.clock)
 	alerts, err := raise.Raise(ctx, watchedMeters(snapshot, settings, env))
 	for _, alert := range alerts {
 		logger.Info("alert raised",
@@ -36,6 +40,29 @@ func raiseAlerts(ctx context.Context, snapshot domain.Snapshot, settings configf
 	if err != nil {
 		logger.Warn("alerts", slog.String("error", err.Error()))
 	}
+	failing, err := alertsapp.NewNotifyFailingSources(store, failureNotifier, env.clock).Notify(ctx, watchedSources(snapshot, env))
+	for _, alert := range failing {
+		logger.Info("source failing", slog.String("subscription", alert.Subscription), slog.String("failure", alert.Failure))
+	}
+	if err != nil {
+		logger.Warn("alerts", slog.String("error", err.Error()))
+	}
+}
+
+// watchedSources tell, for every subscription, whether its source gives
+// figures or what replaced them; a transient failure that keeps the last
+// good reading is not a failure here.
+func watchedSources(snapshot domain.Snapshot, env environment) []alertsdomain.WatchedSource {
+	var watched []alertsdomain.WatchedSource
+	for _, status := range snapshot.StatusAt(env.clock.Now()).Statuses() {
+		reading := status.Reading()
+		source := alertsdomain.WatchedSource{Subscription: reading.Subscription().String()}
+		if !reading.Outcome().HasFigures() {
+			source.Failure, source.Hint = string(reading.Outcome()), reading.Hint()
+		}
+		watched = append(watched, source)
+	}
+	return watched
 }
 
 // watchedMeters are the meters with figures, as they stand now: a reborn
@@ -84,5 +111,9 @@ func watchedMeters(snapshot domain.Snapshot, settings configfile.Settings, env e
 type noDesktop struct{}
 
 func (noDesktop) Notify(context.Context, alertsdomain.Alert) error {
+	return errors.New("no session bus to show the alert on")
+}
+
+func (noDesktop) NotifySourceFailure(context.Context, alertsdomain.SourceAlert) error {
 	return errors.New("no session bus to show the alert on")
 }

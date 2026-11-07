@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/alerts/infrastructure/desktopnotify/notifytest"
+	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/platform/dbustest"
 )
 
@@ -43,6 +44,37 @@ func TestAThresholdIsAnnouncedOncePerWindow(t *testing.T) {
 	state, _ := os.ReadFile(filepath.Join(w.root, "state", "ataecina", "alerts.json"))
 	if strings.Count(string(state), `"threshold"`) != 1 {
 		t.Fatalf("only the current window is remembered:\n%s", state)
+	}
+}
+
+func TestAFailingSourceIsAnnouncedOnceUntilItRecovers(t *testing.T) {
+	w := newWorld(t, `{"version": 1, "subscriptions": [{"id": "acme", "source": "scripted"}]}`)
+	address := dbustest.Start(t)
+	desktop := notifytest.Start(t, address)
+	w.vars["DBUS_SESSION_BUS_ADDRESS"] = address
+
+	w.source.set(func(domain.Subscription, time.Time) (domain.Reading, error) {
+		return domain.Reading{}, domain.Failure(domain.ErrorContractChanged, "unexpected shape", nil)
+	})
+	w.collect()
+	w.clock.advance(5 * time.Minute)
+	w.collect()
+	if shown := desktop.Shown(); len(shown) != 1 || shown[0].Summary != "acme · broken" {
+		t.Fatalf("shown = %+v", shown)
+	}
+	state := filepath.Join(w.root, "state", "ataecina", "alerts.json")
+	if kept, _ := os.ReadFile(state); !strings.Contains(string(kept), `"failure": "BROKEN"`) {
+		t.Fatalf("the failure is remembered:\n%s", kept)
+	}
+	w.clock.advance(5 * time.Minute)
+	w.source.set(fiveHours(10, time.Hour))
+	w.collect()
+	if kept, _ := os.ReadFile(state); strings.Contains(string(kept), `"failure"`) || len(desktop.Shown()) != 1 {
+		t.Fatalf("a source that recovers is forgotten, silently:\n%s", kept)
+	}
+	logged, _ := os.ReadFile(filepath.Join(w.root, "state", "ataecina", "ataecina.log"))
+	if strings.Count(string(logged), `"msg":"source failing"`) != 1 {
+		t.Fatalf("log:\n%s", logged)
 	}
 }
 

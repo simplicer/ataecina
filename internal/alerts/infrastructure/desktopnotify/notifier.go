@@ -36,19 +36,49 @@ func New(connect func() (*dbus.Conn, error), now func() time.Time) Notifier {
 // Notify shows "zai · 5 hours at 92 %" with the time to rebirth; the
 // second threshold and above are critical.
 func (n Notifier) Notify(ctx context.Context, alert domain.Alert) error {
-	conn, err := n.connect()
-	if err != nil {
-		return fmt.Errorf("no session bus: %w", err)
-	}
-	defer conn.Close()
 	summary, body := Text(alert, n.now())
 	urgency := byte(1)
 	if alert.Threshold >= 95 {
 		urgency = 2
 	}
+	return send(ctx, n.connect, summary, body, urgency, "ataecina.quota")
+}
+
+// FailureNotifier sends one notification per source that starts failing.
+type FailureNotifier struct {
+	connect func() (*dbus.Conn, error)
+}
+
+// NewFailureNotifier connects with connect for each notification.
+func NewFailureNotifier(connect func() (*dbus.Conn, error)) FailureNotifier {
+	return FailureNotifier{connect: connect}
+}
+
+// NotifySourceFailure shows "workers-ai · key missing" with the source's
+// hint.
+func (n FailureNotifier) NotifySourceFailure(ctx context.Context, alert domain.SourceAlert) error {
+	summary, body := FailureText(alert)
+	return send(ctx, n.connect, summary, body, 1, "ataecina.source")
+}
+
+// FailureText is the summary and body of a failing source.
+func FailureText(alert domain.SourceAlert) (string, string) {
+	summary := alert.Subscription + " · " + strings.ToLower(strings.ReplaceAll(alert.Failure, "_", " "))
+	if alert.Hint == "" {
+		return summary, "Ataecina cannot read this subscription until it is fixed."
+	}
+	return summary, alert.Hint
+}
+
+func send(ctx context.Context, connect func() (*dbus.Conn, error), summary, body string, urgency byte, category string) error {
+	conn, err := connect()
+	if err != nil {
+		return fmt.Errorf("no session bus: %w", err)
+	}
+	defer conn.Close()
 	hints := map[string]dbus.Variant{
 		"urgency":       dbus.MakeVariant(urgency),
-		"category":      dbus.MakeVariant("ataecina.quota"),
+		"category":      dbus.MakeVariant(category),
 		"desktop-entry": dbus.MakeVariant("org.simplicer.ataecina"),
 	}
 	var id uint32

@@ -34,7 +34,21 @@ func TestTheStateRoundTrips(t *testing.T) {
 	if err != nil || len(loaded.Raised()) != 1 || loaded.Raised()[0] != state.Raised()[0] {
 		t.Fatalf("loaded = %+v, %v", loaded.Raised(), err)
 	}
-	for _, content := range []string{`{`, `{"version":2}`, `{"version":1,"raised":[{"threshold":0}]}`} {
+	withFailing := domain.NewAlertState(state.Raised(), domain.FailingSource{Subscription: "ollama", Failure: "BROKEN", Since: at})
+	if err := store.Save(withFailing); err != nil {
+		t.Fatal(err)
+	}
+	if loaded, err := store.Load(); err != nil || len(loaded.Failing()) != 1 || loaded.Failing()[0] != withFailing.Failing()[0] || len(loaded.Raised()) != 1 {
+		t.Fatalf("failing sources = %+v, %v", loaded.Failing(), err)
+	}
+	// A state written before failing sources were kept still loads.
+	if err := os.WriteFile(filepath.Join(dir, "alerts.json"), []byte(`{"version":1,"raised":[]}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if loaded, err := store.Load(); err != nil || len(loaded.Failing()) != 0 {
+		t.Fatalf("older state = %+v, %v", loaded.Failing(), err)
+	}
+	for _, content := range []string{`{`, `{"version":2}`, `{"version":1,"raised":[{"threshold":0}]}`, `{"version":1,"raised":[],"failing":[{"subscription":"zai"}]}`} {
 		if err := os.WriteFile(filepath.Join(dir, "alerts.json"), []byte(content), 0o600); err != nil {
 			t.Fatal(err)
 		}

@@ -592,9 +592,22 @@ not implement yet shows `UNSUPPORTED`.
   normal, critical from 95 %. Without a session bus (SSH, headless) alerts
   are kept and logged, not shown; a failed notification is not repeated.
   The Plasma widget also highlights the meter.
+- **Failing sources:** after the thresholds, `notify_failing_sources`
+  watches every subscription's outcome. A source fails when its outcome
+  carries no figures (`BROKEN`, `UNAVAILABLE`, `KEY_MISSING`, `LOCKED`,
+  `UNSUPPORTED`); a transient failure that keeps the last good reading is
+  not one. Each source is announced once when it starts failing, and again
+  only if it fails for another reason; a source that recovers, or leaves the
+  configuration, is forgotten, so failing again is announced again. The
+  notification reads "`<subscription> · <outcome>`" (`workers-ai · key
+  missing`) with the source's hint as body, urgency normal, and the log gets
+  one `source failing` line. The Plasma widget lists the same sources under
+  its warnings (§8.3).
 - State in `$XDG_STATE_HOME/ataecina/alerts.json` (`0600`): `{ "version": 1,
   "raised": [ { "subscription", "bucket", "window", "resets_at",
-  "threshold", "raised_at" } ] }`.
+  "threshold", "raised_at" } ], "failing": [ { "subscription", "failure",
+  "since" } ] }`; a file without `failing` (written before 0.19.0) still
+  loads.
 
 ## 8. Displays and the JSON contract
 
