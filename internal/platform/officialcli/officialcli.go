@@ -35,12 +35,35 @@ type Command struct {
 	MaxOutput int
 }
 
-// Output runs the command and returns its stdout.
+// turn lets one official CLI run at a time: several heavy ones (an
+// OpenCode server, gh, codex app-server) at once would add up their
+// memory.
+var turn = make(chan struct{}, 1)
+
+// Turn waits until no other official CLI runs and gives the release.
+// Command takes it by itself; an adapter that drives a CLI on its own
+// (codex app-server) takes it around the whole process. Waiting counts
+// against the caller's deadline, not the command's own timeout.
+func Turn(ctx context.Context) (release func(), err error) {
+	select {
+	case turn <- struct{}{}:
+		return func() { <-turn }, nil
+	case <-ctx.Done():
+		return nil, fmt.Errorf("%w: waiting for its turn: %w", ErrFailed, ctx.Err())
+	}
+}
+
+// Output runs the command, once its turn comes, and returns its stdout.
 func (c Command) Output(ctx context.Context) ([]byte, error) {
 	path, err := c.Find()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrNotFound, err)
 	}
+	release, err := Turn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
 	ctx, cancel := context.WithTimeout(ctx, c.Timeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, path, c.Args...)

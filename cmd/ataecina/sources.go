@@ -31,6 +31,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/xaiapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/zaiapi"
 	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
+	"codeberg.org/simplicer/ataecina/internal/platform/officialcli"
 	"codeberg.org/simplicer/ataecina/internal/platform/pathlookup"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
@@ -119,10 +120,10 @@ func standardSources() sourceRegistry {
 			return appServer(c.env)
 		},
 		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
-			return opencodezen.NewSource(balancefile.NewStore(c.paths.StateDir()), zenSpend(c.env), c.env.clock.Now)
+			return opencodezen.NewSource(balancefile.NewStore(c.paths.StateDir()), zenSpend(c.env, zenReuse(c)), c.env.clock.Now)
 		},
 		opencodeconsole.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
-			return opencodeconsole.New(pathlookup.Find("opencode", c.env.getenv("PATH")), c.env.clock.Now)
+			return opencodeconsole.New(pathlookup.Find("opencode", c.env.getenv("PATH")), c.env.clock.Now, consoleReuse(c))
 		},
 		copilotgh.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
 			return copilotgh.New(pathlookup.Find("gh", c.env.getenv("PATH")), settings.Login, settings.MonthlyAllowance, c.env.clock.Now)
@@ -169,9 +170,49 @@ func standardSources() sourceRegistry {
 	}}
 }
 
-// zenSpend reads OpenCode Zen spending with the `opencode` found on PATH.
-func zenSpend(env environment) opencodezen.Stats {
-	return opencodezen.NewStats(pathlookup.Find("opencode", env.getenv("PATH")))
+// zenSpend reads OpenCode Zen spending with the `opencode` found on PATH;
+// reuse may be nil (always run it).
+func zenSpend(env environment, reuse *officialcli.Reuse) opencodezen.Stats {
+	return opencodezen.NewStats(pathlookup.Find("opencode", env.getenv("PATH")), reuse)
+}
+
+// Each `opencode --standalone` run starts a whole OpenCode server (about
+// 160 MB for stats, 600 MB for the Console limits), so the collector
+// reuses the figures it extracted instead (ADR 0018).
+const (
+	// zenSpendAge bounds the kept spend even when OpenCode's database
+	// did not change.
+	zenSpendAge = 6 * time.Hour
+	// consoleLimitsAge is how stale the kept Console figures may be.
+	consoleLimitsAge = 30 * time.Minute
+)
+
+// zenReuse keeps the Zen spend until OpenCode's database changes, i.e.
+// until OpenCode was used again.
+func zenReuse(c collection) *officialcli.Reuse {
+	data := opencodeData(c.paths, c.env)
+	return &officialcli.Reuse{
+		File:   filepath.Join(c.paths.StateDir(), "opencode-stats.json"),
+		Watch:  []string{filepath.Join(data, "opencode.db"), filepath.Join(data, "opencode.db-wal")},
+		MaxAge: zenSpendAge, Now: c.env.clock.Now,
+	}
+}
+
+// consoleReuse keeps the Console figures for a while.
+func consoleReuse(c collection) *officialcli.Reuse {
+	return &officialcli.Reuse{
+		File:   filepath.Join(c.paths.StateDir(), "opencode-limits.json"),
+		MaxAge: consoleLimitsAge, Now: c.env.clock.Now,
+	}
+}
+
+// opencodeData is where OpenCode keeps its database: $XDG_DATA_HOME when
+// absolute, as OpenCode reads it, else ~/.local/share.
+func opencodeData(paths xdg.Paths, env environment) string {
+	if data := env.getenv("XDG_DATA_HOME"); filepath.IsAbs(data) {
+		return filepath.Join(filepath.Clean(data), "opencode")
+	}
+	return filepath.Join(paths.Home(), ".local", "share", "opencode")
 }
 
 // appServer runs the official `codex` found on the collector's PATH.

@@ -9,10 +9,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 )
 
 // fakeOpencode installs tests/e2e/testdata/fake-opencode as `opencode` on
-// the world's PATH, reporting spent dollars on OpenCode Zen to date.
+// the world's PATH, reporting spent dollars on OpenCode Zen to date, as
+// if OpenCode had just been used.
 func (w *world) fakeOpencode(spent string) {
 	w.t.Helper()
 	script, err := os.ReadFile(filepath.Join("..", "..", "tests", "e2e", "testdata", "fake-opencode"))
@@ -26,13 +28,36 @@ func (w *world) fakeOpencode(spent string) {
 	if err := os.WriteFile(filepath.Join(bin, "opencode"), script, 0o700); err != nil {
 		w.t.Fatal(err)
 	}
+	w.vars["PATH"] = bin + ":/usr/bin:/bin"
+	w.opencodeAnswers(spent)
+	w.opencodeUsed()
+}
+
+// opencodeAnswers sets the spend the fake `opencode stats` reports.
+func (w *world) opencodeAnswers(spent string) {
+	w.t.Helper()
 	stats := filepath.Join(w.root, "opencode-stats.json")
 	output := fmt.Sprintf(`{"models": [{"model": {"providerID": "opencode", "modelID": "zen-synthetic"}, "cost": %s}, {"model": {"providerID": "openrouter", "modelID": "synthetic"}, "cost": 9}]}`, spent)
 	if err := os.WriteFile(stats, []byte(output), 0o600); err != nil {
 		w.t.Fatal(err)
 	}
 	w.t.Setenv("FAKE_OPENCODE_STATS", stats) // read by the script itself
-	w.vars["PATH"] = bin + ":/usr/bin:/bin"
+}
+
+// opencodeUsed writes OpenCode's database, as using OpenCode does.
+func (w *world) opencodeUsed() {
+	w.t.Helper()
+	database := filepath.Join(w.vars["HOME"], ".local", "share", "opencode", "opencode.db")
+	if err := os.MkdirAll(filepath.Dir(database), 0o700); err != nil {
+		w.t.Fatal(err)
+	}
+	if err := os.WriteFile(database, []byte(time.Now().String()), 0o600); err != nil {
+		w.t.Fatal(err)
+	}
+	used := time.Now()
+	if err := os.Chtimes(database, used, used); err != nil {
+		w.t.Fatal(err)
+	}
 }
 
 const zenConfig = `{"version": 1, "subscriptions": [
@@ -97,6 +122,22 @@ func TestTheZenBalanceIsDerivedFromDeclaredTopUps(t *testing.T) {
 	w.collect()
 	if zen := w.zen(); zen.Balance.Remaining.Amount != 5 || zen.Balance.Spent.Amount != 0 {
 		t.Fatalf("after a declared balance: %+v", zen)
+	}
+}
+
+func TestTheZenSpendIsReadAgainOnlyOnceOpenCodeWasUsed(t *testing.T) {
+	w := newWorld(t, zenConfig)
+	w.fakeOpencode("4.75")
+	w.collect()
+	w.opencodeAnswers("6.75")
+	w.collect()
+	if zen := w.zen(); zen.Balance.Spent.Amount != 4.75 {
+		t.Fatalf("OpenCode was not used, yet its spend was read again: %+v", zen.Balance.Spent)
+	}
+	w.opencodeUsed()
+	w.collect()
+	if zen := w.zen(); zen.Balance.Spent.Amount != 6.75 {
+		t.Fatalf("OpenCode was used, yet its spend was not read again: %+v", zen.Balance.Spent)
 	}
 }
 

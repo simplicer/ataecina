@@ -17,17 +17,33 @@ var statsArguments = []string{"stats", "--all", "--models", "--limit", "1000", "
 // Stats reads the money spent on OpenCode Zen to date from `opencode stats`.
 type Stats struct {
 	command officialcli.Command
+	reuse   *officialcli.Reuse
 }
 
-// NewStats finds the opencode binary with findOpencode.
-func NewStats(findOpencode func() (string, error)) Stats {
-	return Stats{command: officialcli.Command{
+// keptSpend is all that is kept of an answer (officialcli.Reuse).
+type keptSpend struct {
+	Spent string `json:"spent_usd"`
+}
+
+// NewStats finds the opencode binary with findOpencode; with reuse set, a
+// recent spend is given again instead of starting opencode (nil: always
+// run it).
+func NewStats(findOpencode func() (string, error), reuse *officialcli.Reuse) Stats {
+	return Stats{reuse: reuse, command: officialcli.Command{
 		Find: findOpencode, Args: statsArguments, Timeout: 15 * time.Second, MaxOutput: 1 << 20,
 	}}
 }
 
-// SpentToDate runs `opencode stats` once with a fixed argv and no shell.
+// SpentToDate gives the kept spend while it holds, else runs `opencode
+// stats` once with a fixed argv and no shell.
 func (s Stats) SpentToDate(ctx context.Context) (domain.Money, error) {
+	usd, _ := domain.NewCurrency("USD")
+	var kept keptSpend
+	if s.reuse.Recall(&kept) {
+		if spent, err := domain.ParseAmount(kept.Spent); err == nil {
+			return domain.NewMoney(spent, usd), nil
+		}
+	}
 	output, err := s.command.Output(ctx)
 	switch {
 	case errors.Is(err, officialcli.ErrNotFound):
@@ -41,6 +57,6 @@ func (s Stats) SpentToDate(ctx context.Context) (domain.Money, error) {
 	if err != nil {
 		return domain.Money{}, domain.Failure(domain.ErrorContractChanged, "unexpected opencode stats output", err)
 	}
-	usd, _ := domain.NewCurrency("USD")
+	s.reuse.Keep(keptSpend{Spent: spent.String()})
 	return domain.NewMoney(spent, usd), nil
 }

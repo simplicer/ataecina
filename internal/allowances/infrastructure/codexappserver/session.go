@@ -15,6 +15,8 @@ import (
 	"os/exec"
 	"syscall"
 	"time"
+
+	"codeberg.org/simplicer/ataecina/internal/platform/officialcli"
 )
 
 const (
@@ -66,8 +68,14 @@ type session struct {
 }
 
 // readRateLimits starts `codex app-server` with a fixed argv and no shell,
-// performs the handshake, reads the limits and stops the process.
+// once no other official CLI runs, performs the handshake, reads the
+// limits and stops the process.
 func readRateLimits(ctx context.Context, codexPath, version string) (json.RawMessage, error) {
+	release, err := officialcli.Turn(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer release()
 	ctx, stop := context.WithCancel(ctx)
 	defer stop()
 	cmd := exec.CommandContext(ctx, codexPath, "app-server")

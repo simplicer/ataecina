@@ -59,34 +59,25 @@ type Limits struct {
 // Source reads one OpenCode Console workspace.
 type Source struct {
 	command officialcli.Command
+	reuse   *officialcli.Reuse
 	now     func() time.Time
 }
 
-// New runs the opencode found with findOpencode.
-func New(findOpencode func() (string, error), now func() time.Time) Source {
-	return Source{now: now, command: officialcli.Command{
+// New runs the opencode found with findOpencode; with reuse set, recent
+// figures are given again instead of starting opencode (nil: always run
+// it).
+func New(findOpencode func() (string, error), now func() time.Time, reuse *officialcli.Reuse) Source {
+	return Source{now: now, reuse: reuse, command: officialcli.Command{
 		Find: findOpencode, Args: Arguments, Env: []string{"NO_COLOR=1"},
 		Timeout: 15 * time.Second, MaxOutput: 64 << 10,
 	}}
 }
 
-// Read runs opencode once.
+// Read gives the kept limits while they hold, else runs opencode once.
 func (s Source) Read(ctx context.Context, subscription domain.Subscription) (domain.Reading, error) {
-	output, err := s.command.Output(ctx)
-	switch {
-	case errors.Is(err, officialcli.ErrNotFound):
-		return domain.Reading{}, domain.Failure(domain.ErrorUnreadable, "opencode is not on PATH", err)
-	case errors.Is(err, officialcli.ErrTooLarge):
-		return domain.Reading{}, domain.Failure(domain.ErrorContractChanged, operation+" answered more than 64 KiB", nil)
-	case err != nil:
-		return domain.Reading{}, domain.Failure(domain.ErrorUnavailable, operation+" did not answer", err)
-	}
-	limits, err := DecodeLimits(output)
-	if errors.Is(err, ErrSignedOut) {
-		return domain.Reading{}, domain.Failure(domain.ErrorUnavailable, ErrSignedOut.Error()+": sign it in with opencode auth login", nil)
-	}
+	limits, err := s.limits(ctx)
 	if err != nil {
-		return domain.Reading{}, unexpected(err)
+		return domain.Reading{}, err
 	}
 	facts := domain.ReadingFacts{
 		Subscription: subscription.ID(), Provider: subscription.Provider(), Source: subscription.Source(),
@@ -109,6 +100,44 @@ func (s Source) Read(ctx context.Context, subscription domain.Subscription) (dom
 		facts.Balance = &balance
 	}
 	return domain.NewReading(facts)
+}
+
+// limits gives the kept limits while they hold, else asks opencode and
+// keeps what it extracted (a signed-out answer too: signing in is rare).
+func (s Source) limits(ctx context.Context) (Limits, error) {
+	var last keptLimits
+	if s.reuse.Recall(&last) {
+		limits, err := last.limits()
+		switch {
+		case err == nil:
+			return limits, nil
+		case errors.Is(err, ErrSignedOut):
+			return Limits{}, signedOut()
+		}
+	}
+	output, err := s.command.Output(ctx)
+	switch {
+	case errors.Is(err, officialcli.ErrNotFound):
+		return Limits{}, domain.Failure(domain.ErrorUnreadable, "opencode is not on PATH", err)
+	case errors.Is(err, officialcli.ErrTooLarge):
+		return Limits{}, domain.Failure(domain.ErrorContractChanged, operation+" answered more than 64 KiB", nil)
+	case err != nil:
+		return Limits{}, domain.Failure(domain.ErrorUnavailable, operation+" did not answer", err)
+	}
+	limits, err := DecodeLimits(output)
+	if errors.Is(err, ErrSignedOut) {
+		s.reuse.Keep(keptLimits{SignedOut: true})
+		return Limits{}, signedOut()
+	}
+	if err != nil {
+		return Limits{}, unexpected(err)
+	}
+	s.reuse.Keep(keep(limits))
+	return limits, nil
+}
+
+func signedOut() *domain.SourceFailure {
+	return domain.Failure(domain.ErrorUnavailable, ErrSignedOut.Error()+": sign it in with opencode auth login", nil)
 }
 
 func unexpected(err error) *domain.SourceFailure {

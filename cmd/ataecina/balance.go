@@ -69,7 +69,7 @@ func declareBalance(ctx context.Context, id string, kind domain.DeclarationKind,
 	if err := takesDeclarations(settings, subscription, env); err != nil {
 		return domain.Declaration{}, err
 	}
-	declare := application.NewDeclareBalance(balancefile.NewStore(paths.StateDir()), zenSpend(env), env.clock)
+	declare := application.NewDeclareBalance(balancefile.NewStore(paths.StateDir()), zenSpend(env, nil), env.clock)
 	return declare.Declare(ctx, subscription, kind, domain.NewMoney(amount, currency))
 }
 

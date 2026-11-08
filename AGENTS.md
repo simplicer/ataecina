@@ -165,7 +165,8 @@ feature (ADRs 0003–0006).
   until then.
 - **Local data of other tools** (Codex logs, Claude status line input,
   `opencode stats` output) is read-only and only the documented fields
-  are extracted. Official CLIs run with a fixed argv, no shell and a timeout.
+  are extracted. Official CLIs run one at a time (ADR 0018), with a fixed
+  argv, no shell and a timeout; only figures extracted from them are kept.
   Prompt or response content never leaves the process and is never stored.
 - **No telemetry, no update checks, no analytics.** The only hosts contacted
   are the ones listed in `docs/SPECS.md` §3, and only for enabled
@@ -213,7 +214,7 @@ the repository's `etc/`/`var/` convention for an installed desktop tool:
 | Sealed keys | `$XDG_CONFIG_HOME/ataecina/keys.json` |
 | Snapshot | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` |
 | Hook signals (Claude limits) | `$XDG_RUNTIME_DIR/ataecina/signals/` |
-| Alert state, declared balances, model catalogue | `$XDG_STATE_HOME/ataecina/` |
+| Alert state, declared balances, model catalogue, kept CLI figures | `$XDG_STATE_HOME/ataecina/` |
 | Logs | `$XDG_STATE_HOME/ataecina/ataecina.log` |
 
 In the repository, `etc/ataecina.example.json` is the documented example

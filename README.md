@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.32.0-unstable` — early development: everything below
+**Current version:** `0.32.1-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -461,13 +461,14 @@ secret-service` before uninstalling).
 
 ## Performance
 
-Measured on the maintainer's desktop (x86-64, KDE Plasma 6.6, twelve
+Measured on the maintainer's desktop (x86-64, KDE Plasma 6.6, eleven
 subscriptions):
 
 | What | Figure |
 |---|---|
 | `ataecina status` (what the widget runs) | ~5 ms, ~8 MB peak memory |
-| A full collection, twelve subscriptions | 1–1.5 s, mostly waiting for the network and the official CLIs |
+| A full collection, eleven subscriptions | ~0.9 s and ~50 MB peak (the whole service, as systemd counts it) |
+| …when OpenCode Zen's spend must be read again | ~1 s and ~135 MB peak for that second: `opencode stats` starts a whole OpenCode server |
 | Resident processes | none: the collector exits; the widget lives inside Plasma |
 | Binary | one static file, ~10 MB; the `.deb` is ~3.7 MB |
 

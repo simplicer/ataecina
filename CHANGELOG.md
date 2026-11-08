@@ -8,6 +8,21 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.32.1-unstable] - 2026-11-08
+
+### Changed
+
+- The collector is much lighter: official CLIs (`opencode`, `gh`, `bl`,
+  `codex app-server`) run one at a time instead of side by side, and the
+  OpenCode figures are reused instead of starting a whole OpenCode server
+  at every collection — the Zen spend until OpenCode is used again (at
+  most 6 hours), the OpenCode Go and Console figures for 30 minutes. Only
+  the extracted figures are kept (`opencode-stats.json`,
+  `opencode-limits.json` in the state directory, `0600`). A collection
+  measured 181 MB and 2 s of CPU at its peak; it is now about 50 MB and
+  0.6 s when nothing changed. `balance declare` still reads the spend
+  live.
+
 ## [0.32.0-unstable] - 2026-11-08
 
 ### Added

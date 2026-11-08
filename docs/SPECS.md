@@ -547,6 +547,23 @@ declarations and those records:
   "BALANCE", "amount": <money>, "declared_at": <RFC 3339>,
   "spent_baseline": <money> } ] } }`, at most 100 top-ups after the last
   declared balance.
+- **Kept figures (ADR 0018).** Each `opencode … --standalone` run starts a
+  whole OpenCode server (measured 2026-11-08: about 160 MB for `stats`,
+  about 600 MB for the Console limits), so the collector keeps what it
+  extracted and gives it again instead of starting OpenCode:
+  - the Zen spend to date (`{ "spent_usd": "<decimal>" }`) in
+    `$XDG_STATE_HOME/ataecina/opencode-stats.json`, until OpenCode's
+    database (`$XDG_DATA_HOME/opencode/opencode.db` or its `-wal` journal,
+    `~/.local/share` when `XDG_DATA_HOME` is unset) changes — i.e. until
+    OpenCode is used again — and for at most 6 hours. Only their
+    modification times are read, never their content;
+  - the Console figures (Go windows, budgets, or "signed out") in
+    `$XDG_STATE_HOME/ataecina/opencode-limits.json`, for 30 minutes.
+
+  Both files are `0600` and hold only those figures, never OpenCode's
+  output (no statistics, workspace or directory). A failed or unexpected
+  answer is never kept. `balance declare` always runs `opencode stats` live,
+  so the spend baseline is exact.
 
 Providers without a readable allowance (table above) are shown only through
 `heimdall`, or as `UNSUPPORTED` with a hint.
@@ -1013,7 +1030,7 @@ extension.
 | `…/keys.json` | sealed keys and wrapped master key | `0600` |
 | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` | latest readings (figures only) | `0600` |
 | `$XDG_RUNTIME_DIR/ataecina/signals/` | signals written by hooks (Claude limits), read by the collector | `0700` / `0600` |
-| `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, model catalogue (`offerings.json`, §11), log offsets, log | `0700` / `0600` |
+| `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, model catalogue (`offerings.json`, §11), kept OpenCode figures (`opencode-stats.json`, `opencode-limits.json`, §3.4), log offsets, log | `0700` / `0600` |
 
 `config.json` example (`etc/ataecina.example.json`):
 
@@ -1102,7 +1119,12 @@ machine; `make install-deb` then installs it with `apt`.
 
 - Display path: no network, no decryption, < 50 ms.
 - Collector: one-shot, bounded by a global deadline (default 20 s), memory
-  well under 30 MB.
+  well under 30 MB for its own process.
+- Official CLIs (`opencode`, `gh`, `bl`, `codex app-server`) run one at a
+  time, never side by side, so their memory never adds up; waiting for
+  the turn counts against the collector's deadline (ADR 0018). Answers
+  that start a whole server are kept as extracted figures and reused
+  (§3.4).
 - Single static binary (`CGO_ENABLED=0`); runtime dependencies: none beyond
   the session D-Bus.
 - Linux only. Plasma 6 is the reference desktop; others through the tray.

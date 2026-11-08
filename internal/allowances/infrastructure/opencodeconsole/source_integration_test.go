@@ -13,6 +13,7 @@ import (
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodeconsole"
+	"codeberg.org/simplicer/ataecina/internal/platform/officialcli"
 )
 
 var (
@@ -23,6 +24,12 @@ var (
 // fakeOpencode points the adapter at tests/e2e/testdata/fake-opencode with
 // an answer.
 func fakeOpencode(t *testing.T, answer string, fail bool) (opencodeconsole.Source, string) {
+	t.Helper()
+	return keptOpencode(t, answer, fail, nil)
+}
+
+// keptOpencode is fakeOpencode with its answers kept by reuse.
+func keptOpencode(t *testing.T, answer string, fail bool, reuse *officialcli.Reuse) (opencodeconsole.Source, string) {
 	t.Helper()
 	dir := t.TempDir()
 	journal, limits := filepath.Join(dir, "journal"), filepath.Join(dir, "limits.json")
@@ -40,7 +47,81 @@ func fakeOpencode(t *testing.T, answer string, fail bool) (opencodeconsole.Sourc
 	if err != nil {
 		t.Fatal(err)
 	}
-	return opencodeconsole.New(func() (string, error) { return opencode, nil }, func() time.Time { return now }), journal
+	return opencodeconsole.New(func() (string, error) { return opencode, nil }, func() time.Time { return now }, reuse), journal
+}
+
+func TestTheLimitsAreReusedForAWhile(t *testing.T) {
+	clock := now
+	reuse := &officialcli.Reuse{File: filepath.Join(t.TempDir(), "state", "opencode-limits.json"), MaxAge: 30 * time.Minute, Now: func() time.Time { return clock }}
+	source, journal := keptOpencode(t, string(read(t, "limits.json")), false, reuse)
+	first, err := source.Read(context.Background(), subscription)
+	if err != nil {
+		t.Fatal(err)
+	}
+	clock = clock.Add(29 * time.Minute)
+	again, err := source.Read(context.Background(), subscription)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if runs := lines(t, journal); runs != 1 {
+		t.Fatalf("opencode ran %d times, want once", runs)
+	}
+	if len(again.Meters()) != len(first.Meters()) {
+		t.Fatalf("kept meters = %+v, want %+v", again.Meters(), first.Meters())
+	}
+	for i, meter := range first.Meters() {
+		kept := again.Meters()[i]
+		keptReset, _ := kept.ResetsAt()
+		reset, _ := meter.ResetsAt()
+		if kept.Used() != meter.Used() || kept.Window() != meter.Window() || kept.Bucket() != meter.Bucket() || !keptReset.Equal(reset) {
+			t.Fatalf("kept meter %d = %+v, want %+v", i, kept, meter)
+		}
+	}
+	kept, err := os.ReadFile(reuse.File)
+	if err != nil || strings.Contains(string(kept), "directory") {
+		t.Fatalf("kept = %s, %v; want the figures only", kept, err)
+	}
+
+	clock = clock.Add(time.Minute)
+	if _, err := source.Read(context.Background(), subscription); err != nil {
+		t.Fatal(err)
+	}
+	if runs := lines(t, journal); runs != 2 {
+		t.Fatalf("opencode ran %d times after MaxAge, want twice", runs)
+	}
+}
+
+func TestASignedOutAnswerIsReusedButAFailureIsNot(t *testing.T) {
+	reuse := &officialcli.Reuse{File: filepath.Join(t.TempDir(), "state", "opencode-limits.json"), MaxAge: 30 * time.Minute}
+	source, journal := keptOpencode(t, string(read(t, "signed-out.json")), false, reuse)
+	var failure *domain.SourceFailure
+	for range 2 {
+		if _, err := source.Read(context.Background(), subscription); !errors.As(err, &failure) || !strings.Contains(failure.Error(), "opencode auth login") {
+			t.Fatalf("signed out = %v", err)
+		}
+	}
+	if runs := lines(t, journal); runs != 1 {
+		t.Fatalf("opencode ran %d times while signed out, want once", runs)
+	}
+
+	failing, journal := keptOpencode(t, "{}", true, &officialcli.Reuse{File: filepath.Join(t.TempDir(), "state", "opencode-limits.json"), MaxAge: 30 * time.Minute})
+	for range 2 {
+		if _, err := failing.Read(context.Background(), subscription); err == nil {
+			t.Fatal("a failed run gave a reading")
+		}
+	}
+	if runs := lines(t, journal); runs != 2 {
+		t.Fatalf("opencode ran %d times after failing, want twice", runs)
+	}
+}
+
+func lines(t *testing.T, path string) int {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Count(string(data), "\n")
 }
 
 func TestGoAndTheBudgetAreReadThroughOpencode(t *testing.T) {
@@ -101,7 +182,7 @@ func expectClass(t *testing.T, name string, source opencodeconsole.Source, class
 // Each fake is made right before it is read: its answer lives in the
 // process environment.
 func TestOpencodeFailuresAreClassified(t *testing.T) {
-	missing := opencodeconsole.New(func() (string, error) { return "", errors.New("not found") }, time.Now)
+	missing := opencodeconsole.New(func() (string, error) { return "", errors.New("not found") }, time.Now, nil)
 	expectClass(t, "missing opencode", missing, domain.ErrorUnreadable)
 	failing, _ := fakeOpencode(t, "{}", true)
 	expectClass(t, "opencode fails", failing, domain.ErrorUnavailable)
