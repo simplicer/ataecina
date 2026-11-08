@@ -8,6 +8,11 @@ ConfigModel {
         source: "configGeneral.qml"
     }
     ConfigCategory {
+        name: i18n("Subscriptions")
+        icon: "view-list-details"
+        source: "configSubscriptions.qml"
+    }
+    ConfigCategory {
         name: i18n("Keys")
         icon: "dialog-password"
         source: "configKeys.qml"

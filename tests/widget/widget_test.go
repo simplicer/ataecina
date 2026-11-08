@@ -337,9 +337,17 @@ var platformMembers = []string{
 	"arc", "reset", "stroke", "slice", "visible", "small", "policy",
 }
 
+// cliMembers are the properties of the other JSON documents the settings
+// read: `ataecina sources --json` and `ataecina subscriptions --json`
+// (SPECS §8.5).
+var cliMembers = []string{
+	"id", "label", "provider", "fidelity", "needs_key", "options", "required",
+	"takes_declarations", "source", "plan", "key",
+}
+
 func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {
 	known := contractKeys(t)
-	for _, member := range platformMembers {
+	for _, member := range append(platformMembers, cliMembers...) {
 		known[member] = true
 	}
 	files := qmlFiles(t)

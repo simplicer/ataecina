@@ -899,7 +899,17 @@ schemes and the accent colour like the battery or network widgets.
   whether what is left shows in the panel, and which subscriptions to show
   in which order (comma-separated ids; empty shows all in configuration
   order).
-- **Keys** settings page (ADR 0014), read from `ataecina status --json`:
+- **Subscriptions** settings page: lists the subscriptions of `config.json`
+  (`ataecina subscriptions --json`), removes one after a second click
+  (`ataecina subscriptions remove <id>`) and adds one: the source is chosen
+  from `ataecina sources --json`, an id is suggested (the provider, or
+  `minimax-2` when `minimax` is taken), only the source's required options
+  are asked, and `ataecina subscriptions add` validates the result like
+  `collect` does before writing it. Every argument is single-quoted for the
+  shell; the widget never writes the file itself. Two subscriptions of the
+  same source differ by id and by key name (default: the id).
+- **Keys** settings page (ADR 0014), read from `ataecina status --json`
+  (and `ataecina sources --json` for which sources need a key):
   every subscription whose source needs a key, with `works`, `no key`,
   `key rejected` (`error_class` `KEY_REJECTED`, which also reads
   `KEY_MISSING`), `key accepted, answer not understood` (`BROKEN`) or `not
@@ -926,6 +936,29 @@ schemes and the accent colour like the battery or network widgets.
   template and translated, and every field the QML reads inside this
   contract; `make check` runs `qmllint` when it is installed and `msgfmt
   --check` always.
+
+### 8.5 Subscriptions and sources from the CLI
+
+`config.json` can be edited by hand or through the CLI, which keeps its
+layout (one subscription per line), validates the whole result exactly as
+`collect` loads it, and replaces the file atomically (`0600`):
+
+- `ataecina subscriptions [--json]` lists them; `--json` gives `{ "data": [ {
+  "id", "source", "label" (`UPPER_SNAKE_CASE`, as in `status --json`),
+  "provider", "plan" (or null), "key" (the sealed key's name, or null),
+  "options": { <option>: <value> } } ] }`.
+- `ataecina subscriptions add <id> --source <source> [--plan <plan>]
+  [--key <name>] [--set <option>=<value>]…` appends one (numbers and
+  switches are written as such); it prints the `keys set` command when the
+  source needs a key.
+- `ataecina subscriptions remove <id>` drops one; its sealed key stays until
+  `ataecina keys forget`.
+- `ataecina sources [--json]` lists every source: `{ "data": [ { "id",
+  "label", "provider" (null when the owner names it), "fidelity",
+  "needs_key", "options", "required", "takes_declarations" } ] }`.
+
+These documents are read by the widget's settings pages and are additive
+like `status --json`.
 
 ### 8.4 Tray (`ataecina tray`)
 

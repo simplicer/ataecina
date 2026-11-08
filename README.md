@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.26.0-unstable` — early development: everything below
+**Current version:** `0.27.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -216,7 +216,7 @@ enabled for you.
 
 ```sh
 ataecina init                                         # ~/.config/ataecina, 0700, and the master key
-$EDITOR ~/.config/ataecina/config.json                # your subscriptions (see below)
+ataecina subscriptions add zai --source zai-api       # or edit ~/.config/ataecina/config.json (see below)
 systemctl --user enable --now ataecina-collect.timer  # collect every 5 minutes
 ataecina doctor                                       # checks permissions, keyring, keys and sources
 ```
@@ -241,6 +241,14 @@ unknown keys are errors. The full reference is in
   ]
 }
 ```
+
+**Subscriptions from the widget.** On Plasma, the widget's settings
+(right-click, "Configure Ataecina…", **Subscriptions**) list your
+subscriptions and add or remove them: pick the source, keep or change the
+suggested id — two MiniMax plans are simply `minimax` and `minimax-2`,
+each with its own key — and fill in what that source needs. In a
+terminal, `ataecina sources` lists every source and
+`ataecina subscriptions add <id> --source <source>` does the same.
 
 **API keys.** For each subscription that needs one, either type it in a
 terminal or, on Plasma, use the widget's settings (right-click the widget,

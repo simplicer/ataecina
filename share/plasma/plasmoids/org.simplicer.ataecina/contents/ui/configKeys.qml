@@ -20,13 +20,14 @@ KCM.SimpleKCM {
     readonly property string statusCommand: command + " status --json"
     readonly property string dialogCheck: "command -v kdialog"
     readonly property string refreshCommand: "systemctl --user start ataecina-collect.service"
+    readonly property string sourcesCommand: command + " sources --json"
 
     property var subscriptions: []
     property bool dialogs: true
     property string message: ""
 
-    // Sources that read with a key of the owner's (SPECS §3).
-    readonly property var keySources: ["ZAI_API", "MINIMAX_API", "COMMANDCODE_API", "OPENROUTER_API", "VERCEL_API", "OLLAMA_API", "ORCAROUTER_API", "CLOUDFLARE_API", "HEIMDALL"]
+    // Sources that read with a key of the owner's, from `ataecina sources`.
+    property var keySources: []
     readonly property var keyed: subscriptions.filter(s => keySources.indexOf(s.source) >= 0)
     readonly property var declared: subscriptions.filter(s => s.source === "OPENCODE_ZEN")
 
@@ -113,6 +114,14 @@ KCM.SimpleKCM {
                 page.dialogs = data["exit code"] === 0;
                 return;
             }
+            if (source === page.sourcesCommand) {
+                try {
+                    page.keySources = JSON.parse(data["stdout"]).data.filter(s => s.needs_key).map(s => s.label);
+                } catch (error) {
+                    page.message = (data["stderr"] || "").trim();
+                }
+                return;
+            }
             if (source === page.statusCommand) {
                 try {
                     page.subscriptions = JSON.parse(data["stdout"]).data.subscriptions;
@@ -143,6 +152,7 @@ KCM.SimpleKCM {
 
     Component.onCompleted: {
         executable.connectSource(dialogCheck);
+        executable.connectSource(sourcesCommand);
         executable.connectSource(statusCommand);
     }
 

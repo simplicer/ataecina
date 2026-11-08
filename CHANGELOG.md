@@ -8,6 +8,23 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.27.0-unstable] - 2026-11-08
+
+### Added
+
+- Subscriptions can be listed, added and removed without editing
+  `config.json`: `ataecina subscriptions [add|remove]` and
+  `ataecina sources`, and a **Subscriptions** page in the widget's
+  settings. Two subscriptions of the same provider (two MiniMax plans)
+  are two ids, each with its own key. Every change is validated like
+  `collect` does and the file keeps one subscription per line.
+
+### Fixed
+
+- The Keys settings page offers "Set key…" for every source that needs a
+  key (Moonshot, Kimi Code, xAI and Cursor were missing): it now asks
+  `ataecina sources` instead of keeping its own list.
+
 ## [0.26.0-unstable] - 2026-11-08
 
 ### Added

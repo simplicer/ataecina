@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 11:18+0100\n"
+"POT-Creation-Date: 2026-11-08 11:26+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Catalan <https://codeberg.org/simplicer/ataecina>\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: contents/ui/CompactRepresentation.qml:58
+#: contents/ui/CompactRepresentation.qml:58 contents/ui/Snapshot.qml:23
 msgid "%1%"
 msgstr "%1 %"
 
@@ -31,7 +31,7 @@ msgstr "Actualitza ara"
 msgid "Configure Ataecina…"
 msgstr "Configura Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:478
+#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:481
 msgid "No snapshot yet"
 msgstr "Encara no hi ha instantània"
 
@@ -39,208 +39,208 @@ msgstr "Encara no hi ha instantània"
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr "Executeu `ataecina collect` o activeu ataecina-collect.timer."
 
-#: contents/ui/Snapshot.qml:80
+#: contents/ui/Snapshot.qml:83
 msgid "ataecina status failed: %1"
 msgstr "ataecina status ha fallat: %1"
 
-#: contents/ui/Snapshot.qml:89
+#: contents/ui/Snapshot.qml:92
 msgid "ataecina status gave something the widget cannot read"
 msgstr "ataecina status ha retornat una cosa que el giny no sap llegir"
 
-#: contents/ui/Snapshot.qml:241 contents/ui/Snapshot.qml:395
+#: contents/ui/Snapshot.qml:244 contents/ui/Snapshot.qml:398
 msgid "%1 spent"
 msgstr "%1 gastats"
 
-#: contents/ui/Snapshot.qml:249
+#: contents/ui/Snapshot.qml:252
 msgid "%1 of %2"
 msgstr "%1 de %2"
 
-#: contents/ui/Snapshot.qml:251 contents/ui/Snapshot.qml:392
-#: contents/ui/configKeys.qml:79
+#: contents/ui/Snapshot.qml:254 contents/ui/Snapshot.qml:395
+#: contents/ui/configKeys.qml:80
 msgid "%1 left"
 msgstr "queden %1"
 
-#: contents/ui/Snapshot.qml:278
+#: contents/ui/Snapshot.qml:281
 msgid "5 h"
 msgstr "5 h"
 
-#: contents/ui/Snapshot.qml:280
+#: contents/ui/Snapshot.qml:283
 msgid "day"
 msgstr "dia"
 
-#: contents/ui/Snapshot.qml:282
+#: contents/ui/Snapshot.qml:285
 msgid "week"
 msgstr "setmana"
 
-#: contents/ui/Snapshot.qml:284
+#: contents/ui/Snapshot.qml:287
 msgid "month"
 msgstr "mes"
 
-#: contents/ui/Snapshot.qml:286
+#: contents/ui/Snapshot.qml:289
 msgid "cycle"
 msgstr "cicle"
 
-#: contents/ui/Snapshot.qml:290
+#: contents/ui/Snapshot.qml:293
 msgid "%1 d"
 msgstr "%1 d"
 
-#: contents/ui/Snapshot.qml:293
+#: contents/ui/Snapshot.qml:296
 msgid "%1 h"
 msgstr "%1 h"
 
-#: contents/ui/Snapshot.qml:295
+#: contents/ui/Snapshot.qml:298
 msgid "%1 min"
 msgstr "%1 min"
 
-#: contents/ui/Snapshot.qml:314
+#: contents/ui/Snapshot.qml:317
 msgid "reborn"
 msgstr "renascuda"
 
-#: contents/ui/Snapshot.qml:322
+#: contents/ui/Snapshot.qml:325
 msgid "%1 d %2 h"
 msgstr "%1 d %2 h"
 
-#: contents/ui/Snapshot.qml:325
+#: contents/ui/Snapshot.qml:328
 msgid "%1 h %2 m"
 msgstr "%1 h %2 m"
 
-#: contents/ui/Snapshot.qml:327
+#: contents/ui/Snapshot.qml:330
 msgid "%1 m"
 msgstr "%1 m"
 
-#: contents/ui/Snapshot.qml:340
+#: contents/ui/Snapshot.qml:343
 msgid "just now"
 msgstr "ara mateix"
 
-#: contents/ui/Snapshot.qml:343
+#: contents/ui/Snapshot.qml:346
 msgid "%1 min ago"
 msgid_plural "%1 min ago"
 msgstr[0] "fa %1 min"
 msgstr[1] "fa %1 min"
 
-#: contents/ui/Snapshot.qml:346
+#: contents/ui/Snapshot.qml:349
 msgid "%1 hour ago"
 msgid_plural "%1 hours ago"
 msgstr[0] "fa %1 hora"
 msgstr[1] "fa %1 hores"
 
-#: contents/ui/Snapshot.qml:348
+#: contents/ui/Snapshot.qml:351
 msgid "%1 day ago"
 msgid_plural "%1 days ago"
 msgstr[0] "fa %1 dia"
 msgstr[1] "fa %1 dies"
 
-#: contents/ui/Snapshot.qml:362
+#: contents/ui/Snapshot.qml:365
 msgid "Updates when you use Claude Code"
 msgstr "S'actualitza quan feu servir Claude Code"
 
-#: contents/ui/Snapshot.qml:365
+#: contents/ui/Snapshot.qml:368
 msgid "Updates when you use Codex"
 msgstr "S'actualitza quan feu servir Codex"
 
-#: contents/ui/Snapshot.qml:368
+#: contents/ui/Snapshot.qml:371
 msgid "Stale, observed %1"
 msgstr "Desactualitzat, observat %1"
 
-#: contents/ui/Snapshot.qml:372
+#: contents/ui/Snapshot.qml:375
 msgid "Declare its balance in the settings to see what is left"
 msgstr "Declareu-ne el saldo a la configuració per veure el que queda"
 
-#: contents/ui/Snapshot.qml:375
+#: contents/ui/Snapshot.qml:378
 msgid "%1 banked reset"
 msgid_plural "%1 banked resets"
 msgstr[0] "%1 reinici desat"
 msgstr[1] "%1 reinicis desats"
 
-#: contents/ui/Snapshot.qml:398
+#: contents/ui/Snapshot.qml:401
 msgid "unlimited credits"
 msgstr "crèdits il·limitats"
 
-#: contents/ui/Snapshot.qml:398
+#: contents/ui/Snapshot.qml:401
 msgid "%1 credits"
 msgstr "%1 crèdits"
 
-#: contents/ui/Snapshot.qml:413
+#: contents/ui/Snapshot.qml:416
 msgid "%1 model included"
 msgid_plural "%1 models included"
 msgstr[0] "%1 model inclòs"
 msgstr[1] "%1 models inclosos"
 
-#: contents/ui/Snapshot.qml:415
+#: contents/ui/Snapshot.qml:418
 msgid "%1 model"
 msgid_plural "%1 models"
 msgstr[0] "%1 model"
 msgstr[1] "%1 models"
 
-#: contents/ui/Snapshot.qml:416
+#: contents/ui/Snapshot.qml:419
 msgid "%1 free"
 msgid_plural "%1 free"
 msgstr[0] "%1 gratuït"
 msgstr[1] "%1 gratuïts"
 
-#: contents/ui/Snapshot.qml:428
+#: contents/ui/Snapshot.qml:431
 msgid "%1 more"
 msgid_plural "%1 more"
 msgstr[0] "%1 més"
 msgstr[1] "%1 més"
 
-#: contents/ui/Snapshot.qml:430
+#: contents/ui/Snapshot.qml:433
 msgid "Free: %1"
 msgstr "Gratuïts: %1"
 
-#: contents/ui/Snapshot.qml:439
+#: contents/ui/Snapshot.qml:442
 msgid "New: %1"
 msgstr "Nous: %1"
 
-#: contents/ui/Snapshot.qml:445 contents/ui/configKeys.qml:46
+#: contents/ui/Snapshot.qml:448 contents/ui/configKeys.qml:47
 msgid "key rejected"
 msgstr "clau rebutjada"
 
-#: contents/ui/Snapshot.qml:449
+#: contents/ui/Snapshot.qml:452
 msgid "partial"
 msgstr "parcial"
 
-#: contents/ui/Snapshot.qml:451
+#: contents/ui/Snapshot.qml:454
 msgid "broken"
 msgstr "trencat"
 
-#: contents/ui/Snapshot.qml:453
+#: contents/ui/Snapshot.qml:456
 msgid "unavailable"
 msgstr "no disponible"
 
-#: contents/ui/Snapshot.qml:455
+#: contents/ui/Snapshot.qml:458
 msgid "key missing"
 msgstr "falta la clau"
 
-#: contents/ui/Snapshot.qml:457
+#: contents/ui/Snapshot.qml:460
 msgid "locked"
 msgstr "bloquejat"
 
-#: contents/ui/Snapshot.qml:459
+#: contents/ui/Snapshot.qml:462
 msgid "unsupported"
 msgstr "no compatible"
 
-#: contents/ui/Snapshot.qml:467
+#: contents/ui/Snapshot.qml:470
 msgid "derived"
 msgstr "derivat"
 
-#: contents/ui/Snapshot.qml:469
+#: contents/ui/Snapshot.qml:472
 msgid "observed"
 msgstr "observat"
 
-#: contents/ui/Snapshot.qml:471
+#: contents/ui/Snapshot.qml:474
 msgid "declared"
 msgstr "declarat"
 
-#: contents/ui/Snapshot.qml:478
+#: contents/ui/Snapshot.qml:481
 msgid "No windows to show"
 msgstr "No hi ha finestres per mostrar"
 
-#: contents/ui/Snapshot.qml:480 contents/ui/SubscriptionRow.qml:192
+#: contents/ui/Snapshot.qml:483 contents/ui/SubscriptionRow.qml:194
 msgid "%1% left"
 msgstr "resta un %1 %"
 
-#: contents/ui/SubscriptionRow.qml:254
+#: contents/ui/SubscriptionRow.qml:256
 msgid "observed %1"
 msgstr "observat %1"
 
@@ -274,73 +274,145 @@ msgstr "totes, en l'ordre de la configuració"
 msgid "Comma-separated ids, in the order to show them."
 msgstr "Identificadors separats per comes, en l'ordre en què es mostren."
 
-#: contents/ui/configKeys.qml:49
+#: contents/ui/configKeys.qml:50
 msgid "no key"
 msgstr "sense clau"
 
-#: contents/ui/configKeys.qml:52
+#: contents/ui/configKeys.qml:53
 msgid "works"
 msgstr "funciona"
 
-#: contents/ui/configKeys.qml:55
+#: contents/ui/configKeys.qml:56
 msgid "key accepted, answer not understood"
 msgstr "clau acceptada, resposta no entesa"
 
-#: contents/ui/configKeys.qml:57
+#: contents/ui/configKeys.qml:58
 msgid "not read yet"
 msgstr "encara no llegida"
 
-#: contents/ui/configKeys.qml:77
+#: contents/ui/configKeys.qml:78
 msgid "no balance declared"
 msgstr "sense saldo declarat"
 
-#: contents/ui/configKeys.qml:86
+#: contents/ui/configKeys.qml:87
 msgid "API key for %1. It is sealed at once and never shown."
 msgstr "Clau API de %1. Se segella al moment i no es mostra mai."
 
-#: contents/ui/configKeys.qml:94
+#: contents/ui/configKeys.qml:95
 msgid "Current balance of %1, in US dollars:"
 msgstr "Saldo actual de %1, en dòlars dels EUA:"
 
-#: contents/ui/configKeys.qml:129
+#: contents/ui/configKeys.qml:138 contents/ui/configSubscriptions.qml:135
 msgid "Saved. Reading the subscriptions again…"
 msgstr "Desat. Es tornen a llegir les subscripcions…"
 
-#: contents/ui/configKeys.qml:153
+#: contents/ui/configKeys.qml:163
 msgid "API keys"
 msgstr "Claus API"
 
-#: contents/ui/configKeys.qml:157
+#: contents/ui/configKeys.qml:167
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
 msgstr "Les claus van d'un diàleg emmascarat directament a `ataecina keys set`."
 
-#: contents/ui/configKeys.qml:157
+#: contents/ui/configKeys.qml:167
 msgid "The widget never sees them."
 msgstr "El giny no les veu mai."
 
-#: contents/ui/configKeys.qml:164
+#: contents/ui/configKeys.qml:174
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
 msgstr "Sense kdialog, poseu les claus en un terminal: `ataecina keys set <nom>`."
 
-#: contents/ui/configKeys.qml:170
+#: contents/ui/configKeys.qml:180
 msgid "No subscription needs a key."
 msgstr "Cap subscripció no necessita clau."
 
-#: contents/ui/configKeys.qml:194
+#: contents/ui/configKeys.qml:204
 msgid "Replace key…"
 msgstr "Canvia la clau…"
 
-#: contents/ui/configKeys.qml:194
+#: contents/ui/configKeys.qml:204
 msgid "Set key…"
 msgstr "Posa la clau…"
 
-#: contents/ui/configKeys.qml:202
+#: contents/ui/configKeys.qml:212
 msgid "Balances"
 msgstr "Saldos"
 
-#: contents/ui/configKeys.qml:224
+#: contents/ui/configKeys.qml:234
 msgid "Declare balance…"
 msgstr "Declara el saldo…"
+
+#: contents/ui/configSubscriptions.qml:59
+msgid "Cloudflare account id:"
+msgstr "Id del compte de Cloudflare:"
+
+#: contents/ui/configSubscriptions.qml:61
+msgid "GitHub login:"
+msgstr "Usuari de GitHub:"
+
+#: contents/ui/configSubscriptions.qml:63
+msgid "Monthly allowance (requests or credits):"
+msgstr "Assignació mensual (peticions o crèdits):"
+
+#: contents/ui/configSubscriptions.qml:65
+msgid "xAI team id:"
+msgstr "Id de l'equip d'xAI:"
+
+#: contents/ui/configSubscriptions.qml:67
+msgid "Your e-mail in the team:"
+msgstr "El vostre correu a l'equip:"
+
+#: contents/ui/configSubscriptions.qml:69
+msgid "Provider Heimdall follows:"
+msgstr "Proveïdor que segueix Heimdall:"
+
+#: contents/ui/configSubscriptions.qml:77
+msgid "The id takes lowercase letters, digits and dashes."
+msgstr "L'id admet minúscules, dígits i guions."
+
+#: contents/ui/configSubscriptions.qml:87
+msgid "Fill in every field."
+msgstr "Ompliu tots els camps."
+
+#: contents/ui/configSubscriptions.qml:135
+msgid "Added. Set its key on the Keys page."
+msgstr "Afegida. Poseu-ne la clau a la pàgina Claus."
+
+#: contents/ui/configSubscriptions.qml:156 contents/config/config.qml:11
+msgid "Subscriptions"
+msgstr "Subscripcions"
+
+#: contents/ui/configSubscriptions.qml:160
+msgid "Two subscriptions of the same provider need different ids, and each its own key."
+msgstr "Dues subscripcions del mateix proveïdor necessiten ids diferents i cadascuna la seva clau."
+
+#: contents/ui/configSubscriptions.qml:186
+msgid "Remove it"
+msgstr "Elimina-la"
+
+#: contents/ui/configSubscriptions.qml:186
+msgid "Remove…"
+msgstr "Elimina…"
+
+#: contents/ui/configSubscriptions.qml:193
+msgid "Add a subscription"
+msgstr "Afegeix una subscripció"
+
+#: contents/ui/configSubscriptions.qml:201
+msgid "Source:"
+msgstr "Font:"
+
+#: contents/ui/configSubscriptions.qml:216
+msgid "Id:"
+msgstr "Id:"
+
+#: contents/ui/configSubscriptions.qml:224
+msgid "Plan (optional):"
+msgstr "Pla (opcional):"
+
+#: contents/ui/configSubscriptions.qml:257
+msgid "Add"
+msgstr "Afegeix"
 
 #: contents/ui/main.qml:27
 msgid "Ataecina"
@@ -350,6 +422,6 @@ msgstr "Ataecina"
 msgid "General"
 msgstr "General"
 
-#: contents/config/config.qml:11
+#: contents/config/config.qml:16
 msgid "Keys"
 msgstr "Claus"

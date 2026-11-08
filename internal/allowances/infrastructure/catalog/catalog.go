@@ -3,7 +3,12 @@
 // extra options its subscriptions accept in config.json.
 package catalog
 
-import "codeberg.org/simplicer/ataecina/internal/allowances/domain"
+import (
+	"slices"
+	"strings"
+
+	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
+)
 
 // Option names a source-specific setting in config.json.
 type Option string
@@ -96,6 +101,16 @@ func (c Catalog) With(entry Entry) Catalog {
 	}
 	entries[entry.Source] = entry
 	return Catalog{entries: entries}
+}
+
+// Entries lists every source, by id.
+func (c Catalog) Entries() []Entry {
+	entries := make([]Entry, 0, len(c.entries))
+	for _, entry := range c.entries {
+		entries = append(entries, entry)
+	}
+	slices.SortFunc(entries, func(a, b Entry) int { return strings.Compare(string(a.Source), string(b.Source)) })
+	return entries
 }
 
 // Lookup finds a source.

@@ -64,6 +64,9 @@ Commands:
                     seal a provider key read from stdin without echo, list or forget keys
   unlockers list | add <kind> | remove <kind>
                     manage how the master key is held (secret-service, passphrase, systemd-creds)
+  subscriptions [--json] | add <id> --source <source> [--plan <p>] [--key <name>] [--set <option>=<value>]… | remove <id>
+                    list, add or remove the subscriptions of config.json (validated)
+  sources [--json]  list the sources Ataecina reads and the options each needs
   doctor            check permissions, configuration, keys, the keyring and sources
   tray              show the snapshot in the system tray (StatusNotifierItem) until Quit
   version           print the version
@@ -104,6 +107,10 @@ func run(ctx context.Context, args []string, env environment) int {
 		return unlockersCommand(ctx, rest, env)
 	case "doctor":
 		return doctor(rest, env)
+	case "sources":
+		return sourcesCommand(rest, env)
+	case "subscriptions":
+		return subscriptionsCommand(rest, env)
 	case "tray":
 		return trayCommand(ctx, rest, env)
 	case "version":
