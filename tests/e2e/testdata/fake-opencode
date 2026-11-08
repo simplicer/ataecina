@@ -1,9 +1,12 @@
 #!/bin/sh
 # Fake `opencode` for integration, acceptance and end-to-end tests: records
-# its arguments in $FAKE_OPENCODE_JOURNAL and, for `stats`, prints the
-# synthetic statistics in $FAKE_OPENCODE_STATS. The real OpenCode is never
-# started.
+# its arguments in $FAKE_OPENCODE_JOURNAL; for `stats` it prints the
+# synthetic statistics in $FAKE_OPENCODE_STATS, for `api` the synthetic
+# usage limits in $FAKE_OPENCODE_LIMITS. The real OpenCode is never started.
 printf '%s\n' "$*" >>"${FAKE_OPENCODE_JOURNAL:-/dev/null}"
-[ "$1" = "stats" ] || exit 2
 [ -n "${FAKE_OPENCODE_FAIL:-}" ] && exit 1
-cat "$FAKE_OPENCODE_STATS"
+case "$1" in
+stats) cat "$FAKE_OPENCODE_STATS" ;;
+api) cat "$FAKE_OPENCODE_LIMITS" ;;
+*) exit 2 ;;
+esac

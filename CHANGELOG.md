@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.21.0-unstable] - 2026-11-08
+
+### Added
+
+- `opencode-console` source: the OpenCode Go allowance (rolling five
+  hours, week and month) and what is left of each OpenCode Console budget,
+  read with the official `opencode api experimental.usage.limits`, through
+  OpenCode's own sign-in to the Console. Signed out, it reads as a warning
+  that says how to sign in.
+
 ## [0.20.4-unstable] - 2026-11-08
 
 ### Fixed

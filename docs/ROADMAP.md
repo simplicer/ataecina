@@ -17,6 +17,7 @@ one Conventional Commit; every `feat` raises the minor while the major is 0
 | 8 | Other desktops | `ataecina tray` (StatusNotifierItem + DBusMenu) for XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar and GNOME with AppIndicator; refresh through systemd's `StartUnit`; launcher `.desktop` | done |
 | 9 | More sources | `alibaba-cli` (`bl usage token-plan`), `ollama-api`, `copilot-gh` (`gh api` billing report), `orcarouter-api`, `cloudflare-api` (each verified live first), `heimdall` observed cooldowns for free tiers | done (every adapter built against synthetic answers; live verification by the owner before a release) |
 | 10 | Publication | License, `SECURITY.md`, `CONTRIBUTING.md`, Forgejo CI on Codeberg with GitHub push mirror, first public `0.x` packages | in progress (`SECURITY.md`, `CONTRIBUTING.md`, the Forgejo workflow and the license — GPL-3.0-or-later — done; remotes, push mirror and published packages wait for the maintainer) |
+| 11 | Wider coverage | `opencode-console` (OpenCode Go and Console budgets through the official CLI); `ollama-api` reading the usage report; more API-key sources researched from public documentation (each marked to verify until read live); a daily model catalogue with the free models of each subscription | in progress |
 
 ## Later (not scheduled)
 

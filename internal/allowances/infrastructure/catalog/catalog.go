@@ -62,6 +62,7 @@ func Standard() Catalog {
 		{Source: "openrouter-api", Provider: "openrouter", Fidelity: reported, NeedsKey: true},
 		{Source: "vercel-api", Provider: "vercel", Fidelity: reported, NeedsKey: true},
 		{Source: "opencode-zen", Provider: "opencode", Fidelity: derived, TakesDeclarations: true},
+		{Source: "opencode-console", Provider: "opencode", Fidelity: reported},
 		{Source: "ollama-api", Provider: "ollama", Fidelity: reported, NeedsKey: true},
 		{Source: "copilot-gh", Provider: "github", Fidelity: derived,
 			Options: []Option{OptionLogin, OptionMonthlyAllowance}, Requires: []Option{OptionLogin, OptionMonthlyAllowance}},

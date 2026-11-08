@@ -1,0 +1,19 @@
+{
+  "location": { "directory": "/home/someone" },
+  "data": {
+    "workspace": { "id": "wrk_synthetic", "name": "Synthetic", "usageURL": "https://opencode.ai/workspace/wrk_synthetic/usage" },
+    "go": {
+      "rolling": { "percent": 25, "limited": false, "resetsAt": 1794141000000 },
+      "weekly": { "percent": 40.5, "limited": false, "resetsAt": 1794528000000 },
+      "monthly": { "percent": 12, "limited": false, "resetsAt": 1796083200000 }
+    },
+    "budgets": [
+      {
+        "id": "bud_synthetic", "limit": 20, "spent": 5,
+        "scope": "combined", "per": "set", "coverage": "all",
+        "models": [], "vendors": [], "picked": false, "shared": true,
+        "resetsAt": 1796083200000
+      }
+    ]
+  }
+}

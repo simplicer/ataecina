@@ -68,6 +68,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` (§3.5) | API key (`Bearer`; `/credits` may need a management key) | `data.{usage,limit,limit_remaining,free_model_daily_requests}`, `data.{total_credits,total_usage}` | yes | REPORTED | docs 2026-11-06 |
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
 | `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --all --models --limit 1000 --json --standalone` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` to date, against the declared balance (§3.4) | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape and `--standalone` to verify |
+| `opencode-console` | OpenCode Go, OpenCode Console budgets | official CLI | `opencode api experimental.usage.limits --standalone` (fixed argv, no shell) (§3.4) | OpenCode's own sign-in to an OpenCode Console workspace | `data` (null when signed out); `data.go.{rolling,weekly,monthly}.{percent,limited,resetsAt}`; `data.budgets[].{limit,spent,resetsAt}` | experimental operation of OpenCode's local server, schema in the opencode 2.2.5 binary | REPORTED | local 2026-11-08 (signed-out answer); Go and budgets to verify |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/usage` (§3.3) | Ollama API key (`Authorization: Bearer`) | `limits.session.usage`, `limits.weekly.usage` (fraction 0–1 of the cap); monthly-credit plans: fields to verify | no (called by the ollama.com web page) | REPORTED | third-party 2026-11-06; live to verify |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
@@ -419,19 +420,35 @@ declarations and those records:
   records were cleared). `remaining` may go negative when a top-up was not
   declared. Fidelity `DERIVED`. Without any declaration the reading is
   `PARTIAL`, shows only the spending to date and hints at the command.
-- **Researched 2026-11-07 (opencode 2.2.5), not implemented:** OpenCode's
-  local server documents `experimental.usage.limits` (`GET
-  /api/experimental/usage/limits`, reachable with the official CLI as
-  `opencode api experimental.usage.limits`). It returns, for the OpenCode
-  Console workspace OpenCode is signed in to, the **OpenCode Go** allowance
-  (`go.rolling`, `go.weekly`, `go.monthly`: `percent`, `limited`,
-  `resetsAt` in epoch milliseconds) and the **Console budgets** (`budgets[]`:
-  `limit` and `spent` in USD, `resetsAt`, `scope`, `per`, `coverage`,
-  models), or `data: null` when OpenCode is not signed in to the Console
-  (`opencode auth login`). It gives what is left of a budget the owner set,
-  not the prepaid Zen balance, and the operation is marked experimental. A
-  future source could read it with that fixed argv when the owner signs
-  OpenCode in to the Console; until then the balance stays declared.
+- **OpenCode Go and Console budgets (`opencode-console`, verified locally
+  2026-11-08 with opencode 2.2.5 signed out).** OpenCode's local server
+  offers the experimental operation `experimental.usage.limits` (`GET
+  /api/experimental/usage/limits`). Ataecina runs it through the official CLI
+  with a fixed argv, `opencode api experimental.usage.limits --standalone`
+  (no shell, `NO_COLOR=1`, 15 s, 64 KiB), so OpenCode uses its own sign-in
+  and Ataecina never sees a credential. The answer is `{ "location": …,
+  "data": null }` when OpenCode is not signed in to an OpenCode Console
+  workspace (`UNAVAILABLE`, with the hint to run `opencode auth login`),
+  otherwise `data` is `{ "workspace": { "id", "name"?, "usageURL" }, "go"?:
+  { "rolling", "weekly", "monthly" }, "budgets": [ … ] }` (schema
+  `UsageLimits.Info` in the opencode 2.2.5 binary):
+  - each Go window is `{ "percent": 0–100 used, "limited": bool, "resetsAt":
+    epoch ms }` → meters `FIVE_HOURS` (rolling, length to verify), `WEEKLY`
+    and `MONTHLY` in the main bucket; `limited: true` reads as 100 %; the
+    plan reads `GO` unless the owner declared one;
+  - each budget is `{ "id", "limit", "spent" (USD), "scope", "per",
+    "coverage", "models", "vendors", "picked", "shared", "resetsAt" }` → a
+    `BILLING_CYCLE` meter `spent ÷ limit` in bucket `budget` (`budget_1`,
+    `budget_2`… when there are several) reborn at `resetsAt`; a single budget
+    is also the balance (left = `limit − spent`, never below zero); a budget
+    with a zero limit is skipped;
+  - no Go plan and no budget is `UNAVAILABLE`; a missing `data` or
+    `budgets`, an incomplete Go window, a percent outside 0–100, a negative
+    amount or a reset instant not in epoch milliseconds is
+    `CONTRACT_CHANGED`.
+
+  It gives what is left of the Go allowance and of the budgets the owner
+  set, not the prepaid Zen balance, which stays declared (above).
 - Spending sums the `cost` of every entry `{ "model": { "providerID":
   "opencode", … }, "cost": <number> }` wherever it sits in the JSON
   output; other providers are ignored. An output with no model entry and no
@@ -871,6 +888,7 @@ extension.
     { "id": "openrouter", "source": "openrouter-api", "key": "openrouter" },
     { "id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef" },
     { "id": "zen", "source": "opencode-zen" },
+    { "id": "opencode-go", "source": "opencode-console" },
     { "id": "copilot", "source": "copilot-gh", "login": "your-github-login", "monthly_allowance": 300 },
     { "id": "gemini", "source": "heimdall", "provider": "google" }
   ]

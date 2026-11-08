@@ -19,6 +19,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/ollamaapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodeconsole"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/openrouterapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/orcarouterapi"
@@ -114,6 +115,9 @@ func standardSources() sourceRegistry {
 		},
 		opencodezen.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			return opencodezen.NewSource(balancefile.NewStore(c.paths.StateDir()), zenSpend(c.env), c.env.clock.Now)
+		},
+		opencodeconsole.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
+			return opencodeconsole.New(pathlookup.Find("opencode", c.env.getenv("PATH")), c.env.clock.Now)
 		},
 		copilotgh.SourceID: func(settings configfile.SubscriptionSettings, c collection) domain.Source {
 			return copilotgh.New(pathlookup.Find("gh", c.env.getenv("PATH")), settings.Login, settings.MonthlyAllowance, c.env.clock.Now)

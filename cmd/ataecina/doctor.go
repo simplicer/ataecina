@@ -155,7 +155,7 @@ func toolsOf(source string, appServer bool) []string {
 	switch {
 	case source == "codex-app-server" || (source == "codex-logs" && appServer):
 		return []string{"codex"}
-	case source == "opencode-zen":
+	case source == "opencode-zen" || source == "opencode-console":
 		return []string{"opencode"}
 	case source == "copilot-gh":
 		return []string{"gh"}

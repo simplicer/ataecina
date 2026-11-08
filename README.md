@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.20.4-unstable` — early development: everything below
+**Current version:** `0.21.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -104,6 +104,7 @@ hints the collector writes are in English. Translations are welcome
 | Vercel AI Gateway | credits left and spent | AI Gateway `/v1/credits` | API key | reported | verified |
 | Orca Router | allowance left and spent | Orca Router billing API | API key | reported | verified |
 | OpenCode Zen | balance left | your declared balance minus the cost `opencode stats` records | none | derived | verified |
+| OpenCode Go, OpenCode Console budgets | rolling, weekly and monthly Go windows; what is left of each budget | official `opencode api experimental.usage.limits` | OpenCode's own sign-in to the Console | reported | to verify |
 | Ollama Cloud | session and weekly usage | ollama.com usage API (undocumented) | API key | reported | adapter needs a fix |
 | Cloudflare Workers AI | neurons used today of the free 10 000 | Cloudflare GraphQL Analytics | analytics-only token + account id | reported | to verify |
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
@@ -219,7 +220,8 @@ unknown keys are errors. The full reference is in
     { "id": "codex", "source": "codex-logs", "app_server": true },
     { "id": "zai", "source": "zai-api" },
     { "id": "openrouter", "source": "openrouter-api" },
-    { "id": "zen", "source": "opencode-zen" }
+    { "id": "zen", "source": "opencode-zen" },
+    { "id": "opencode-go", "source": "opencode-console" }
   ]
 }
 ```
