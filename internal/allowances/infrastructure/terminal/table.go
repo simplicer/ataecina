@@ -38,9 +38,11 @@ type cell struct {
 	colour colour
 }
 
-// Render writes the table. Colours are used only when colourful is true
+// Render writes the table, with where each subscription stands between
+// peak and off-peak hours when its provider publishes them (periods, by
+// subscription id). Colours are used only when colourful is true
 // (stdout is a terminal and NO_COLOR is unset).
-func Render(w io.Writer, report domain.StatusReport, now time.Time, colourful bool) error {
+func Render(w io.Writer, report domain.StatusReport, now time.Time, periods map[string]domain.RatePeriod, colourful bool) error {
 	takenAt, taken := report.TakenAt()
 	if !taken {
 		_, err := fmt.Fprintln(w, NoSnapshot)
@@ -48,7 +50,8 @@ func Render(w io.Writer, report domain.StatusReport, now time.Time, colourful bo
 	}
 	rows := [][]cell{{{text: "SUBSCRIPTION"}, {text: "PLAN"}, {text: "WORST"}, {text: "WINDOWS"}, {text: "BALANCE"}, {text: "STATE"}}}
 	for _, status := range report.Statuses() {
-		rows = append(rows, row(status, now))
+		period, known := periods[status.Reading().Subscription().String()]
+		rows = append(rows, row(status, now, period, known))
 	}
 	if _, err := fmt.Fprintln(w, "Ataecina · "+Updated(takenAt, now)); err != nil {
 		return err
@@ -56,7 +59,7 @@ func Render(w io.Writer, report domain.StatusReport, now time.Time, colourful bo
 	return writeAligned(w, rows, colourful)
 }
 
-func row(status domain.SubscriptionStatus, now time.Time) []cell {
+func row(status domain.SubscriptionStatus, now time.Time, period domain.RatePeriod, known bool) []cell {
 	reading := status.Reading()
 	plan := reading.Plan().String()
 	if plan == "" {
@@ -72,7 +75,7 @@ func row(status domain.SubscriptionStatus, now time.Time) []cell {
 		worst,
 		{text: windows(reading, now)},
 		{text: money(reading)},
-		state(status, now),
+		state(status, now, period, known),
 	}
 }
 
@@ -130,7 +133,7 @@ func money(reading domain.Reading) string {
 	return strings.Join(parts, " · ")
 }
 
-func state(status domain.SubscriptionStatus, now time.Time) cell {
+func state(status domain.SubscriptionStatus, now time.Time, period domain.RatePeriod, known bool) cell {
 	reading := status.Reading()
 	var parts []string
 	tone := plain
@@ -157,7 +160,26 @@ func state(status domain.SubscriptionStatus, now time.Time) cell {
 	if hint := reading.Hint(); hint != "" {
 		text += ": " + hint
 	}
+	if known {
+		if text != "" {
+			text += " · "
+		}
+		text += rate(period, now)
+	}
 	return cell{text: text, colour: tone}
+}
+
+// rate is "off-peak until 07:00" or "peak until Mon 11:00", in local time.
+func rate(period domain.RatePeriod, now time.Time) string {
+	label := "off-peak"
+	if period.Current == domain.RatePeak {
+		label = "peak"
+	}
+	ends, today := period.EndsAt.Local(), now.Local()
+	if ends.Year() == today.Year() && ends.YearDay() == today.YearDay() {
+		return label + " until " + ends.Format("15:04")
+	}
+	return label + " until " + ends.Format("Mon 15:04")
 }
 
 func writeAligned(w io.Writer, rows [][]cell, colourful bool) error {

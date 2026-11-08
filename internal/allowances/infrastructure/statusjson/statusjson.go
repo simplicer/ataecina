@@ -13,13 +13,15 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/readingjson"
 )
 
-// Meta describes the program that produced the document, and what the
-// model catalogue says of each subscription (by subscription id).
+// Meta describes the program that produced the document, what the
+// model catalogue says of each subscription and where each one stands
+// between peak and off-peak hours (both by subscription id).
 type Meta struct {
 	Version              string
 	GeneratedAt          time.Time
 	Offerings            map[string]Offerings
 	OfferingsRefreshedAt time.Time
+	RatePeriods          map[string]domain.RatePeriod
 }
 
 // Offerings is what the model catalogue says of one subscription's
@@ -70,6 +72,21 @@ type subscription struct {
 	ErrorClass   *string                   `json:"error_class"`
 	Hint         *string                   `json:"hint"`
 	Offerings    *offerings                `json:"offerings"`
+	RatePeriod   *ratePeriod               `json:"rate_period"`
+}
+
+// ratePeriod is where the generation instant falls between the peak
+// hours the provider publishes and off-peak (SPECS §13).
+type ratePeriod struct {
+	Current        string              `json:"current"`
+	EndsAt         readingjson.Instant `json:"ends_at"`
+	NextPeak       peakSpan            `json:"next_peak"`
+	OffPeakBenefit string              `json:"off_peak_benefit"`
+}
+
+type peakSpan struct {
+	StartsAt readingjson.Instant `json:"starts_at"`
+	EndsAt   readingjson.Instant `json:"ends_at"`
 }
 
 type offerings struct {
@@ -116,6 +133,7 @@ func Write(w io.Writer, report domain.StatusReport, about Meta) error {
 			ErrorClass:   reading.ErrorClass,
 			Hint:         reading.Hint,
 			Offerings:    encodeOfferings(about.Offerings, reading.Subscription),
+			RatePeriod:   encodeRatePeriod(about.RatePeriods, reading.Subscription),
 		})
 	}
 	takenAt, taken := report.TakenAt()
@@ -142,6 +160,20 @@ func encodeOfferings(all map[string]Offerings, subscription string) *offerings {
 	return &offerings{
 		Catalogue: found.Catalogue, Name: found.Name, Models: found.Models, Free: len(found.FreeModels),
 		FreeModels: encodeModels(found.FreeModels, maxFreeModels), NewModels: encodeModels(found.NewModels, maxNewModels),
+	}
+}
+
+// encodeRatePeriod is null for a subscription whose provider publishes
+// no peak hours.
+func encodeRatePeriod(all map[string]domain.RatePeriod, subscription string) *ratePeriod {
+	period, ok := all[subscription]
+	if !ok {
+		return nil
+	}
+	return &ratePeriod{
+		Current: string(period.Current), EndsAt: readingjson.Instant{Time: period.EndsAt},
+		NextPeak:       peakSpan{StartsAt: readingjson.Instant{Time: period.PeakStartsAt}, EndsAt: readingjson.Instant{Time: period.PeakEndsAt}},
+		OffPeakBenefit: string(period.Benefit),
 	}
 }
 

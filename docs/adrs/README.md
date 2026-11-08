@@ -21,6 +21,7 @@
 | [0017](0017-published-coding-plan-offers.md) | Coding plan offers published in the repository |
 | [0018](0018-official-clis-one-at-a-time-and-kept-figures.md) | Official CLIs one at a time, and kept figures |
 | [0019](0019-key-checks-for-providers-without-an-allowance.md) | Key checks for providers that publish no allowance |
+| [0020](0020-peak-and-off-peak-hours.md) | Peak and off-peak hours from a compiled calendar |
 
 Each ADR has Context, Decision, Consequences and Alternatives. A superseded
 ADR stays, marked `superseded by NNNN`.

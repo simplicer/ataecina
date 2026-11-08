@@ -49,7 +49,18 @@ QtObject {
             "CLOUDFLARE_API": "Workers AI",
             "OPENCODE_ZEN": "OpenCode Zen",
             "COPILOT_GH": "Copilot",
-            "ALIBABA_CLI": "Alibaba Model Studio"
+            "ALIBABA_CLI": "Alibaba Model Studio",
+            "ALIBABA_CODING_CLI": "Alibaba Coding Plan",
+            "OPENCODE_CONSOLE": "OpenCode Go",
+            "MOONSHOT_API": "Moonshot AI",
+            "MOONSHOT_CN_API": "Moonshot AI",
+            "KIMI_CODE_API": "Kimi Code",
+            "XAI_API": "xAI",
+            "CURSOR_ADMIN_API": "Cursor",
+            "KILO_API": "Kilo Gateway",
+            "GROQ_API": "Groq",
+            "NVIDIA_API": "NVIDIA",
+            "GEMINI_API": "Google AI Studio"
         })
 
     readonly property var currencySymbols: ({
@@ -117,6 +128,9 @@ QtObject {
     // but has nothing worth showing: a free credit used up, or only what was
     // spent of a finished one.
     function placement(subscription) {
+        if (keyChecked(subscription)) {
+            return "row";
+        }
         if (failed(subscription)) {
             return "warning";
         }
@@ -124,6 +138,68 @@ QtObject {
             return "row";
         }
         return subscription.outcome === "PARTIAL" && subscription.hint ? "warning" : "hidden";
+    }
+
+    // A provider that publishes no allowance, whose key was just checked
+    // and works (SPECS §3.7): a row with its models, not a warning.
+    readonly property var keyCheckSources: ["GROQ_API", "NVIDIA_API", "GEMINI_API"]
+    function keyChecked(subscription) {
+        return keyCheckSources.indexOf(subscription.source) >= 0 && subscription.outcome === "UNSUPPORTED"
+            && subscription.freshness === "FRESH" && !subscription.error_class;
+    }
+
+    // Nothing left to use now: a window at 100 % or no money left.
+    function exhausted(subscription) {
+        if (!lively(subscription)) {
+            return false;
+        }
+        if (subscription.meters.some(meter => meter.used_percent >= 100)) {
+            return true;
+        }
+        const balance = subscription.balance;
+        return !!balance && !!balance.remaining && Number(balance.remaining.amount) <= 0;
+    }
+
+    // ----- peak and off-peak hours (SPECS §13) -----
+
+    function offPeak(subscription) {
+        const period = subscription.rate_period;
+        return !!period && period.current === "OFF_PEAK";
+    }
+
+    // "Off-peak until 07:00 · half the credits" or "Peak hours until 11:00".
+    function rateText(subscription) {
+        const period = subscription.rate_period;
+        if (!period) {
+            return "";
+        }
+        if (period.current === "PEAK") {
+            return l10n.i18n("Peak hours until %1", when(period.ends_at));
+        }
+        const saving = benefitText(period.off_peak_benefit);
+        const until = l10n.i18n("Off-peak until %1", when(period.ends_at));
+        return saving === "" ? until : until + " · " + saving;
+    }
+
+    function benefitText(benefit) {
+        switch (benefit) {
+        case "HALF_CREDITS":
+            return l10n.i18n("half the credits");
+        case "DISCOUNTED_CREDITS":
+            return l10n.i18n("fewer credits");
+        case "LONGER_SESSIONS":
+            return l10n.i18n("the session lasts longer");
+        }
+        return "";
+    }
+
+    // A time today, else the day and the time.
+    function when(iso) {
+        const at = new Date(iso);
+        if (at.toDateString() === now.toDateString()) {
+            return clock(iso);
+        }
+        return l10n.locale.dayName(at.getDay(), Locale.ShortFormat) + " " + clock(iso);
     }
 
     // A partial reading that knows only the money spent.
@@ -361,10 +437,18 @@ QtObject {
         return iso ? Qt.formatTime(new Date(iso), l10n.locale.timeFormat(Locale.ShortFormat)) : "";
     }
 
-    // The small line under a row: how a stale reading gets fresh again, and
-    // banked resets.
+    // The small line under a row: a key that works without a published
+    // quota, peak or off-peak hours, how a stale reading gets fresh again,
+    // and banked resets.
     function note(subscription) {
         const parts = [];
+        if (keyChecked(subscription)) {
+            parts.push(l10n.i18n("No quota published · the key works"));
+        }
+        const rate = rateText(subscription);
+        if (rate !== "") {
+            parts.push(rate);
+        }
         if (subscription.freshness !== "FRESH") {
             switch (subscription.source) {
             case "CLAUDE_STATUSLINE":

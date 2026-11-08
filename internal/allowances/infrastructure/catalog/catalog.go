@@ -6,6 +6,7 @@ package catalog
 import (
 	"slices"
 	"strings"
+	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 )
@@ -38,6 +39,9 @@ type Entry struct {
 	// TakesDeclarations marks balance-only sources that derive what is
 	// left from `ataecina balance declare`.
 	TakesDeclarations bool
+	// PeakHours are the hours the plan charges at its full rate (SPECS
+	// §13); nil when the provider publishes none.
+	PeakHours *domain.PeakHours
 }
 
 // Accepts reports whether the source takes an option.
@@ -59,12 +63,12 @@ type Catalog struct {
 func Standard() Catalog {
 	reported, derived, observed := domain.FidelityReported, domain.FidelityDerived, domain.FidelityObserved
 	entries := []Entry{
-		{Source: "claude-statusline", Provider: "anthropic", Fidelity: reported},
+		{Source: "claude-statusline", Provider: "anthropic", Fidelity: reported, PeakHours: claudePeak()},
 		{Source: "codex-logs", Provider: "openai", Fidelity: reported, Options: []Option{OptionAppServer, OptionAppServerAfter}},
 		{Source: "codex-app-server", Provider: "openai", Fidelity: reported},
-		{Source: "zai-api", Provider: "zai", Fidelity: reported, NeedsKey: true},
+		{Source: "zai-api", Provider: "zai", Fidelity: reported, NeedsKey: true, PeakHours: zaiPeak()},
 		{Source: "minimax-api", Provider: "minimax", Fidelity: reported, NeedsKey: true},
-		{Source: "alibaba-cli", Provider: "alibaba", Fidelity: reported},
+		{Source: "alibaba-cli", Provider: "alibaba", Fidelity: reported, PeakHours: tokenPlanPeak()},
 		{Source: "alibaba-coding-cli", Provider: "alibaba", Fidelity: reported},
 		{Source: "commandcode-api", Provider: "commandcode", Fidelity: reported, NeedsKey: true},
 		{Source: "openrouter-api", Provider: "openrouter", Fidelity: reported, NeedsKey: true},
@@ -121,4 +125,41 @@ func (c Catalog) Entries() []Entry {
 func (c Catalog) Lookup(source domain.SourceID) (Entry, bool) {
 	entry, ok := c.entries[source]
 	return entry, ok
+}
+
+// The peak hours providers publish (SPECS §13, checked 2026-11-08).
+var (
+	chinaStandardTime = time.FixedZone("UTC+8", 8*3600)
+	workingDays       = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}
+	everyDay          = []time.Weekday{time.Sunday, time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday}
+)
+
+// zaiPeak: the GLM Coding Plan charges full credits Monday to Friday,
+// 14:00 to 18:00 UTC+8, and half the credits otherwise.
+func zaiPeak() *domain.PeakHours {
+	return peak(chinaStandardTime, workingDays, 14*60, 18*60, domain.OffPeakHalfCredits)
+}
+
+// tokenPlanPeak: the Model Studio Token Plan discounts the credits of
+// calls from 22:00 to 08:00 UTC+8, by a rate per model.
+func tokenPlanPeak() *domain.PeakHours {
+	return peak(chinaStandardTime, everyDay, 8*60, 22*60, domain.OffPeakDiscountedCredits)
+}
+
+// claudePeak: Claude's session window drains faster on weekdays from 05:00
+// to 11:00 Pacific time; none without the time zone database.
+func claudePeak() *domain.PeakHours {
+	pacific, err := time.LoadLocation("America/Los_Angeles")
+	if err != nil {
+		return nil
+	}
+	return peak(pacific, workingDays, 5*60, 11*60, domain.OffPeakLongerSessions)
+}
+
+func peak(zone *time.Location, days []time.Weekday, from, to int, benefit domain.OffPeakBenefit) *domain.PeakHours {
+	hours, err := domain.NewPeakHours(zone, days, from, to, benefit)
+	if err != nil {
+		return nil
+	}
+	return &hours
 }

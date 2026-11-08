@@ -39,7 +39,7 @@ Use these words verbatim in code, docs and commits (defined in
 `docs/SPECS.md` §1): subscription, provider, allowance, meter, window,
 balance, reading, source, fidelity, freshness, snapshot, reset (rebirth),
 threshold, alert, sealed key, unlocker, collector, display, offering,
-model catalogue.
+model catalogue, peak hours, off-peak.
 
 ## Architecture
 

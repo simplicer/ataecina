@@ -8,6 +8,26 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.34.0-unstable] - 2026-11-08
+
+### Added
+
+- Peak and off-peak hours: for Z.ai (half the credits off-peak), the
+  Alibaba Token Plan (discounted credits from 22:00 to 08:00 UTC+8) and
+  Claude (the session drains slower off-peak), `status --json` adds
+  `rate_period` (current period, when it ends, the next peak, what
+  off-peak saves), the terminal says "off-peak until 07:00", and the
+  widget tints the row while off-peak and says until when.
+- The widget shows a subscription's name in red while nothing is left
+  to use.
+
+### Changed
+
+- Groq, NVIDIA and Google AI Studio subscriptions whose key works are a
+  row with their models and "No quota published · the key works",
+  instead of a warning; the widget names them and the other newer
+  sources.
+
 ## [0.33.0-unstable] - 2026-11-08
 
 ### Added

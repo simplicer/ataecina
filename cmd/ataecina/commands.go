@@ -12,6 +12,7 @@ import (
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/application"
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/journal"
 	sealedkeys "codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/keyring"
@@ -171,18 +172,33 @@ func status(args []string, env environment) int {
 	if err != nil {
 		return fail("snapshot-unreadable", "The snapshot cannot be read", err)
 	}
+	now := env.clock.Now()
+	periods := ratePeriodsOf(report, env.sources.catalog, now)
 	if *asJSON {
 		offerings, refreshedAt := offeringsOf(paths, env)
 		err = statusjson.Write(env.stdout, report, statusjson.Meta{
-			Version: version, GeneratedAt: env.clock.Now(), Offerings: offerings, OfferingsRefreshedAt: refreshedAt,
+			Version: version, GeneratedAt: now, Offerings: offerings, OfferingsRefreshedAt: refreshedAt, RatePeriods: periods,
 		})
 	} else {
-		err = terminal.Render(env.stdout, report, env.clock.Now(), env.terminal && env.getenv("NO_COLOR") == "")
+		err = terminal.Render(env.stdout, report, now, periods, env.terminal && env.getenv("NO_COLOR") == "")
 	}
 	if err != nil {
 		return exitFailure
 	}
 	return exitOK
+}
+
+// ratePeriodsOf tells, for each subscription whose plan publishes peak
+// hours, where now falls (SPECS §13); it reads no file and no network.
+func ratePeriodsOf(report domain.StatusReport, sources catalog.Catalog, now time.Time) map[string]domain.RatePeriod {
+	periods := map[string]domain.RatePeriod{}
+	for _, status := range report.Statuses() {
+		reading := status.Reading()
+		if entry, ok := sources.Lookup(reading.Source()); ok && entry.PeakHours != nil {
+			periods[reading.Subscription().String()] = entry.PeakHours.At(now)
+		}
+	}
+	return periods
 }
 
 // collect reads every subscription once and keeps the snapshot.

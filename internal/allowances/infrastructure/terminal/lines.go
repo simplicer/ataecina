@@ -13,7 +13,7 @@ const NoSnapshot = "No snapshot yet. Run `ataecina collect`, or enable ataecina-
 // Line is one subscription on one plain line without colours, for menus
 // and tooltips: "claude · PRO · 5h 23.5% ↻ 2h10m · week 41.2% ↻ 4d04h · fresh just now".
 func Line(status domain.SubscriptionStatus, now time.Time) string {
-	cells := row(status, now)
+	cells := row(status, now, domain.RatePeriod{}, false)
 	parts := make([]string, 0, len(cells))
 	for i, cell := range cells {
 		if i == worstColumn || cell.text == "—" || cell.text == "" {

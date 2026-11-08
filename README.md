@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.33.0-unstable` — early development: everything below
+**Current version:** `0.34.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -53,6 +53,11 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 - **Balances** — `$6.80 of $70.00` when the total is known, `≈` when the
   figure is derived rather than reported, `$1.20 spent` while an OpenCode
   Zen balance is not declared yet.
+- **Peak and off-peak hours** — for plans that charge less outside their
+  peak hours (Z.ai, the Alibaba Token Plan, Claude's session window), the
+  row is tinted while it is off-peak and says until when ("Off-peak until
+  07:00 · half the credits", "Peak hours until 11:00"). A subscription
+  with nothing left to use has its name in red.
 - **Warnings** — subscriptions whose key is missing or rejected, or whose
   source answered something unexpected, fold under one line with the
   reason. Free providers without a plan appear only when they report

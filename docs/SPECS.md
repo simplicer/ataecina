@@ -28,6 +28,7 @@ decisions.
 | **Display** | Anything that shows the snapshot: terminal table, JSON, Plasma widget, tray. |
 | **Offering** | A model a provider offers, with its list price and release day; **free** when priced at 0, **new** when released in the last 30 days. |
 | **Model catalogue** | The offerings of the providers that describe the configured subscriptions, refreshed once a day from models.dev (§11). |
+| **Peak hours, off-peak** | The hours a plan charges its allowance at the full rate, and the rest of the week, when the same use costs less (§13). |
 
 ## 2. Scope
 
@@ -856,7 +857,9 @@ Contract details:
   `released_on` is a date (`2026-10-30`) or `null`; in `meta`,
   `snapshot_taken_at` (`null` before the first collection),
   `worst_used_percent` (`null` without meters) and
-  `offerings_refreshed_at` (`null` before the catalogue was first read).
+  `offerings_refreshed_at` (`null` before the catalogue was first read);
+  on a subscription, `rate_period` (§13; `null` when its plan publishes
+  no peak hours).
 - `used_percent` may exceed 100 when a provider allows overage.
 - Before the first collection the document has an empty `subscriptions`
   list; this is not an error.
@@ -892,7 +895,9 @@ schemes and the accent colour like the battery or network widgets.
   90 % used. Tooltip: that subscription, window, what is left and the time
   to rebirth. Left click opens the popup; middle click refreshes.
 - **What gets a row, a warning or nothing:** a subscription whose source
-  failed (any outcome but `OK` and `PARTIAL`) is a **warning**; one with
+  failed (any outcome but `OK` and `PARTIAL`) is a **warning**, except a
+  fresh `UNSUPPORTED` reading of a key check (§3.7), which gets a row
+  with its models; one with
   windows, or with money left (`balance.remaining` above zero), gets a
   **row**; so does a `PARTIAL` reading that knows only what was spent (an
   OpenCode Zen balance not declared yet: "$1.20 spent", with a note to
@@ -915,9 +920,14 @@ schemes and the accent colour like the battery or network widgets.
     (`5 h`, `week`, `month` or `cycle`), each as a large percentage (`≈`
     when estimated after a rebirth) over its countdown (`↻ 3 d 17 h`) or
     `reborn`;
-  - a small note: how a stale reading gets fresh again (`Updates when you
-    use Claude Code`, `Updates when you use Codex`, else `Stale, observed 2
-    hours ago`) and banked resets;
+  - a small note: a key that works for a provider without a published
+    quota (`No quota published · the key works`, §3.7), peak or
+    off-peak hours (§13), how a stale reading gets fresh again
+    (`Updates when you use Claude Code`, `Updates when you use Codex`,
+    else `Stale, observed 2 hours ago`) and banked resets;
+  - the row is tinted green while its plan is off-peak (§13), and the
+    name turns red while nothing is left to use (a window at 100 % or
+    more, or no money left);
   - a click unfolds every bucket and window (label, bar of what is left,
     `% left`, countdown), the balance and credits, fidelity and outcome,
     the hint and the reading's age.
@@ -1282,3 +1292,33 @@ The bounded context `offerings` keeps that, apart from the quotas.
   the providers): provider · plan, the price per period (`month`, `year`,
   `first month` translated), the title, and "Sponsored link" for an
   affiliate link; a click opens the link in the browser.
+
+## 13. Peak and off-peak hours (ADR 0020)
+
+Some plans charge their allowance at a full rate during **peak hours** and
+less the rest of the week (**off-peak**). Ataecina knows the hours each
+plan publishes, compiled into the source catalogue, and every display says
+where now falls; nothing is fetched and nothing is stored. The hours are
+in the provider's time zone and shown in the owner's.
+
+| Source | Peak hours | Off-peak saves (`off_peak_benefit`) | Checked |
+|---|---|---|---|
+| `zai-api` (GLM Coding Plan) | Monday to Friday, 14:00–18:00 UTC+8 (06:00–10:00 UTC) | half the credits, weekends included (`HALF_CREDITS`) | third-party summaries of the plan overview, 2026-11-05; agrees with the owner's own notes |
+| `alibaba-cli` (Model Studio Token Plan) | every day, 08:00–22:00 UTC+8 (off-peak 22:00–08:00) | fewer credits, by a discount per model and limited in time (`DISCOUNTED_CREDITS`) | Model Studio help pages and blog, 2026-11 |
+| `claude-statusline` (Claude) | Monday to Friday, 05:00–11:00 Pacific time (daylight saving followed) | the 5-hour session drains slower; the weekly window does not change (`LONGER_SESSIONS`) | third-party coverage of Anthropic's announcement of 2026-03-26; **to verify**: since 2026-05-06 Claude Code on Pro and Max may no longer be throttled at peak |
+
+- `ataecina status --json` adds `rate_period` to each subscription (§8.2),
+  `null` for plans without published hours: `{ "current": "PEAK" |
+  "OFF_PEAK", "ends_at": <when the current period ends>, "next_peak": {
+  "starts_at", "ends_at" } (the peak that holds now or comes next),
+  "off_peak_benefit": "HALF_CREDITS" | "DISCOUNTED_CREDITS" |
+  "LONGER_SESSIONS" }`. The values are computed when the document is
+  written, from the clock.
+- The terminal table adds `off-peak until 07:00` or `peak until Mon 11:00`
+  (local time) to the state.
+- The widget tints a row while its plan is off-peak and adds to the note
+  "Off-peak until 07:00 · half the credits" or "Peak hours until 11:00"
+  (a day name when not today). Claude's peak hours need the system time
+  zone database (`tzdata`); without it Claude has none.
+- Promotions change these hours often; a change is a new release with the
+  table above updated.

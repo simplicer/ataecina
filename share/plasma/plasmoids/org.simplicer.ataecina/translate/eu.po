@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 13:25+0100\n"
+"POT-Creation-Date: 2026-11-08 15:51+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Basque <https://codeberg.org/simplicer/ataecina>\n"
@@ -23,7 +23,7 @@ msgid "Checked %1"
 msgstr "Egiaztatua: %1"
 
 #: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
-#: contents/ui/main.qml:53
+#: contents/ui/main.qml:62
 msgid "Refresh now"
 msgstr "Freskatu orain"
 
@@ -31,7 +31,7 @@ msgstr "Freskatu orain"
 msgid "Configure Ataecina…"
 msgstr "Konfiguratu Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:558
+#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:631
 msgid "No snapshot yet"
 msgstr "Oraindik ez dago argazkirik"
 
@@ -57,240 +57,264 @@ msgstr "ataecina status-ek huts egin du: %1"
 msgid "ataecina status gave something the widget cannot read"
 msgstr "ataecina status-ek trepetak irakurri ezin duen zerbait itzuli du"
 
-#: contents/ui/Snapshot.qml:250 contents/ui/Snapshot.qml:404
+#: contents/ui/Snapshot.qml:166
+msgid "Peak hours until %1"
+msgstr "Puntako ordua %1 arte"
+
+#: contents/ui/Snapshot.qml:169
+msgid "Off-peak until %1"
+msgstr "Puntaz kanpo %1 arte"
+
+#: contents/ui/Snapshot.qml:176
+msgid "half the credits"
+msgstr "kredituen erdia"
+
+#: contents/ui/Snapshot.qml:178
+msgid "fewer credits"
+msgstr "kreditu gutxiago"
+
+#: contents/ui/Snapshot.qml:180
+msgid "the session lasts longer"
+msgstr "saioak gehiago irauten du"
+
+#: contents/ui/Snapshot.qml:315 contents/ui/Snapshot.qml:477
 msgid "%1 spent"
 msgstr "%1 gastatuta"
 
-#: contents/ui/Snapshot.qml:258
+#: contents/ui/Snapshot.qml:323
 msgid "%1 of %2"
 msgstr "%1 / %2"
 
-#: contents/ui/Snapshot.qml:260 contents/ui/Snapshot.qml:401
+#: contents/ui/Snapshot.qml:325 contents/ui/Snapshot.qml:474
 #: contents/ui/configKeys.qml:81
 msgid "%1 left"
 msgstr "%1 geratzen da"
 
-#: contents/ui/Snapshot.qml:287
+#: contents/ui/Snapshot.qml:352
 msgid "5 h"
 msgstr "5 h"
 
-#: contents/ui/Snapshot.qml:289
+#: contents/ui/Snapshot.qml:354
 msgid "day"
 msgstr "eguna"
 
-#: contents/ui/Snapshot.qml:291
+#: contents/ui/Snapshot.qml:356
 msgid "week"
 msgstr "astea"
 
-#: contents/ui/Snapshot.qml:293 contents/ui/Snapshot.qml:442
+#: contents/ui/Snapshot.qml:358 contents/ui/Snapshot.qml:515
 msgid "month"
 msgstr "hilabetea"
 
-#: contents/ui/Snapshot.qml:295
+#: contents/ui/Snapshot.qml:360
 msgid "cycle"
 msgstr "zikloa"
 
-#: contents/ui/Snapshot.qml:299
+#: contents/ui/Snapshot.qml:364
 msgid "%1 d"
 msgstr "%1 e"
 
-#: contents/ui/Snapshot.qml:302
+#: contents/ui/Snapshot.qml:367
 msgid "%1 h"
 msgstr "%1 h"
 
-#: contents/ui/Snapshot.qml:304
+#: contents/ui/Snapshot.qml:369
 msgid "%1 min"
 msgstr "%1 min"
 
-#: contents/ui/Snapshot.qml:323
+#: contents/ui/Snapshot.qml:388
 msgid "reborn"
 msgstr "berpiztua"
 
-#: contents/ui/Snapshot.qml:331
+#: contents/ui/Snapshot.qml:396
 msgid "%1 d %2 h"
 msgstr "%1 e %2 h"
 
-#: contents/ui/Snapshot.qml:334
+#: contents/ui/Snapshot.qml:399
 msgid "%1 h %2 m"
 msgstr "%1 h %2 m"
 
-#: contents/ui/Snapshot.qml:336
+#: contents/ui/Snapshot.qml:401
 msgid "%1 m"
 msgstr "%1 m"
 
-#: contents/ui/Snapshot.qml:349
+#: contents/ui/Snapshot.qml:414
 msgid "just now"
 msgstr "oraintxe"
 
-#: contents/ui/Snapshot.qml:352
+#: contents/ui/Snapshot.qml:417
 msgid "%1 min ago"
 msgid_plural "%1 min ago"
 msgstr[0] "duela %1 min"
 msgstr[1] "duela %1 min"
 
-#: contents/ui/Snapshot.qml:355
+#: contents/ui/Snapshot.qml:420
 msgid "%1 hour ago"
 msgid_plural "%1 hours ago"
 msgstr[0] "duela ordu %1"
 msgstr[1] "duela %1 ordu"
 
-#: contents/ui/Snapshot.qml:357
+#: contents/ui/Snapshot.qml:422
 msgid "%1 day ago"
 msgid_plural "%1 days ago"
 msgstr[0] "duela egun %1"
 msgstr[1] "duela %1 egun"
 
-#: contents/ui/Snapshot.qml:371
+#: contents/ui/Snapshot.qml:435
+msgid "No quota published · the key works"
+msgstr "Kuotarik argitaratu gabe · gakoak badabil"
+
+#: contents/ui/Snapshot.qml:444
 msgid "Updates when you use Claude Code"
 msgstr "Claude Code erabiltzean eguneratzen da"
 
-#: contents/ui/Snapshot.qml:374
+#: contents/ui/Snapshot.qml:447
 msgid "Updates when you use Codex"
 msgstr "Codex erabiltzean eguneratzen da"
 
-#: contents/ui/Snapshot.qml:377
+#: contents/ui/Snapshot.qml:450
 msgid "Stale, observed %1"
 msgstr "Zaharkitua, %1 behatua"
 
-#: contents/ui/Snapshot.qml:381
+#: contents/ui/Snapshot.qml:454
 msgid "Declare its balance in the settings to see what is left"
 msgstr "Adierazi saldoa ezarpenetan geratzen dena ikusteko"
 
-#: contents/ui/Snapshot.qml:384
+#: contents/ui/Snapshot.qml:457
 msgid "%1 banked reset"
 msgid_plural "%1 banked resets"
 msgstr[0] "berrabiarazte %1 gordeta"
 msgstr[1] "%1 berrabiarazte gordeta"
 
-#: contents/ui/Snapshot.qml:407
+#: contents/ui/Snapshot.qml:480
 msgid "unlimited credits"
 msgstr "kreditu mugagabeak"
 
-#: contents/ui/Snapshot.qml:407
+#: contents/ui/Snapshot.qml:480
 msgid "%1 credits"
 msgstr "%1 kreditu"
 
-#: contents/ui/Snapshot.qml:442
+#: contents/ui/Snapshot.qml:515
 msgid "year"
 msgstr "urtea"
 
-#: contents/ui/Snapshot.qml:442
+#: contents/ui/Snapshot.qml:515
 msgid "first month"
 msgstr "lehen hilabetea"
 
-#: contents/ui/Snapshot.qml:463
+#: contents/ui/Snapshot.qml:536
 msgid "No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models."
 msgstr "Oraindik ez dago adimen-indizerik: ezarri Artificial Analysis edo OpenRouter gako bat eta eguneratu ereduak."
 
-#: contents/ui/Snapshot.qml:466
+#: contents/ui/Snapshot.qml:539
 msgid "Intelligence: Artificial Analysis Intelligence Index"
 msgstr "Adimena: Artificial Analysis Intelligence Index"
 
-#: contents/ui/Snapshot.qml:467
+#: contents/ui/Snapshot.qml:540
 msgid "%1, via %2"
 msgstr "%1, %2 bidez"
 
-#: contents/ui/Snapshot.qml:477
+#: contents/ui/Snapshot.qml:550
 msgid "free"
 msgstr "doan"
 
-#: contents/ui/Snapshot.qml:493
+#: contents/ui/Snapshot.qml:566
 msgid "%1 model included"
 msgid_plural "%1 models included"
 msgstr[0] "eredu %1 barne"
 msgstr[1] "%1 eredu barne"
 
-#: contents/ui/Snapshot.qml:495
+#: contents/ui/Snapshot.qml:568
 msgid "%1 model"
 msgid_plural "%1 models"
 msgstr[0] "eredu %1"
 msgstr[1] "%1 eredu"
 
-#: contents/ui/Snapshot.qml:496
+#: contents/ui/Snapshot.qml:569
 msgid "%1 free"
 msgid_plural "%1 free"
 msgstr[0] "%1 doan"
 msgstr[1] "%1 doan"
 
-#: contents/ui/Snapshot.qml:508 contents/ui/SubscriptionRow.qml:305
+#: contents/ui/Snapshot.qml:581 contents/ui/SubscriptionRow.qml:318
 msgid "%1 more"
 msgid_plural "%1 more"
 msgstr[0] "%1 gehiago"
 msgstr[1] "%1 gehiago"
 
-#: contents/ui/Snapshot.qml:510
+#: contents/ui/Snapshot.qml:583
 msgid "Free: %1"
 msgstr "Doakoak: %1"
 
-#: contents/ui/Snapshot.qml:519
+#: contents/ui/Snapshot.qml:592
 msgid "New: %1"
 msgstr "Berriak: %1"
 
-#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:48
+#: contents/ui/Snapshot.qml:598 contents/ui/configKeys.qml:48
 msgid "key rejected"
 msgstr "gakoa baztertuta"
 
-#: contents/ui/Snapshot.qml:529
+#: contents/ui/Snapshot.qml:602
 msgid "partial"
 msgstr "partziala"
 
-#: contents/ui/Snapshot.qml:531
+#: contents/ui/Snapshot.qml:604
 msgid "broken"
 msgstr "hautsita"
 
-#: contents/ui/Snapshot.qml:533
+#: contents/ui/Snapshot.qml:606
 msgid "unavailable"
 msgstr "ez dago erabilgarri"
 
-#: contents/ui/Snapshot.qml:535
+#: contents/ui/Snapshot.qml:608
 msgid "key missing"
 msgstr "gakoa falta da"
 
-#: contents/ui/Snapshot.qml:537
+#: contents/ui/Snapshot.qml:610
 msgid "locked"
 msgstr "blokeatuta"
 
-#: contents/ui/Snapshot.qml:539
+#: contents/ui/Snapshot.qml:612
 msgid "unsupported"
 msgstr "onartu gabea"
 
-#: contents/ui/Snapshot.qml:547
+#: contents/ui/Snapshot.qml:620
 msgid "derived"
 msgstr "eratorria"
 
-#: contents/ui/Snapshot.qml:549
+#: contents/ui/Snapshot.qml:622
 msgid "observed"
 msgstr "behatua"
 
-#: contents/ui/Snapshot.qml:551
+#: contents/ui/Snapshot.qml:624
 msgid "declared"
 msgstr "adierazia"
 
-#: contents/ui/Snapshot.qml:558
+#: contents/ui/Snapshot.qml:631
 msgid "No windows to show"
 msgstr "Ez dago erakusteko leihorik"
 
-#: contents/ui/Snapshot.qml:560 contents/ui/SubscriptionRow.qml:195
+#: contents/ui/Snapshot.qml:633 contents/ui/SubscriptionRow.qml:208
 msgid "%1% left"
 msgstr "% %1 geratzen da"
 
-#: contents/ui/SubscriptionRow.qml:244
+#: contents/ui/SubscriptionRow.qml:257
 msgid "Hide models"
 msgstr "Ezkutatu ereduak"
 
-#: contents/ui/SubscriptionRow.qml:244
+#: contents/ui/SubscriptionRow.qml:257
 msgid "Models you can use"
 msgstr "Erabil ditzakezun ereduak"
 
-#: contents/ui/SubscriptionRow.qml:330
+#: contents/ui/SubscriptionRow.qml:343
 msgid "Updating…"
 msgstr "Eguneratzen…"
 
-#: contents/ui/SubscriptionRow.qml:330
+#: contents/ui/SubscriptionRow.qml:343
 msgid "Update models"
 msgstr "Eguneratu ereduak"
 
-#: contents/ui/SubscriptionRow.qml:357
+#: contents/ui/SubscriptionRow.qml:370
 msgid "observed %1"
 msgstr "%1 behatua"
 
@@ -300,39 +324,39 @@ msgid_plural "%1 warnings"
 msgstr[0] "abisu %1"
 msgstr[1] "%1 abisu"
 
-#: contents/ui/configGeneral.qml:27
+#: contents/ui/configGeneral.qml:38
 msgid "Language:"
 msgstr "Hizkuntza:"
 
-#: contents/ui/configGeneral.qml:31
+#: contents/ui/configGeneral.qml:42
 msgid "The desktop's"
 msgstr "Mahaigainekoa"
 
-#: contents/ui/configGeneral.qml:42
+#: contents/ui/configGeneral.qml:53
 msgid "Desktop notifications follow `language` in config.json, or the desktop."
 msgstr "Mahaigaineko jakinarazpenek config.json-eko `language` jarraitzen dute, edo mahaigainekoa."
 
-#: contents/ui/configGeneral.qml:50
+#: contents/ui/configGeneral.qml:61
 msgid "Command:"
 msgstr "Komandoa:"
 
-#: contents/ui/configGeneral.qml:55
+#: contents/ui/configGeneral.qml:66
 msgid "Read the snapshot every (seconds):"
 msgstr "Irakurri argazkia (segundotan):"
 
-#: contents/ui/configGeneral.qml:61
+#: contents/ui/configGeneral.qml:72
 msgid "Show what is left in the panel"
 msgstr "Erakutsi geratzen dena panelean"
 
-#: contents/ui/configGeneral.qml:65
+#: contents/ui/configGeneral.qml:76
 msgid "Subscriptions to show:"
 msgstr "Erakutsi beharreko harpidetzak:"
 
-#: contents/ui/configGeneral.qml:66
+#: contents/ui/configGeneral.qml:77
 msgid "all, in configuration order"
 msgstr "guztiak, konfigurazioaren ordenan"
 
-#: contents/ui/configGeneral.qml:69
+#: contents/ui/configGeneral.qml:80
 msgid "Comma-separated ids, in the order to show them."
 msgstr "Komaz bereizitako identifikatzaileak, erakutsiko diren ordenan."
 
@@ -364,55 +388,55 @@ msgstr "%1 zerbitzuaren API gakoa. Berehala zigilatzen da eta ez da inoiz erakus
 msgid "Current balance of %1, in US dollars:"
 msgstr "%1 zerbitzuaren uneko saldoa, AEBetako dolarretan:"
 
-#: contents/ui/configKeys.qml:146 contents/ui/configSubscriptions.qml:146
+#: contents/ui/configKeys.qml:155 contents/ui/configSubscriptions.qml:155
 msgid "Saved. Reading the subscriptions again…"
 msgstr "Gordeta. Harpidetzak berriro irakurtzen…"
 
-#: contents/ui/configKeys.qml:171
+#: contents/ui/configKeys.qml:180
 msgid "API keys"
 msgstr "API gakoak"
 
-#: contents/ui/configKeys.qml:175
+#: contents/ui/configKeys.qml:184
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
 msgstr "Gakoak elkarrizketa-koadro ezkutu batetik zuzenean doaz `ataecina keys set`-era."
 
-#: contents/ui/configKeys.qml:175
+#: contents/ui/configKeys.qml:184
 msgid "The widget never sees them."
 msgstr "Trepetak ez ditu inoiz ikusten."
 
-#: contents/ui/configKeys.qml:182
+#: contents/ui/configKeys.qml:191
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
 msgstr "kdialog gabe, ezarri gakoak terminal batean: `ataecina keys set <izena>`."
 
-#: contents/ui/configKeys.qml:188
+#: contents/ui/configKeys.qml:197
 msgid "No subscription needs a key."
 msgstr "Ez dago gakoa behar duen harpidetzarik."
 
-#: contents/ui/configKeys.qml:212
+#: contents/ui/configKeys.qml:221
 msgid "Replace key…"
 msgstr "Aldatu gakoa…"
 
-#: contents/ui/configKeys.qml:212 contents/ui/configKeys.qml:274
+#: contents/ui/configKeys.qml:221 contents/ui/configKeys.qml:283
 msgid "Set key…"
 msgstr "Ezarri gakoa…"
 
-#: contents/ui/configKeys.qml:220
+#: contents/ui/configKeys.qml:229
 msgid "Balances"
 msgstr "Saldoak"
 
-#: contents/ui/configKeys.qml:242
+#: contents/ui/configKeys.qml:251
 msgid "Declare balance…"
 msgstr "Adierazi saldoa…"
 
-#: contents/ui/configKeys.qml:249
+#: contents/ui/configKeys.qml:258
 msgid "Intelligence index"
 msgstr "Adimen-indizea"
 
-#: contents/ui/configKeys.qml:253
+#: contents/ui/configKeys.qml:262
 msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key."
 msgstr "Artificial Analysis-en doako gako batek harpidetza bakoitzaren ereduak ordenatzen ditu. `ataecina update`-ek bakarrik erabiltzen du. Gabe, indizea OpenRouter bidez iristen da OpenRouter gakoa baduzu."
 
-#: contents/ui/configKeys.qml:268
+#: contents/ui/configKeys.qml:277
 msgid "Get a key"
 msgstr "Lortu gako bat"
 
@@ -448,47 +472,47 @@ msgstr "IDak letra xeheak, digituak eta marratxoak onartzen ditu."
 msgid "Fill in every field."
 msgstr "Bete eremu guztiak."
 
-#: contents/ui/configSubscriptions.qml:146
+#: contents/ui/configSubscriptions.qml:155
 msgid "Added. Set its key on the Keys page."
 msgstr "Gehituta. Ezarri haren gakoa Gakoak orrian."
 
-#: contents/ui/configSubscriptions.qml:167 contents/config/config.qml:11
+#: contents/ui/configSubscriptions.qml:176 contents/config/config.qml:11
 msgid "Subscriptions"
 msgstr "Harpidetzak"
 
-#: contents/ui/configSubscriptions.qml:171
+#: contents/ui/configSubscriptions.qml:180
 msgid "Two subscriptions of the same provider need different ids, and each its own key."
 msgstr "Hornitzaile bereko bi harpidetzek ID desberdinak behar dituzte, eta bakoitzak bere gakoa."
 
-#: contents/ui/configSubscriptions.qml:197
+#: contents/ui/configSubscriptions.qml:206
 msgid "Remove it"
 msgstr "Kendu"
 
-#: contents/ui/configSubscriptions.qml:197
+#: contents/ui/configSubscriptions.qml:206
 msgid "Remove…"
 msgstr "Kendu…"
 
-#: contents/ui/configSubscriptions.qml:204
+#: contents/ui/configSubscriptions.qml:213
 msgid "Add a subscription"
 msgstr "Gehitu harpidetza bat"
 
-#: contents/ui/configSubscriptions.qml:212
+#: contents/ui/configSubscriptions.qml:221
 msgid "Source:"
 msgstr "Iturria:"
 
-#: contents/ui/configSubscriptions.qml:227
+#: contents/ui/configSubscriptions.qml:236
 msgid "Id:"
 msgstr "IDa:"
 
-#: contents/ui/configSubscriptions.qml:235
+#: contents/ui/configSubscriptions.qml:244
 msgid "Plan (optional):"
 msgstr "Plana (aukerakoa):"
 
-#: contents/ui/configSubscriptions.qml:268
+#: contents/ui/configSubscriptions.qml:277
 msgid "Add"
 msgstr "Gehitu"
 
-#: contents/ui/main.qml:43
+#: contents/ui/main.qml:52
 msgid "Ataecina"
 msgstr "Ataecina"
 

@@ -36,6 +36,16 @@ ColumnLayout {
         cursorShape: Qt.PointingHandCursor
         onClicked: row.unfolded = !row.unfolded
 
+        // Off-peak hours, when the same use costs less, tint the row.
+        Rectangle {
+            objectName: "off-peak-" + row.subscription.id
+            visible: snapshot.offPeak(row.subscription)
+            anchors.fill: parent
+            anchors.margins: -Kirigami.Units.smallSpacing
+            radius: Kirigami.Units.smallSpacing
+            color: Qt.rgba(Kirigami.Theme.positiveTextColor.r, Kirigami.Theme.positiveTextColor.g, Kirigami.Theme.positiveTextColor.b, 0.13)
+        }
+
         RowLayout {
             id: summary
             anchors.fill: parent
@@ -71,6 +81,8 @@ ColumnLayout {
 
                     PlasmaComponents3.Label {
                         text: snapshot.name(row.subscription)
+                        // Red while nothing is left to use.
+                        color: snapshot.exhausted(row.subscription) ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.textColor
                         font.weight: Font.DemiBold
                         font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.15
                     }

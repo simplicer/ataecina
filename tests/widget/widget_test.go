@@ -301,7 +301,10 @@ func contractKeys(t *testing.T) map[string]bool {
 	catalogue := map[string]statusjson.Offerings{"example": {
 		Catalogue: "example", Name: "Example", Models: 2, FreeModels: []statusjson.Model{model}, NewModels: []statusjson.Model{model},
 	}}
-	if err := statusjson.Write(&out, snapshot.StatusAt(at), statusjson.Meta{Version: "0.0.0", GeneratedAt: at, Offerings: catalogue, OfferingsRefreshedAt: at}); err != nil {
+	if err := statusjson.Write(&out, snapshot.StatusAt(at), statusjson.Meta{
+		Version: "0.0.0", GeneratedAt: at, Offerings: catalogue, OfferingsRefreshedAt: at,
+		RatePeriods: map[string]domain.RatePeriod{"example": {Current: domain.RateOffPeak, EndsAt: at, PeakStartsAt: at, PeakEndsAt: at.Add(time.Hour), Benefit: domain.OffPeakHalfCredits}},
+	}); err != nil {
 		t.Fatal(err)
 	}
 	var document any

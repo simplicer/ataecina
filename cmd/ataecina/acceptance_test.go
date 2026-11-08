@@ -294,3 +294,59 @@ func TestCommandLine(t *testing.T) {
 		}
 	}
 }
+
+func TestPeakHoursAreShownWhereThePlanPublishesThem(t *testing.T) {
+	// No key is sealed: zai-api fails before any request, yet its plan's
+	// peak hours are known.
+	w := newWorld(t, `{"version": 1, "subscriptions": [
+	  {"id": "acme", "source": "scripted"},
+	  {"id": "zai", "source": "zai-api"}
+	]}`)
+	w.source.set(fiveHours(10, time.Hour))
+	w.collect()
+	type period struct {
+		Current  string `json:"current"`
+		EndsAt   string `json:"ends_at"`
+		NextPeak struct {
+			StartsAt string `json:"starts_at"`
+			EndsAt   string `json:"ends_at"`
+		} `json:"next_peak"`
+		OffPeakBenefit string `json:"off_peak_benefit"`
+	}
+	periods := func() map[string]*period {
+		_, out, _ := w.run("status", "--json")
+		var doc struct {
+			Data struct {
+				Subscriptions []struct {
+					ID         string  `json:"id"`
+					RatePeriod *period `json:"rate_period"`
+				} `json:"subscriptions"`
+			} `json:"data"`
+		}
+		if err := json.Unmarshal([]byte(out), &doc); err != nil {
+			t.Fatal(err)
+		}
+		found := map[string]*period{}
+		for _, s := range doc.Data.Subscriptions {
+			found[s.ID] = s.RatePeriod
+		}
+		return found
+	}
+	// Friday 19:40 UTC: Z.ai's peak (06:00 to 10:00 UTC on weekdays) is over
+	// until Monday.
+	friday := periods()
+	if friday["acme"] != nil {
+		t.Fatalf("acme = %+v", friday["acme"])
+	}
+	zai := friday["zai"]
+	if zai == nil || zai.Current != "OFF_PEAK" || zai.EndsAt != "2026-11-09T06:00:00Z" || zai.NextPeak.EndsAt != "2026-11-09T10:00:00Z" || zai.OffPeakBenefit != "HALF_CREDITS" {
+		t.Fatalf("zai on Friday = %+v", zai)
+	}
+	w.clock.advance(59*time.Hour + 20*time.Minute) // Monday 07:00 UTC
+	if monday := periods()["zai"]; monday == nil || monday.Current != "PEAK" || monday.EndsAt != "2026-11-09T10:00:00Z" {
+		t.Fatalf("zai on Monday = %+v", monday)
+	}
+	if _, table, _ := w.run(); !strings.Contains(table, "peak until") {
+		t.Fatalf("table:\n%s", table)
+	}
+}

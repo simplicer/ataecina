@@ -204,3 +204,44 @@ func TestWriteFailuresAreReported(t *testing.T) {
 		t.Fatal("a failed write must be reported")
 	}
 }
+
+func TestTheRatePeriodIsShownWhereThePlanPublishesPeakHours(t *testing.T) {
+	start, end := time.Date(2026, 11, 9, 6, 0, 0, 0, time.UTC), time.Date(2026, 11, 9, 10, 0, 0, 0, time.UTC)
+	about := statusjson.Meta{Version: "x", GeneratedAt: taken, RatePeriods: map[string]domain.RatePeriod{
+		"openrouter": {Current: domain.RateOffPeak, EndsAt: start, PeakStartsAt: start, PeakEndsAt: end, Benefit: domain.OffPeakHalfCredits},
+	}}
+	var out bytes.Buffer
+	if err := statusjson.Write(&out, report(t), about); err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Data struct {
+			Subscriptions []struct {
+				RatePeriod *struct {
+					Current  string `json:"current"`
+					EndsAt   string `json:"ends_at"`
+					NextPeak struct {
+						StartsAt string `json:"starts_at"`
+						EndsAt   string `json:"ends_at"`
+					} `json:"next_peak"`
+					OffPeakBenefit string `json:"off_peak_benefit"`
+				} `json:"rate_period"`
+			} `json:"subscriptions"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &doc); err != nil {
+		t.Fatal(err)
+	}
+	claude, openrouter := doc.Data.Subscriptions[0], doc.Data.Subscriptions[1]
+	if claude.RatePeriod != nil {
+		t.Fatalf("claude = %+v", claude.RatePeriod)
+	}
+	period := openrouter.RatePeriod
+	if period == nil || period.Current != "OFF_PEAK" || period.EndsAt != "2026-11-09T06:00:00Z" ||
+		period.NextPeak.StartsAt != "2026-11-09T06:00:00Z" || period.NextPeak.EndsAt != "2026-11-09T10:00:00Z" || period.OffPeakBenefit != "HALF_CREDITS" {
+		t.Fatalf("rate period = %+v", period)
+	}
+	if !strings.Contains(out.String(), `"rate_period": null`) {
+		t.Fatal("a plan without peak hours must say null")
+	}
+}

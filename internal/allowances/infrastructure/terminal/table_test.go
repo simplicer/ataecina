@@ -28,7 +28,7 @@ func render(t *testing.T, now time.Time, colourful bool, readings ...domain.Read
 		t.Fatal(err)
 	}
 	var out bytes.Buffer
-	if err := terminal.Render(&out, snapshot.StatusAt(now), now, colourful); err != nil {
+	if err := terminal.Render(&out, snapshot.StatusAt(now), now, nil, colourful); err != nil {
 		t.Fatal(err)
 	}
 	return out.String()
@@ -146,7 +146,7 @@ func TestColoursMarkSeverityOnlyOnATerminal(t *testing.T) {
 
 func TestBeforeTheFirstCollection(t *testing.T) {
 	var out bytes.Buffer
-	if err := terminal.Render(&out, domain.Snapshot{}.StatusAt(taken), taken, false); err != nil {
+	if err := terminal.Render(&out, domain.Snapshot{}.StatusAt(taken), taken, nil, false); err != nil {
 		t.Fatal(err)
 	}
 	if !strings.Contains(out.String(), "No snapshot yet") {
@@ -158,5 +158,36 @@ func TestAgeOfAnOldSnapshot(t *testing.T) {
 	out := render(t, taken.Add(26*time.Minute), false)
 	if !strings.HasPrefix(out, "Ataecina · updated 26m ago") {
 		t.Fatalf("out = %q", out)
+	}
+}
+
+func TestTheTableSaysWhenOffPeakEnds(t *testing.T) {
+	local := time.Local
+	time.Local = time.UTC
+	t.Cleanup(func() { time.Local = local })
+	readings := sample(t)
+	snapshot, err := domain.NewSnapshot(taken, 5*time.Minute, readings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	first := readings[0].Subscription().String()
+	end := taken.Add(2 * time.Hour)
+	periods := map[string]domain.RatePeriod{
+		first: {Current: domain.RateOffPeak, EndsAt: taken.Add(time.Hour), PeakStartsAt: taken.Add(time.Hour), PeakEndsAt: end, Benefit: domain.OffPeakHalfCredits},
+	}
+	var out bytes.Buffer
+	if err := terminal.Render(&out, snapshot.StatusAt(taken), taken, periods, false); err != nil {
+		t.Fatal(err)
+	}
+	if want := "off-peak until " + taken.Add(time.Hour).Format("15:04"); !strings.Contains(out.String(), want) {
+		t.Fatalf("missing %q:\n%s", want, out.String())
+	}
+	periods[first] = domain.RatePeriod{Current: domain.RatePeak, EndsAt: taken.Add(72 * time.Hour), Benefit: domain.OffPeakHalfCredits}
+	out.Reset()
+	if err := terminal.Render(&out, snapshot.StatusAt(taken), taken, periods, false); err != nil {
+		t.Fatal(err)
+	}
+	if want := "peak until " + taken.Add(72*time.Hour).Format("Mon 15:04"); !strings.Contains(out.String(), want) {
+		t.Fatalf("missing %q:\n%s", want, out.String())
 	}
 }
