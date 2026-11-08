@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.21.1-unstable] - 2026-11-08
+
+### Fixed
+
+- Ollama Cloud works again: `ollama-api` expected session and weekly
+  fractions that the usage API no longer gives, so it read as broken. It
+  now reads Ollama's documented balance: the included credit left this
+  period, the allowance and when it renews (or the five-hour and weekly
+  windows of legacy plans), plus any purchased credit.
+
 ## [0.21.0-unstable] - 2026-11-08
 
 ### Added

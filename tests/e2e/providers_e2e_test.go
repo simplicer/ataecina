@@ -26,7 +26,7 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		"/alpha/billing/credits":             "commandcodeapi/testdata/credits.json",
 		"/alpha/usage/summary":               "commandcodeapi/testdata/summary.json",
 		"/alpha/billing/subscriptions":       "commandcodeapi/testdata/subscriptions.json",
-		"/api/usage":                         "ollamaapi/testdata/usage.json",
+		"/api/balance":                       "ollamaapi/testdata/balance.json",
 		"/v1/dashboard/billing/subscription": "orcarouterapi/testdata/subscription.json",
 		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
 		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
@@ -137,7 +137,7 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	if command := subscriptions[byID["commandcode"]]; *command.Plan != "INDIVIDUAL_PRO" || len(command.Meters) != 3 {
 		t.Fatalf("commandcode = %+v", command)
 	}
-	if ollama := subscriptions[byID["ollama"]]; len(ollama.Meters) != 2 || ollama.Meters[1].UsedPercent != 41 {
+	if ollama := subscriptions[byID["ollama"]]; len(ollama.Meters) != 1 || ollama.Meters[0].UsedPercent != 25 || ollama.Balance == nil || ollama.Balance.Remaining.Amount != 50.5 {
 		t.Fatalf("ollama = %+v", ollama)
 	}
 	if b := subscriptions[byID["orca"]].Balance; b == nil || b.Remaining.Amount != 8.42 {

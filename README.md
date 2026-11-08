@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.21.0-unstable` — early development: everything below
+**Current version:** `0.21.1-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -105,7 +105,7 @@ hints the collector writes are in English. Translations are welcome
 | Orca Router | allowance left and spent | Orca Router billing API | API key | reported | verified |
 | OpenCode Zen | balance left | your declared balance minus the cost `opencode stats` records | none | derived | verified |
 | OpenCode Go, OpenCode Console budgets | rolling, weekly and monthly Go windows; what is left of each budget | official `opencode api experimental.usage.limits` | OpenCode's own sign-in to the Console | reported | to verify |
-| Ollama Cloud | session and weekly usage | ollama.com usage API (undocumented) | API key | reported | adapter needs a fix |
+| Ollama Cloud | included credit left this period and its renewal (5-hour and weekly windows on legacy plans), purchased credit | ollama.com balance API | API key | reported | verified |
 | Cloudflare Workers AI | neurons used today of the free 10 000 | Cloudflare GraphQL Analytics | analytics-only token + account id | reported | to verify |
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
 | Alibaba Model Studio Token Plan | 5-hour, weekly and monthly windows | official `bl usage token-plan` | `bl`'s own login | reported | to verify |

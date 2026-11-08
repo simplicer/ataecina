@@ -69,7 +69,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
 | `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --all --models --limit 1000 --json --standalone` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` to date, against the declared balance (§3.4) | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape and `--standalone` to verify |
 | `opencode-console` | OpenCode Go, OpenCode Console budgets | official CLI | `opencode api experimental.usage.limits --standalone` (fixed argv, no shell) (§3.4) | OpenCode's own sign-in to an OpenCode Console workspace | `data` (null when signed out); `data.go.{rolling,weekly,monthly}.{percent,limited,resetsAt}`; `data.budgets[].{limit,spent,resetsAt}` | experimental operation of OpenCode's local server, schema in the opencode 2.2.5 binary | REPORTED | local 2026-11-08 (signed-out answer); Go and budgets to verify |
-| `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/usage` (§3.3) | Ollama API key (`Authorization: Bearer`) | `limits.session.usage`, `limits.weekly.usage` (fraction 0–1 of the cap); monthly-credit plans: fields to verify | no (called by the ollama.com web page) | REPORTED | third-party 2026-11-06; live to verify |
+| `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/balance` (§3.3) | Ollama API key (`Authorization: Bearer`) | `included.{balance_usd, allowance_usd, period.until}`; legacy plans `included.{session, weekly}.{remaining_percent, resets_at}`; `purchased.balance_usd` | yes (docs.ollama.com/api/balance) | REPORTED | docs and live 2026-11-08 (credit plan) |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
 | `cloudflare-api` | Cloudflare Workers AI | provider API | `https://api.cloudflare.com/client/v4/graphql` (GraphQL Analytics, one fixed query) (§3.3) | API token with *Account Analytics: Read* only, plus the account id | `aiInferenceAdaptiveGroups` → `sum.totalNeurons` for the current UTC day, against the published 10 000 neurons/day allocation | yes (GraphQL Analytics API; dataset fields to verify) | REPORTED | docs and third-party 2026-11-06; live to verify |
@@ -248,16 +248,31 @@ capped, a timeout. The collector unit's `PATH` can be extended with a
 drop-in when `gh` or `bl` live elsewhere.
 
 **`ollama-api` (Ollama Cloud).** The `ollama` CLI (0.31.1) has no usage
-command. The ollama.com usage page reads `GET https://ollama.com/api/usage`,
-which accepts the owner's Ollama API key as `Authorization: Bearer` (an
-`X-API-Key` header is rejected). It returns `limits.session.usage` and
-`limits.weekly.usage` as a fraction of the cap (0–1, shown ×100) and no exact
-reset instant, so those meters are `FIVE_HOURS` and `WEEKLY` with an unknown
-`resets_at`; either may be missing, not both. Plans started after 2026-08-31
-replace both windows with a monthly credit allowance that renews on the
-subscription day; its fields are to verify, and until then such an answer
-reads as `BROKEN` (`CONTRACT_CHANGED`). The same key can spend credits, so it
-is sealed like any other key.
+command. Ollama documents `GET https://ollama.com/api/balance` with the
+owner's API key as `Authorization: Bearer` (no query; 10 requests per minute
+per user, shared by all keys; errors are `{ "error": … }` with `400`, `401`,
+`403`, `429` with `Retry-After`, or `503`). Read live on 2026-11-08:
+
+- **credit plans** (every plan started since 2026-08-31: Pro $60 and Max
+  $300 of included usage a month, renewed on the subscription day; it does
+  not roll over and is spent before purchased credit) answer `"included": {
+  "balance_usd", "allowance_usd", "period": { "from", "until" } }` (RFC 3339,
+  `until` exclusive: the renewal). Ataecina shows a `BILLING_CYCLE` meter
+  `(allowance_usd − balance_usd) ÷ allowance_usd`, reborn at `until`, and the
+  balance: spent = `allowance_usd − balance_usd`, left = `balance_usd` plus
+  any purchased credit;
+- **legacy plans** (Pro and Max subscribed before then) answer `"included":
+  { "session", "weekly" }`, each `{ "remaining_percent": 0–100, "resets_at" }`
+  → `FIVE_HOURS` and `WEEKLY` meters, used = 100 − `remaining_percent`;
+- `"purchased": { "balance_usd" }` is purchased credit not yet expired
+  (pay-as-you-go accounts have only this), added to the money left;
+- an answer with none of these figures, a negative amount, a percentage
+  outside 0–100 or an instant that is not RFC 3339 is `CONTRACT_CHANGED`.
+
+`GET /api/usage` (documented too) is a usage history, not a balance:
+`range` `24h`, `7d` or `30d`, daily or hourly buckets of `usage_usd`, tokens
+and requests; Ataecina does not read it. The same key can spend credits, so
+it is sealed like any other key.
 
 **`copilot-gh` (GitHub Copilot).** The Copilot CLI shows usage only inside a
 session (`/usage`). GitHub publishes a per-user billing report:
