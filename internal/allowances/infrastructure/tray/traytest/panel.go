@@ -27,12 +27,14 @@ type Watcher struct {
 func StartWatcher(t testing.TB, address string) *Watcher {
 	t.Helper()
 	conn := connect(t, address)
-	if reply, err := conn.RequestName(watcherName, dbus.NameFlagDoNotQueue); err != nil || reply != dbus.RequestNameReplyPrimaryOwner {
-		t.Fatalf("claim %s: %v", watcherName, err)
-	}
+	// Like a real watcher, the object exists before the name is claimed:
+	// a tray that sees the name can register at once.
 	w := &Watcher{registered: make(chan string, 8)}
 	if err := conn.Export(w, "/StatusNotifierWatcher", watcherName); err != nil {
 		t.Fatal(err)
+	}
+	if reply, err := conn.RequestName(watcherName, dbus.NameFlagDoNotQueue); err != nil || reply != dbus.RequestNameReplyPrimaryOwner {
+		t.Fatalf("claim %s: %v", watcherName, err)
 	}
 	return w
 }

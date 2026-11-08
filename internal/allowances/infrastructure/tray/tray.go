@@ -84,7 +84,9 @@ func (t *Tray) Run(ctx context.Context, conn *dbus.Conn) error {
 	}
 
 	t.update(conn, properties)
+	registered := true
 	if err := register(ctx, conn, name); err != nil {
+		registered = false
 		t.warn("no StatusNotifierWatcher on the session bus yet (%v); the icon appears when the panel provides one", err)
 	}
 
@@ -97,6 +99,11 @@ func (t *Tray) Run(ctx context.Context, conn *dbus.Conn) error {
 			return nil
 		case <-ticker.C:
 			t.update(conn, properties)
+			// A watcher that appeared unseen (before the match took
+			// effect) is found on the next tick.
+			if !registered {
+				registered = register(ctx, conn, name) == nil
+			}
 		case <-reread:
 			reread = nil
 			t.update(conn, properties)
@@ -116,7 +123,9 @@ func (t *Tray) Run(ctx context.Context, conn *dbus.Conn) error {
 				return errors.New("the session bus connection closed")
 			}
 			if watcherAppeared(signal) {
-				if err := register(ctx, conn, name); err != nil {
+				err := register(ctx, conn, name)
+				registered = err == nil
+				if err != nil {
 					t.warn("register with the StatusNotifierWatcher: %v", err)
 				}
 			}

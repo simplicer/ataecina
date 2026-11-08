@@ -8,6 +8,14 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.30.1-unstable] - 2026-11-08
+
+### Fixed
+
+- The tray registers its icon even when the panel's watcher appears at an
+  unlucky moment: it tries again on every tick until registered, instead
+  of waiting for a signal it may have missed.
+
 ## [0.30.0-unstable] - 2026-11-08
 
 ### Added
