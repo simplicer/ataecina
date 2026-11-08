@@ -8,6 +8,14 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.20.4-unstable] - 2026-11-08
+
+### Fixed
+
+- A rejected key reads "key rejected" in the widget's warnings and
+  details, not "key missing" (the outcome is `KEY_MISSING`; the error class
+  `KEY_REJECTED` tells them apart).
+
 ## [0.20.3-unstable] - 2026-11-08
 
 ### Fixed

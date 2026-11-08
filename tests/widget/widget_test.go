@@ -31,7 +31,6 @@ var (
 	settingEdited  = regexp.MustCompile(`property alias cfg_(\w+)`)
 	settingEntry   = regexp.MustCompile(`entry name="(\w+)"`)
 	translatable   = regexp.MustCompile(`\bi18np?\("((?:[^"\\]|\\.)*)"`)
-	poEntry        = regexp.MustCompile(`(?m)^msgid "(.+)"\n(?:msgid_plural ".*"\n)?msgstr(?:\[0\])? "(.*)"$`)
 	importLine     = regexp.MustCompile(`(?m)^import .*$`)
 	declaredName   = regexp.MustCompile(`(?:function|property \w+|property alias|id:|const|let)\s+(\w+)`)
 	parameterList  = regexp.MustCompile(`function\s*\w*\s*\(([^)]*)\)`)
@@ -193,17 +192,6 @@ func TestTheQMLIsBalanced(t *testing.T) {
 	}
 }
 
-// messages returns the msgid → msgstr pairs of a PO file; plural entries
-// are keyed by their singular msgid and keep their first non-empty form.
-func messages(t *testing.T, path string) map[string]string {
-	t.Helper()
-	found := map[string]string{}
-	for _, match := range poEntry.FindAllStringSubmatch(read(t, path), -1) {
-		found[match[1]] = match[2]
-	}
-	return found
-}
-
 var (
 	poField        = regexp.MustCompile(`^(msgid|msgid_plural|msgstr(?:\[\d+\])?) "(.*)"$`)
 	poContinuation = regexp.MustCompile(`^"(.*)"$`)
@@ -260,8 +248,8 @@ func TestNoTranslationJoinsAnother(t *testing.T) {
 }
 
 func TestEveryStringIsInTheTemplateAndTranslated(t *testing.T) {
-	template := messages(t, plasmoid+"/translate/template.pot")
-	spanish := messages(t, plasmoid+"/translate/es.po")
+	template := fullMessages(t, plasmoid+"/translate/template.pot")
+	spanish := fullMessages(t, plasmoid+"/translate/es.po")
 	used := map[string]bool{}
 	for path, source := range qmlFiles(t) {
 		for _, match := range translatable.FindAllStringSubmatch(source, -1) {

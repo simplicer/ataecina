@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-07 12:24+0100\n"
+"POT-Creation-Date: 2026-11-08 09:39+0100\n"
 "PO-Revision-Date: 2026-11-06 00:00+0000\n"
 "Last-Translator: Antonio Villamarín\n"
 "Language-Team: Spanish\n"
@@ -41,80 +41,82 @@ msgstr "todas, en el orden de la configuración"
 msgid "Comma-separated ids, in the order to show them."
 msgstr "Identificadores separados por comas, en el orden en que se muestran."
 
-#: contents/ui/configKeys.qml:45
+#: contents/ui/configKeys.qml:46 contents/ui/Snapshot.qml:391
 msgid "key rejected"
 msgstr "clave rechazada"
 
-#: contents/ui/configKeys.qml:48
+#: contents/ui/configKeys.qml:49
 msgid "no key"
 msgstr "sin clave"
 
-#: contents/ui/configKeys.qml:51
+#: contents/ui/configKeys.qml:52
 msgid "works"
 msgstr "funciona"
 
-#: contents/ui/configKeys.qml:54
+#: contents/ui/configKeys.qml:55
 msgid "key accepted, answer not understood"
 msgstr "clave aceptada, respuesta no entendida"
 
-#: contents/ui/configKeys.qml:56
+#: contents/ui/configKeys.qml:57
 msgid "not read yet"
 msgstr "aún sin leer"
 
-#: contents/ui/configKeys.qml:75 contents/ui/Snapshot.qml:239
+#: contents/ui/configKeys.qml:77
+msgid "no balance declared"
+msgstr "sin saldo declarado"
+
+#: contents/ui/configKeys.qml:79 contents/ui/Snapshot.qml:239
 #: contents/ui/Snapshot.qml:377
 msgid "%1 left"
 msgstr "quedan %1"
 
-#: contents/ui/configKeys.qml:75
-msgid "no balance declared"
-msgstr "sin saldo declarado"
-
-#: contents/ui/configKeys.qml:82
+#: contents/ui/configKeys.qml:86
 msgid "API key for %1. It is sealed at once and never shown."
 msgstr "Clave API de %1. Se sella al momento y nunca se muestra."
 
-#: contents/ui/configKeys.qml:90
+#: contents/ui/configKeys.qml:94
 msgid "Current balance of %1, in US dollars:"
 msgstr "Saldo actual de %1, en dólares estadounidenses:"
 
-#: contents/ui/configKeys.qml:125
+#: contents/ui/configKeys.qml:129
 msgid "Saved. Reading the subscriptions again…"
 msgstr "Guardado. Leyendo de nuevo las suscripciones…"
 
-#: contents/ui/configKeys.qml:149
+#: contents/ui/configKeys.qml:153
 msgid "API keys"
 msgstr "Claves API"
 
-#: contents/ui/configKeys.qml:153
+#: contents/ui/configKeys.qml:157
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
-msgstr "Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
+msgstr ""
+"Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
 
-#: contents/ui/configKeys.qml:153
+#: contents/ui/configKeys.qml:157
 msgid "The widget never sees them."
 msgstr "El widget nunca las ve."
 
-#: contents/ui/configKeys.qml:160
+#: contents/ui/configKeys.qml:164
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
-msgstr "Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
+msgstr ""
+"Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
 
-#: contents/ui/configKeys.qml:166
+#: contents/ui/configKeys.qml:170
 msgid "No subscription needs a key."
 msgstr "Ninguna suscripción necesita clave."
 
-#: contents/ui/configKeys.qml:190
+#: contents/ui/configKeys.qml:194
 msgid "Replace key…"
 msgstr "Cambiar clave…"
 
-#: contents/ui/configKeys.qml:190
+#: contents/ui/configKeys.qml:194
 msgid "Set key…"
 msgstr "Poner clave…"
 
-#: contents/ui/configKeys.qml:198
+#: contents/ui/configKeys.qml:202
 msgid "Balances"
 msgstr "Saldos"
 
-#: contents/ui/configKeys.qml:220
+#: contents/ui/configKeys.qml:224
 msgid "Declare balance…"
 msgstr "Declarar saldo…"
 
@@ -131,11 +133,11 @@ msgstr "Actualizar ahora"
 msgid "Configure Ataecina…"
 msgstr "Configurar Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:130 contents/ui/Snapshot.qml:420
+#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:424
 msgid "No snapshot yet"
 msgstr "Aún no hay instantánea"
 
-#: contents/ui/FullRepresentation.qml:131
+#: contents/ui/FullRepresentation.qml:133
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr "Ejecuta `ataecina collect` o activa ataecina-collect.timer."
 
@@ -255,51 +257,51 @@ msgstr "créditos ilimitados"
 msgid "%1 credits"
 msgstr "%1 créditos"
 
-#: contents/ui/Snapshot.qml:391
+#: contents/ui/Snapshot.qml:395
 msgid "partial"
 msgstr "parcial"
 
-#: contents/ui/Snapshot.qml:393
+#: contents/ui/Snapshot.qml:397
 msgid "broken"
 msgstr "roto"
 
-#: contents/ui/Snapshot.qml:395
+#: contents/ui/Snapshot.qml:399
 msgid "unavailable"
 msgstr "no disponible"
 
-#: contents/ui/Snapshot.qml:397
+#: contents/ui/Snapshot.qml:401
 msgid "key missing"
 msgstr "falta la clave"
 
-#: contents/ui/Snapshot.qml:399
+#: contents/ui/Snapshot.qml:403
 msgid "locked"
 msgstr "bloqueado"
 
-#: contents/ui/Snapshot.qml:401
+#: contents/ui/Snapshot.qml:405
 msgid "unsupported"
 msgstr "no soportado"
 
-#: contents/ui/Snapshot.qml:409
+#: contents/ui/Snapshot.qml:413
 msgid "derived"
 msgstr "derivado"
 
-#: contents/ui/Snapshot.qml:411
+#: contents/ui/Snapshot.qml:415
 msgid "observed"
 msgstr "observado"
 
-#: contents/ui/Snapshot.qml:413
+#: contents/ui/Snapshot.qml:417
 msgid "declared"
 msgstr "declarado"
 
-#: contents/ui/Snapshot.qml:420
+#: contents/ui/Snapshot.qml:424
 msgid "No windows to show"
 msgstr "No hay ventanas que mostrar"
 
-#: contents/ui/Snapshot.qml:422 contents/ui/SubscriptionRow.qml:192
+#: contents/ui/Snapshot.qml:426 contents/ui/SubscriptionRow.qml:192
 msgid "%1 % left"
 msgstr "quedan %1 %"
 
-#: contents/ui/SubscriptionRow.qml:227
+#: contents/ui/SubscriptionRow.qml:228
 msgid "observed %1"
 msgstr "observado %1"
 

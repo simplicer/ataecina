@@ -386,6 +386,10 @@ QtObject {
     }
 
     function outcomeText(subscription) {
+        // A rejected key also reads KEY_MISSING; its error class tells them apart.
+        if (subscription.error_class === "KEY_REJECTED") {
+            return i18n("key rejected");
+        }
         switch (subscription.outcome) {
         case "PARTIAL":
             return i18n("partial");
