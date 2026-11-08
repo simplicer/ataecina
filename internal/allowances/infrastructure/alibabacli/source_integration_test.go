@@ -42,6 +42,24 @@ func fakeBl(t *testing.T, answer string, fail bool) (alibabacli.Source, string) 
 	return alibabacli.New(func() (string, error) { return bl, nil }, func() time.Time { return now }), journal
 }
 
+func TestTheCodingPlanIsReadThroughBl(t *testing.T) {
+	_, journal := fakeBl(t, string(read(t, "coding-plan.json")), false)
+	bl, _ := filepath.Abs("../../../../tests/e2e/testdata/fake-bl")
+	source := alibabacli.NewCodingPlan(func() (string, error) { return bl, nil }, func() time.Time { return now })
+	coding := domain.NewSubscription("alibaba-coding", "alibaba", "alibaba-coding-cli", domain.FidelityReported, "")
+	reading, err := source.Read(context.Background(), coding)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if meters := reading.Meters(); len(meters) != 3 || meters[0].Used() != 38 || meters[2].Used() != 10 || reading.Plan() != "PRO" {
+		t.Fatalf("plan %q, meters %+v", reading.Plan(), meters)
+	}
+	called, _ := os.ReadFile(journal)
+	if strings.TrimSpace(string(called)) != "usage coding-plan --output json" {
+		t.Fatalf("bl was called with %q", called)
+	}
+}
+
 func TestTheTokenPlanIsReadThroughBl(t *testing.T) {
 	source, journal := fakeBl(t, string(read(t, "token-plan.json")), false)
 	reading, err := source.Read(context.Background(), subscription)

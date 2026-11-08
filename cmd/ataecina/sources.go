@@ -137,6 +137,9 @@ func standardSources() sourceRegistry {
 		alibabacli.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			return alibabacli.New(pathlookup.Find("bl", c.env.getenv("PATH")), c.env.clock.Now)
 		},
+		alibabacli.CodingPlanSourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
+			return alibabacli.NewCodingPlan(pathlookup.Find("bl", c.env.getenv("PATH")), c.env.clock.Now)
+		},
 		claudestatusline.SourceID: func(_ configfile.SubscriptionSettings, c collection) domain.Source {
 			// collect has already required the runtime directory.
 			runtimeDir, _ := c.paths.RuntimeDir()

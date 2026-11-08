@@ -8,6 +8,21 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.25.0-unstable] - 2026-11-08
+
+### Added
+
+- `alibaba-coding-cli`: the Alibaba Model Studio Coding Plan (5-hour,
+  weekly and monthly requests, and the plan) through the official
+  `bl usage coding-plan`.
+
+### Changed
+
+- `alibaba-cli` reads every Token Plan window `bl` reports, found by
+  name as `bl` does, instead of a fixed list; its hint names
+  `bl auth login --console`. Model Studio has no quota API for the plan's
+  key, so `bl` stays the way to read it.
+
 ## [0.24.0-unstable] - 2026-11-08
 
 ### Added

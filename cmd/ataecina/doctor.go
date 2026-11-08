@@ -159,7 +159,7 @@ func toolsOf(source string, appServer bool) []string {
 		return []string{"opencode"}
 	case source == "copilot-gh":
 		return []string{"gh"}
-	case source == "alibaba-cli":
+	case source == "alibaba-cli" || source == "alibaba-coding-cli":
 		return []string{"bl"}
 	}
 	return nil

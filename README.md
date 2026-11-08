@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.24.0-unstable` — early development: everything below
+**Current version:** `0.25.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -116,7 +116,8 @@ hints the collector writes are in English. Translations are welcome
 | Cursor Teams / Enterprise | your on-demand spending against your limit this cycle | Cursor Admin API | team Admin API key + your e-mail | reported | to verify |
 | Cloudflare Workers AI | neurons used today of the free 10 000 | Cloudflare GraphQL Analytics | analytics-only token + account id | reported | to verify |
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
-| Alibaba Model Studio Token Plan | 5-hour, weekly and monthly windows | official `bl usage token-plan` | `bl`'s own login | reported | to verify |
+| Alibaba Model Studio Token Plan | every window the plan reports (5-hour, weekly, monthly…) | official `bl usage token-plan` | `bl`'s own console login | reported | to verify |
+| Alibaba Model Studio Coding Plan | 5-hour, weekly and monthly requests, plan | official `bl usage coding-plan` | `bl`'s own console login | reported | to verify |
 | Free tiers served by [Heimdall](https://codeberg.org/simplicer/heimdall) (Gemini keys, NVIDIA, Groq…) | cooldowns and resets observed while serving | Heimdall admin API on loopback | Heimdall admin token | observed | waits for Heimdall |
 | Gemini CLI (Google account), Qwen Code (Qwen OAuth) | — | nothing readable without the tool's login token | — | — | unsupported |
 | Cursor individual plans, Windsurf, SuperGrok | — | usage only behind the dashboard's session; no API key or CLI gives it | — | — | unsupported |

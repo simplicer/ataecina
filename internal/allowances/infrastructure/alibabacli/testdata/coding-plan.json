@@ -1,0 +1,6 @@
+{
+  "instanceType": "pro",
+  "per5Hour": { "usedQuota": 2280, "totalQuota": 6000, "percentage": 0.38, "resetTime": 1793995200000 },
+  "perWeek": { "usedQuota": 9000, "totalQuota": 45000, "percentage": 0.2, "resetTime": 1794499200000 },
+  "perBillMonth": { "usedQuota": 9000, "totalQuota": 90000, "resetTime": 1795795200000 }
+}

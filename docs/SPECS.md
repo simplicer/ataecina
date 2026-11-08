@@ -67,7 +67,8 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED | local 2026-11-06; live to verify |
 | `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` (§3.5) | API key (`Bearer`, to verify) | `data.limits[]` of type `TOKENS_LIMIT`/`CREDIT_LIMIT`: `unit`, `number`, `percentage`, `nextResetTime`; `data.level` | no | REPORTED | third-party 2026-11-06; live to verify |
 | `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (§3.5) | Token Plan key (`Bearer`) | `model_remains[]`: interval and weekly totals, counts (remaining), `*_remaining_percent`, start/end times; `base_resp.status_code` | no | REPORTED | third-party 2026-11-06; live to verify |
-| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) (§3.3) | `bl`'s own login | `per5Hour`/`per1Week`/`per1Month` `Percentage` (used fraction 0–1) and `ResetTime` (epoch ms), `hasQuotaData` | yes (Model Studio docs; field names third-party) | REPORTED | docs and third-party 2026-11-06; `bl` not installed, to verify |
+| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) (§3.3) | `bl`'s own console login (`bl auth login --console`) | every `per<N><Hour|Day|Week|Month>Percentage` (used fraction 0–1) and `…ResetTime` (epoch ms), `hasQuotaData` | yes (Model Studio docs; field names in bl's source) | REPORTED | docs and bl source 2026-11-08; `bl` not installed, to verify |
+| `alibaba-coding-cli` | Alibaba Model Studio Coding Plan | official CLI | `bl usage coding-plan --output json` (fixed argv, no shell) (§3.3) | `bl`'s own console login | `instanceType`; `per5Hour`, `perWeek`, `perBillMonth`: `usedQuota`, `totalQuota`, `percentage` (used fraction), `resetTime` (epoch ms) | yes (Model Studio docs; field names in bl's source) | REPORTED | docs and bl source 2026-11-08; to verify |
 | `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/usage/summary`, `/alpha/billing/subscriptions` (§3.5) | API key (`Bearer`) | `credits.{monthly,purchased,free}Credits`, `windowLimits.{fiveHour,weekly}.{used,cap,resetAt}`, `totalCost`, `data.{planId,currentPeriodEnd}` | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
 | `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` (§3.5) | API key (`Bearer`; `/credits` may need a management key) | `data.{usage,limit,limit_remaining,free_model_daily_requests}`, `data.{total_credits,total_usage}` | yes | REPORTED | docs 2026-11-06 |
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
@@ -307,19 +308,34 @@ a 15 s timeout and 1 MiB of output at most. The user report only covers
 plans the owner pays personally; the AI-credit report path is still to
 verify, so AI-credit plans may read as an empty month.
 
-**`alibaba-cli` (Alibaba Model Studio Token Plan).** The Model Studio docs
-list `bl usage token-plan` for the Token Plan quota and `--output json`,
-whose `hasQuotaData` separates "no quota data" from a normal answer.
-Third-party clients report a flat object whose windows depend on the `bl`
-version: `per5HourPercentage`/`per5HourResetTime` and
-`per1WeekPercentage`/`per1WeekResetTime` (bl 1.x), `per1MonthPercentage`/
-`per1MonthResetTime` (bl 2.2); percentages are used fractions (0–1) and
-reset times epoch milliseconds. Ataecina reads every window present
-(`FIVE_HOURS`, `WEEKLY`, `MONTHLY`); none at all is `CONTRACT_CHANGED`,
-`hasQuotaData: false` is `UNAVAILABLE`. `bl` runs with a fixed argv, no
-shell, `NO_COLOR=1`, a 15 s timeout and 64 KiB of output at most; it keeps
-its own login. Team accounts that need `--region`/`--site` flags are not
-handled yet.
+**`alibaba-cli` and `alibaba-coding-cli` (Alibaba Model Studio).** Model
+Studio has no quota API for the plan's API key (`sk-sp-…` keys only serve
+inference on `coding-intl.dashscope.aliyuncs.com`); the official Bailian
+CLI `bl` (Apache-2.0, checked against bl 2.8.0) reads the quota through
+the Model Studio console with its own console login (`bl auth login
+--console`, once, in a browser). Ataecina runs `bl` with a fixed argv, no
+shell, `NO_COLOR=1`, a 15 s timeout and 64 KiB of output at most, and never
+calls the console gateway itself nor reads bl's configuration.
+
+- **Token Plan** (`bl usage token-plan --output json`): one flat object
+  whose windows depend on the plan and the bl version; Ataecina reads every
+  `per<N><Hour|Day|Week|Month>Percentage` (a used fraction, 0–1) with its
+  `…ResetTime` (epoch ms), as bl itself does: hours, days and weeks by
+  length (5 hours → `FIVE_HOURS`, 1 day → `DAILY`, 1 week → `WEEKLY`,
+  others `OTHER`), `per1Month…` → `MONTHLY`; longer calendar spans are
+  skipped. `hasQuotaData: false` is `UNAVAILABLE`; no window at all is
+  `CONTRACT_CHANGED`.
+- **Coding Plan** (`bl usage coding-plan --output json`): `instanceType`
+  (the plan: `lite`, `pro`) and `per5Hour`, `perWeek`, `perBillMonth`, each
+  `{ "usedQuota", "totalQuota", "percentage", "resetTime" }` in requests;
+  `percentage` (else `usedQuota ÷ totalQuota`) gives `FIVE_HOURS`,
+  `WEEKLY` and `BILLING_CYCLE` meters. Published limits (2026-11-04): Pro,
+  $50 a month, 6 000 requests per 5 hours (rolling), 45 000 per week
+  (Monday 00:00 UTC+8) and 90 000 per month (renewal day, 00:00 UTC+8); Lite
+  closed to new subscribers. An empty answer `{}` (no valid subscription)
+  is `UNAVAILABLE`.
+
+Team accounts that need `--region`/`--site` flags are not handled yet.
 
 **`orcarouter-api` (Orca Router).** OrcaRouter documents two summary
 endpoints authenticated with the API key: `/v1/dashboard/billing/subscription`
@@ -1063,7 +1079,7 @@ The bounded context `offerings` keeps that, apart from the quotas.
   characters).
 - **Which provider.** By source: `zai-api` → `zai-coding-plan`,
   `minimax-api` → `minimax-coding-plan`, `alibaba-cli` →
-  `alibaba-token-plan`, `commandcode-api` → `commandcode`,
+  `alibaba-token-plan`, `alibaba-coding-cli` → `alibaba-coding-plan`, `commandcode-api` → `commandcode`,
   `openrouter-api` → `openrouter`, `vercel-api` → `vercel`,
   `opencode-zen` → `opencode`, `opencode-console` → `opencode-go`,
   `ollama-api` → `ollama-cloud`, `copilot-gh` → `github-copilot`,

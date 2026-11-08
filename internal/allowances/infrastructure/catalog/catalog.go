@@ -60,6 +60,7 @@ func Standard() Catalog {
 		{Source: "zai-api", Provider: "zai", Fidelity: reported, NeedsKey: true},
 		{Source: "minimax-api", Provider: "minimax", Fidelity: reported, NeedsKey: true},
 		{Source: "alibaba-cli", Provider: "alibaba", Fidelity: reported},
+		{Source: "alibaba-coding-cli", Provider: "alibaba", Fidelity: reported},
 		{Source: "commandcode-api", Provider: "commandcode", Fidelity: reported, NeedsKey: true},
 		{Source: "openrouter-api", Provider: "openrouter", Fidelity: reported, NeedsKey: true},
 		{Source: "vercel-api", Provider: "vercel", Fidelity: reported, NeedsKey: true},
