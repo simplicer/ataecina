@@ -22,7 +22,7 @@ works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="The Ataecina popup in the KDE Plasma system tray, light and dark (made-up figures)" width="820">
+  <img src="docs/screenshot.png" alt="The Ataecina popup in KDE Plasma, light and dark, in Spanish (made-up figures)" width="820">
 </p>
 
 ## Why
@@ -61,6 +61,35 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 - **Freshness and fidelity** — every figure knows when it was read and
   whether it was *reported* by the provider, *derived* locally, *observed*
   by a relay or *declared* by you.
+
+## How it looks
+
+The screenshots show the Spanish interface and made-up figures.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/details.png" alt="Two rows unfolded: every window with a bar of what is left and its countdown, and the money left and spent"></td>
+    <td width="50%"><img src="docs/screenshots/warnings.png" alt="The warnings unfolded: a provider whose answer changed and a rejected key, with their reasons"></td>
+  </tr>
+  <tr>
+    <td><strong>Click a row</strong> to unfold every window — a bar of what is left, the countdown to its rebirth — and the balance, spent and left.</td>
+    <td><strong>Warnings</strong> gather the sources that failed, each with its reason, out of the way of the figures that are right.</td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/keys.png" alt="The Keys settings page: each key with whether it works, and the OpenCode Zen balance"></td>
+    <td><img src="docs/screenshots/about.png" alt="The widget's About page in KDE Plasma: version, website, license and author"></td>
+  </tr>
+  <tr>
+    <td><strong>Keys</strong>, in the widget's settings: which keys work, which were rejected, and a masked dialog to set or replace one; the OpenCode Zen balance is declared here too.</td>
+    <td><strong>About</strong>, in the widget's settings: version, website, license and author, as Plasma shows them.</td>
+  </tr>
+</table>
+
+**Languages.** For now the only translation is Spanish: the Plasma widget
+and its settings follow your desktop's language, Spanish or English (the
+language of the source). The terminal, the desktop notifications and the
+hints the collector writes are in English. Translations are welcome
+([CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Supported subscriptions
 
