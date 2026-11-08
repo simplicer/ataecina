@@ -34,7 +34,7 @@ ColumnLayout {
                 Layout.preferredHeight: Kirigami.Units.iconSizes.small
             }
             PlasmaComponents3.Label {
-                text: i18np("%1 warning", "%1 warnings", snapshot.warnings.length)
+                text: l10n.i18np("%1 warning", "%1 warnings", snapshot.warnings.length)
                 font.weight: Font.DemiBold
                 Layout.fillWidth: true
             }

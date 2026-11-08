@@ -19,6 +19,7 @@ import (
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/statusjson"
+	"codeberg.org/simplicer/ataecina/internal/widgetcatalog"
 )
 
 const (
@@ -380,5 +381,17 @@ func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {
 	slices.Sort(unknown)
 	if len(unknown) > 0 {
 		t.Fatalf("the widget reads names outside the status contract:\n%s", strings.Join(slices.Compact(unknown), "\n"))
+	}
+}
+
+// TestTheTranslationTableIsUpToDate keeps contents/ui/translations.js, read
+// when a language is picked in the settings, equal to the PO files.
+func TestTheTranslationTableIsUpToDate(t *testing.T) {
+	want, err := widgetcatalog.Build(plasmoid + "/translate")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := read(t, plasmoid+"/contents/ui/translations.js"); got != string(want) {
+		t.Fatal("contents/ui/translations.js is out of date: run `go run ./cmd/widget-translations`")
 	}
 }

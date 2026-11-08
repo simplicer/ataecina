@@ -25,6 +25,23 @@ PlasmoidItem {
     property string updateProblem: ""
     readonly property string refreshCommand: "systemctl --user start ataecina-collect.service"
 
+    // KDE's own i18n, which the Translator cannot reach from inside.
+    function desktopI18n(text, ...args) {
+        return i18n(text, ...args);
+    }
+
+    function desktopI18np(singular, plural, count, ...args) {
+        return i18np(singular, plural, count, ...args);
+    }
+
+    // The language picked in the settings, or the desktop's.
+    Translator {
+        id: l10n
+        language: Plasmoid.configuration.language || ""
+        desktop: root.desktopI18n
+        desktopPlural: root.desktopI18np
+    }
+
     Snapshot {
         id: snapshot
         wanted: Plasmoid.configuration.subscriptions || ""
@@ -32,7 +49,7 @@ PlasmoidItem {
 
     Plasmoid.icon: "ataecina"
     Plasmoid.status: snapshot.worstPercent >= snapshot.warningPercent ? PlasmaCore.Types.NeedsAttentionStatus : PlasmaCore.Types.ActiveStatus
-    toolTipMainText: i18n("Ataecina")
+    toolTipMainText: l10n.i18n("Ataecina")
     toolTipSubText: snapshot.problem !== "" ? snapshot.problem : snapshot.worstText()
 
     switchWidth: Kirigami.Units.gridUnit * 12
@@ -42,7 +59,7 @@ PlasmoidItem {
 
     Plasmoid.contextualActions: [
         PlasmaCore.Action {
-            text: i18n("Refresh now")
+            text: l10n.i18n("Refresh now")
             icon.name: "view-refresh"
             onTriggered: root.refresh()
         }

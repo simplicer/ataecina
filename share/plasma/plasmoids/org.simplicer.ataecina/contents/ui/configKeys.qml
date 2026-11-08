@@ -16,6 +16,7 @@ KCM.SimpleKCM {
 
     // The settings dialog fills it with the widget's own setting.
     property string cfg_command: "ataecina"
+    property string cfg_language: ""
     readonly property string command: cfg_command || "ataecina"
     readonly property string statusCommand: command + " status --json"
     readonly property string dialogCheck: "command -v kdialog"
@@ -44,18 +45,18 @@ KCM.SimpleKCM {
     // A rejected key also reads KEY_MISSING; its error class tells them apart.
     function keyState(subscription) {
         if (subscription.error_class === "KEY_REJECTED") {
-            return i18n("key rejected");
+            return l10n.i18n("key rejected");
         }
         if (subscription.outcome === "KEY_MISSING") {
-            return i18n("no key");
+            return l10n.i18n("no key");
         }
         if (subscription.outcome === "OK" || subscription.outcome === "PARTIAL") {
-            return i18n("works");
+            return l10n.i18n("works");
         }
         if (subscription.outcome === "BROKEN") {
-            return i18n("key accepted, answer not understood");
+            return l10n.i18n("key accepted, answer not understood");
         }
-        return i18n("not read yet");
+        return l10n.i18n("not read yet");
     }
 
     function keyColor(subscription) {
@@ -75,16 +76,16 @@ KCM.SimpleKCM {
     function balanceState(subscription) {
         const remaining = subscription.balance ? subscription.balance.remaining : null;
         if (!remaining) {
-            return i18n("no balance declared");
+            return l10n.i18n("no balance declared");
         }
-        return i18n("%1 left", Number(remaining.amount).toLocaleString(Qt.locale(), "f", 2) + " " + remaining.currency);
+        return l10n.i18n("%1 left", Number(remaining.amount).toLocaleString(l10n.locale, "f", 2) + " " + remaining.currency);
     }
 
     function setKey(subscription) {
         if (!validId(subscription.id)) {
             return;
         }
-        const prompt = i18n("API key for %1. It is sealed at once and never shown.", subscription.id);
+        const prompt = l10n.i18n("API key for %1. It is sealed at once and never shown.", subscription.id);
         run("kdialog --title Ataecina --password " + quoted(prompt) + " | " + command + " keys set " + quoted(subscription.id));
     }
 
@@ -92,7 +93,7 @@ KCM.SimpleKCM {
         if (!validId(subscription.id)) {
             return;
         }
-        const prompt = i18n("Current balance of %1, in US dollars:", subscription.id);
+        const prompt = l10n.i18n("Current balance of %1, in US dollars:", subscription.id);
         // Declaring reads the spending so far with opencode, which pnpm may
         // keep off plasmashell's PATH: the same directories as the collector unit.
         const path = "PATH=\"$HOME/.local/bin:$HOME/.local/share/pnpm:$HOME/.local/share/pnpm/bin:$PATH\" ";
@@ -102,6 +103,22 @@ KCM.SimpleKCM {
     function run(line) {
         message = "";
         executable.connectSource(line);
+    }
+
+    // KDE's own i18n, which the Translator cannot reach from inside.
+    function desktopI18n(text, ...args) {
+        return i18n(text, ...args);
+    }
+
+    function desktopI18np(singular, plural, count, ...args) {
+        return i18np(singular, plural, count, ...args);
+    }
+
+    Translator {
+        id: l10n
+        language: page.cfg_language
+        desktop: page.desktopI18n
+        desktopPlural: page.desktopI18np
     }
 
     Plasma5Support.DataSource {
@@ -135,7 +152,7 @@ KCM.SimpleKCM {
                 return;
             }
             if (data["exit code"] === 0) {
-                page.message = i18n("Saved. Reading the subscriptions again…");
+                page.message = l10n.i18n("Saved. Reading the subscriptions again…");
                 connectSource(page.refreshCommand);
             } else {
                 page.message = (data["stderr"] || "").trim();
@@ -160,24 +177,24 @@ KCM.SimpleKCM {
         spacing: Kirigami.Units.largeSpacing
 
         Kirigami.Heading {
-            text: i18n("API keys")
+            text: l10n.i18n("API keys")
             level: 3
         }
         QQC2.Label {
-            text: i18n("Keys go from a masked dialog straight to `ataecina keys set`.") + " " + i18n("The widget never sees them.")
+            text: l10n.i18n("Keys go from a masked dialog straight to `ataecina keys set`.") + " " + l10n.i18n("The widget never sees them.")
             wrapMode: Text.Wrap
             opacity: 0.7
             Layout.fillWidth: true
         }
         QQC2.Label {
             visible: !page.dialogs
-            text: i18n("Without kdialog, set keys in a terminal: `ataecina keys set <name>`.")
+            text: l10n.i18n("Without kdialog, set keys in a terminal: `ataecina keys set <name>`.")
             wrapMode: Text.Wrap
             Layout.fillWidth: true
         }
         QQC2.Label {
             visible: page.keyed.length === 0
-            text: i18n("No subscription needs a key.")
+            text: l10n.i18n("No subscription needs a key.")
             opacity: 0.7
         }
 
@@ -201,7 +218,7 @@ KCM.SimpleKCM {
                 QQC2.Button {
                     enabled: page.dialogs
                     icon.name: "dialog-password"
-                    text: page.hasKey(modelData) ? i18n("Replace key…") : i18n("Set key…")
+                    text: page.hasKey(modelData) ? l10n.i18n("Replace key…") : l10n.i18n("Set key…")
                     onClicked: page.setKey(modelData)
                 }
             }
@@ -209,7 +226,7 @@ KCM.SimpleKCM {
 
         Kirigami.Heading {
             visible: page.declared.length > 0
-            text: i18n("Balances")
+            text: l10n.i18n("Balances")
             level: 3
         }
         Repeater {
@@ -231,18 +248,18 @@ KCM.SimpleKCM {
                 QQC2.Button {
                     enabled: page.dialogs
                     icon.name: "wallet-open"
-                    text: i18n("Declare balance…")
+                    text: l10n.i18n("Declare balance…")
                     onClicked: page.declareBalance(modelData)
                 }
             }
         }
 
         Kirigami.Heading {
-            text: i18n("Intelligence index")
+            text: l10n.i18n("Intelligence index")
             level: 3
         }
         QQC2.Label {
-            text: i18n("A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key.")
+            text: l10n.i18n("A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key.")
             wrapMode: Text.Wrap
             opacity: 0.7
             Layout.fillWidth: true
@@ -257,13 +274,13 @@ KCM.SimpleKCM {
             }
             QQC2.Button {
                 icon.name: "internet-web-browser"
-                text: i18n("Get a key")
+                text: l10n.i18n("Get a key")
                 onClicked: Qt.openUrlExternally("https://artificialanalysis.ai/")
             }
             QQC2.Button {
                 enabled: page.dialogs
                 icon.name: "dialog-password"
-                text: i18n("Set key…")
+                text: l10n.i18n("Set key…")
                 onClicked: page.setKey({ id: "artificial-analysis" })
             }
         }

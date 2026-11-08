@@ -18,6 +18,10 @@
       <label>Show what is left of the closest window next to the panel icon.</label>
       <default>true</default>
     </entry>
+    <entry name="language" type="String">
+      <label>The widget's language: es, ca, eu, gl or en; empty follows the desktop.</label>
+      <default></default>
+    </entry>
     <entry name="subscriptions" type="String">
       <label>Subscriptions to show, comma-separated, in order; empty shows all.</label>
       <default></default>

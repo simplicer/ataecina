@@ -26,6 +26,9 @@ func raiseAlerts(ctx context.Context, snapshot domain.Snapshot, settings configf
 	if address := sessionBusAddress(env); address != "" {
 		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
 		language := locale.FromEnvironment(env.getenv)
+		if settings.Language != "" {
+			language = locale.Language(settings.Language)
+		}
 		notifier = desktopnotify.New(connect, env.clock.Now, language)
 		failureNotifier = desktopnotify.NewFailureNotifier(connect, language)
 	}

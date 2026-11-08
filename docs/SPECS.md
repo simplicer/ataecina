@@ -932,7 +932,15 @@ schemes and the accent colour like the battery or network widgets.
   Galician, `% 63`/`%63` in Basque, where the big figures also put the sign
   first); money and dates follow Qt's locale. Desktop notifications use the
   same five languages, chosen from `LC_ALL`, `LC_MESSAGES`, `LANG` and
-  `LANGUAGE` like gettext, English otherwise.
+  `LANGUAGE` like gettext, English otherwise, unless `"language"` in
+  `config.json` names one.
+- **Language setting** (General page): "The desktop's" (default), Español,
+  Català, Euskara, Galego or English. KDE's i18n always follows the session,
+  so a picked language is read from `contents/ui/translations.js`, generated
+  from the PO files by `go run ./cmd/widget-translations` (tests/widget
+  fails when it is out of date) through `Translator.qml`, which also gives
+  the locale for money, numbers and times (`es_ES`, `ca_ES`, `eu_ES`,
+  `gl_ES`, `en_US`).
 - Checks: `tests/widget` (run by `go test`) keeps `metadata.json` at
   `VERSION`, the settings schema in step with the QML, every string in the
   template and translated, and every field the QML reads inside this
@@ -1035,6 +1043,7 @@ anything:
 | `subscriptions[].thresholds` | optional, same rules; replaces `alerts.thresholds` for that subscription |
 | `network.use_environment_proxy` | default `false` (ADR 0006) |
 | `offers` | default `true`; `false` keeps `ataecina update` from fetching the published offers (§12) |
+| `language` | optional: `es`, `ca`, `eu`, `gl` or `en`, the language of desktop notifications; default the session's |
 | `subscriptions[].id` | required, unique, `[a-z0-9][a-z0-9-]{0,31}` |
 | `subscriptions[].source` | required, a source id of §3 |
 | `subscriptions[].plan` | optional, any text, normalised to `UPPER_SNAKE_CASE`; a plan reported by the source wins |

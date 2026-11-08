@@ -192,7 +192,7 @@ ColumnLayout {
                     }
                 }
                 PlasmaComponents3.Label {
-                    text: i18n("%1% left", snapshot.leftText(modelData))
+                    text: l10n.i18n("%1% left", snapshot.leftText(modelData))
                     color: row.figureColor(modelData.used_percent)
                     horizontalAlignment: Text.AlignRight
                     // Translations can be longer than "100 % left".
@@ -241,7 +241,7 @@ ColumnLayout {
         PlasmaComponents3.ToolButton {
             visible: !!row.subscription.offerings
             icon.name: row.showModels ? "go-up" : "go-down"
-            text: row.showModels ? i18n("Hide models") : i18n("Models you can use")
+            text: row.showModels ? l10n.i18n("Hide models") : l10n.i18n("Models you can use")
             onClicked: {
                 row.showModels = !row.showModels;
                 if (row.showModels) {
@@ -302,7 +302,7 @@ ColumnLayout {
         }
         PlasmaComponents3.Label {
             visible: row.showModels && snapshot.moreModels(row.subscription.id) > 0
-            text: i18np("%1 more", "%1 more", snapshot.moreModels(row.subscription.id))
+            text: l10n.i18np("%1 more", "%1 more", snapshot.moreModels(row.subscription.id))
             font: Kirigami.Theme.smallFont
             opacity: 0.6
         }
@@ -327,7 +327,7 @@ ColumnLayout {
             PlasmaComponents3.ToolButton {
                 enabled: !root.updating
                 icon.name: "view-refresh"
-                text: root.updating ? i18n("Updating…") : i18n("Update models")
+                text: root.updating ? l10n.i18n("Updating…") : l10n.i18n("Update models")
                 onClicked: root.updateModels()
             }
         }
@@ -354,7 +354,7 @@ ColumnLayout {
         }
         PlasmaComponents3.Label {
             visible: row.subscription.observed_at !== null
-            text: i18n("observed %1", snapshot.age(row.subscription.observed_at))
+            text: l10n.i18n("observed %1", snapshot.age(row.subscription.observed_at))
             font: Kirigami.Theme.smallFont
             opacity: 0.5
         }

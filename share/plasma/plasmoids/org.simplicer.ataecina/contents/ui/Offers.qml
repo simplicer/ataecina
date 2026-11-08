@@ -34,7 +34,7 @@ ColumnLayout {
                 Layout.preferredHeight: Kirigami.Units.iconSizes.small
             }
             PlasmaComponents3.Label {
-                text: i18np("%1 offer", "%1 offers", snapshot.offers.length)
+                text: l10n.i18np("%1 offer", "%1 offers", snapshot.offers.length)
                 font.weight: Font.DemiBold
                 Layout.fillWidth: true
             }
@@ -99,7 +99,7 @@ ColumnLayout {
                 }
                 PlasmaComponents3.Label {
                     visible: offer.modelData.sponsored
-                    text: i18n("Sponsored link")
+                    text: l10n.i18n("Sponsored link")
                     font: Kirigami.Theme.smallFont
                     opacity: 0.5
                 }

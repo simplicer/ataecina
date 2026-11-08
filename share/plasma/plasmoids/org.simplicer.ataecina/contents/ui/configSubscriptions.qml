@@ -17,6 +17,7 @@ KCM.SimpleKCM {
     id: page
 
     property string cfg_command: "ataecina"
+    property string cfg_language: ""
     readonly property string command: cfg_command || "ataecina"
     readonly property string listCommand: command + " subscriptions --json"
     readonly property string sourcesCommand: command + " sources --json"
@@ -56,17 +57,17 @@ KCM.SimpleKCM {
     function optionLabel(option) {
         switch (option) {
         case "account":
-            return i18n("Cloudflare account id:");
+            return l10n.i18n("Cloudflare account id:");
         case "login":
-            return i18n("GitHub login:");
+            return l10n.i18n("GitHub login:");
         case "monthly_allowance":
-            return i18n("Monthly allowance (requests or credits):");
+            return l10n.i18n("Monthly allowance (requests or credits):");
         case "team":
-            return i18n("xAI team id:");
+            return l10n.i18n("xAI team id:");
         case "email":
-            return i18n("Your e-mail in the team:");
+            return l10n.i18n("Your e-mail in the team:");
         case "provider":
-            return i18n("Provider Heimdall follows:");
+            return l10n.i18n("Provider Heimdall follows:");
         }
         return option + ":";
     }
@@ -74,7 +75,7 @@ KCM.SimpleKCM {
     function add() {
         const id = idField.text.trim();
         if (!selected || !validId(id)) {
-            message = i18n("The id takes lowercase letters, digits and dashes.");
+            message = l10n.i18n("The id takes lowercase letters, digits and dashes.");
             return;
         }
         let line = command + " subscriptions add " + quoted(id) + " --source " + quoted(selected.id);
@@ -84,7 +85,7 @@ KCM.SimpleKCM {
         for (const option of selected.required) {
             const value = (values[option] || "").trim();
             if (value === "") {
-                message = i18n("Fill in every field.");
+                message = l10n.i18n("Fill in every field.");
                 return;
             }
             line += " --set " + quoted(option + "=" + value);
@@ -106,6 +107,22 @@ KCM.SimpleKCM {
     function run(line) {
         message = "";
         executable.connectSource(line);
+    }
+
+    // KDE's own i18n, which the Translator cannot reach from inside.
+    function desktopI18n(text, ...args) {
+        return i18n(text, ...args);
+    }
+
+    function desktopI18np(singular, plural, count, ...args) {
+        return i18np(singular, plural, count, ...args);
+    }
+
+    Translator {
+        id: l10n
+        language: page.cfg_language
+        desktop: page.desktopI18n
+        desktopPlural: page.desktopI18np
     }
 
     Plasma5Support.DataSource {
@@ -135,7 +152,7 @@ KCM.SimpleKCM {
             }
             if (data["exit code"] === 0) {
                 const added = page.selected && page.selected.needs_key && source.indexOf(" subscriptions add ") >= 0;
-                page.message = added ? i18n("Added. Set its key on the Keys page.") : i18n("Saved. Reading the subscriptions again…");
+                page.message = added ? l10n.i18n("Added. Set its key on the Keys page.") : l10n.i18n("Saved. Reading the subscriptions again…");
                 page.values = {};
                 idField.text = "";
                 planField.text = "";
@@ -156,11 +173,11 @@ KCM.SimpleKCM {
         spacing: Kirigami.Units.largeSpacing
 
         Kirigami.Heading {
-            text: i18n("Subscriptions")
+            text: l10n.i18n("Subscriptions")
             level: 3
         }
         QQC2.Label {
-            text: i18n("Two subscriptions of the same provider need different ids, and each its own key.")
+            text: l10n.i18n("Two subscriptions of the same provider need different ids, and each its own key.")
             wrapMode: Text.Wrap
             opacity: 0.7
             Layout.fillWidth: true
@@ -186,14 +203,14 @@ KCM.SimpleKCM {
                 }
                 QQC2.Button {
                     icon.name: "list-remove"
-                    text: page.removing === modelData.id ? i18n("Remove it") : i18n("Remove…")
+                    text: page.removing === modelData.id ? l10n.i18n("Remove it") : l10n.i18n("Remove…")
                     onClicked: page.remove(modelData.id)
                 }
             }
         }
 
         Kirigami.Heading {
-            text: i18n("Add a subscription")
+            text: l10n.i18n("Add a subscription")
             level: 3
         }
         GridLayout {
@@ -201,7 +218,7 @@ KCM.SimpleKCM {
             Layout.fillWidth: true
 
             QQC2.Label {
-                text: i18n("Source:")
+                text: l10n.i18n("Source:")
             }
             QQC2.ComboBox {
                 id: sourceBox
@@ -216,7 +233,7 @@ KCM.SimpleKCM {
                 }
             }
             QQC2.Label {
-                text: i18n("Id:")
+                text: l10n.i18n("Id:")
             }
             QQC2.TextField {
                 id: idField
@@ -224,7 +241,7 @@ KCM.SimpleKCM {
                 Layout.fillWidth: true
             }
             QQC2.Label {
-                text: i18n("Plan (optional):")
+                text: l10n.i18n("Plan (optional):")
             }
             QQC2.TextField {
                 id: planField
@@ -257,7 +274,7 @@ KCM.SimpleKCM {
         QQC2.Button {
             enabled: page.selected !== null && idField.text.trim() !== ""
             icon.name: "list-add"
-            text: i18n("Add")
+            text: l10n.i18n("Add")
             onClicked: page.add()
         }
 

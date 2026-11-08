@@ -20,7 +20,7 @@ QtObject {
     readonly property color criticalColor: "#e2604a"
     // Whether the language writes the percent sign before the number
     // (Basque: "% 76"), read from the translation of "%1%".
-    readonly property bool percentSignFirst: i18n("%1%", "0").trim().startsWith("%")
+    readonly property bool percentSignFirst: l10n.i18n("%1%", "0").trim().startsWith("%")
 
     property var subscriptions: []
     property var meta: ({})
@@ -86,7 +86,7 @@ QtObject {
 
     function read(exitCode, stdout, stderr) {
         if (exitCode !== 0) {
-            problem = i18n("ataecina status failed: %1", (stderr || "").trim() || exitCode);
+            problem = l10n.i18n("ataecina status failed: %1", (stderr || "").trim() || exitCode);
             return;
         }
         try {
@@ -95,7 +95,7 @@ QtObject {
             meta = document.meta;
             problem = "";
         } catch (error) {
-            problem = i18n("ataecina status gave something the widget cannot read");
+            problem = l10n.i18n("ataecina status gave something the widget cannot read");
         }
     }
 
@@ -227,9 +227,9 @@ QtObject {
     function amountText(amount, currency) {
         const symbol = currencySymbols[currency];
         if (symbol === undefined) {
-            return amount.toLocaleString(Qt.locale(), "f", 2) + " " + currency;
+            return amount.toLocaleString(l10n.locale, "f", 2) + " " + currency;
         }
-        return amount.toLocaleCurrencyString(Qt.locale(), symbol);
+        return amount.toLocaleCurrencyString(l10n.locale, symbol);
     }
 
     // The currency inside a money ring.
@@ -247,7 +247,7 @@ QtObject {
     // left.
     function moneyLine(subscription) {
         if (spentOnly(subscription)) {
-            return i18n("%1 spent", money(subscription.balance.spent));
+            return l10n.i18n("%1 spent", money(subscription.balance.spent));
         }
         if (moneyLeft(subscription) <= 0) {
             return "";
@@ -255,9 +255,9 @@ QtObject {
         const left = approximate(subscription) + money(subscription.balance.remaining);
         const total = moneyTotal(subscription);
         if (total > 0) {
-            return i18n("%1 of %2", left, amountText(total, subscription.balance.remaining.currency));
+            return l10n.i18n("%1 of %2", left, amountText(total, subscription.balance.remaining.currency));
         }
-        return i18n("%1 left", left);
+        return l10n.i18n("%1 left", left);
     }
 
     function approximate(subscription) {
@@ -284,24 +284,24 @@ QtObject {
     function windowLabel(meter) {
         switch (meter.window) {
         case "FIVE_HOURS":
-            return i18n("5 h");
+            return l10n.i18n("5 h");
         case "DAILY":
-            return i18n("day");
+            return l10n.i18n("day");
         case "WEEKLY":
-            return i18n("week");
+            return l10n.i18n("week");
         case "MONTHLY":
-            return i18n("month");
+            return l10n.i18n("month");
         case "BILLING_CYCLE":
-            return i18n("cycle");
+            return l10n.i18n("cycle");
         }
         const minutes = meter.window_minutes || 0;
         if (minutes % 1440 === 0) {
-            return i18n("%1 d", minutes / 1440);
+            return l10n.i18n("%1 d", minutes / 1440);
         }
         if (minutes % 60 === 0) {
-            return i18n("%1 h", minutes / 60);
+            return l10n.i18n("%1 h", minutes / 60);
         }
-        return i18n("%1 min", minutes);
+        return l10n.i18n("%1 min", minutes);
     }
 
     function meterLabel(subscription, meter) {
@@ -320,7 +320,7 @@ QtObject {
         if (meter.resets_at) {
             return countdown(meter.resets_at);
         }
-        return meter.estimated ? i18n("reborn") : "";
+        return meter.estimated ? l10n.i18n("reborn") : "";
     }
 
     function duration(iso) {
@@ -328,12 +328,12 @@ QtObject {
         const days = Math.floor(minutes / 1440);
         const hours = Math.floor((minutes % 1440) / 60);
         if (days > 0) {
-            return i18n("%1 d %2 h", days, hours);
+            return l10n.i18n("%1 d %2 h", days, hours);
         }
         if (hours > 0) {
-            return i18n("%1 h %2 m", hours, minutes % 60);
+            return l10n.i18n("%1 h %2 m", hours, minutes % 60);
         }
-        return i18n("%1 m", minutes);
+        return l10n.i18n("%1 m", minutes);
     }
 
     function countdown(iso) {
@@ -346,19 +346,19 @@ QtObject {
         }
         const minutes = Math.max(0, Math.round((now - new Date(iso)) / 60000));
         if (minutes < 1) {
-            return i18n("just now");
+            return l10n.i18n("just now");
         }
         if (minutes < 60) {
-            return i18np("%1 min ago", "%1 min ago", minutes);
+            return l10n.i18np("%1 min ago", "%1 min ago", minutes);
         }
         if (minutes < 2880) {
-            return i18np("%1 hour ago", "%1 hours ago", Math.round(minutes / 60));
+            return l10n.i18np("%1 hour ago", "%1 hours ago", Math.round(minutes / 60));
         }
-        return i18np("%1 day ago", "%1 days ago", Math.round(minutes / 1440));
+        return l10n.i18np("%1 day ago", "%1 days ago", Math.round(minutes / 1440));
     }
 
     function clock(iso) {
-        return iso ? Qt.formatTime(new Date(iso), Qt.locale().timeFormat(Locale.ShortFormat)) : "";
+        return iso ? Qt.formatTime(new Date(iso), l10n.locale.timeFormat(Locale.ShortFormat)) : "";
     }
 
     // The small line under a row: how a stale reading gets fresh again, and
@@ -368,20 +368,20 @@ QtObject {
         if (subscription.freshness !== "FRESH") {
             switch (subscription.source) {
             case "CLAUDE_STATUSLINE":
-                parts.push(i18n("Updates when you use Claude Code"));
+                parts.push(l10n.i18n("Updates when you use Claude Code"));
                 break;
             case "CODEX_LOGS":
-                parts.push(i18n("Updates when you use Codex"));
+                parts.push(l10n.i18n("Updates when you use Codex"));
                 break;
             default:
-                parts.push(i18n("Stale, observed %1", age(subscription.observed_at)));
+                parts.push(l10n.i18n("Stale, observed %1", age(subscription.observed_at)));
             }
         }
         if (spentOnly(subscription) && subscription.source === "OPENCODE_ZEN") {
-            parts.push(i18n("Declare its balance in the settings to see what is left"));
+            parts.push(l10n.i18n("Declare its balance in the settings to see what is left"));
         }
         if (subscription.banked_resets && subscription.banked_resets.available > 0) {
-            parts.push(i18np("%1 banked reset", "%1 banked resets", subscription.banked_resets.available));
+            parts.push(l10n.i18np("%1 banked reset", "%1 banked resets", subscription.banked_resets.available));
         }
         return parts.join(" · ");
     }
@@ -398,13 +398,13 @@ QtObject {
     function balanceText(subscription) {
         const parts = [];
         if (subscription.balance && subscription.balance.remaining) {
-            parts.push(i18n("%1 left", approximate(subscription) + money(subscription.balance.remaining)));
+            parts.push(l10n.i18n("%1 left", approximate(subscription) + money(subscription.balance.remaining)));
         }
         if (subscription.balance && subscription.balance.spent) {
-            parts.push(i18n("%1 spent", money(subscription.balance.spent)));
+            parts.push(l10n.i18n("%1 spent", money(subscription.balance.spent)));
         }
         if (subscription.credits) {
-            parts.push(subscription.credits.unlimited ? i18n("unlimited credits") : i18n("%1 credits", subscription.credits.available));
+            parts.push(subscription.credits.unlimited ? l10n.i18n("unlimited credits") : l10n.i18n("%1 credits", subscription.credits.available));
         }
         return parts.join(" · ");
     }
@@ -439,7 +439,7 @@ QtObject {
         if (!offer.price) {
             return "";
         }
-        const periods = {"month": i18n("month"), "year": i18n("year"), "first month": i18n("first month")};
+        const periods = {"month": l10n.i18n("month"), "year": l10n.i18n("year"), "first month": l10n.i18n("first month")};
         const period = periods[offer.period] || offer.period;
         const price = amountText(offer.price, offer.currency);
         return period ? price + " / " + period : price;
@@ -460,11 +460,11 @@ QtObject {
     // or how to get one.
     function intelligenceCredit() {
         if (!modelsMeta.intelligence_refreshed_at) {
-            return i18n("No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models.");
+            return l10n.i18n("No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models.");
         }
         const version = modelsMeta.intelligence_index_version;
-        const credit = i18n("Intelligence: Artificial Analysis Intelligence Index") + (version ? " v" + version : "");
-        return modelsMeta.intelligence_via ? i18n("%1, via %2", credit, modelsMeta.intelligence_via) : credit;
+        const credit = l10n.i18n("Intelligence: Artificial Analysis Intelligence Index") + (version ? " v" + version : "");
+        return modelsMeta.intelligence_via ? l10n.i18n("%1, via %2", credit, modelsMeta.intelligence_via) : credit;
     }
 
     function intelligenceText(model) {
@@ -474,7 +474,7 @@ QtObject {
     // "free", or input / output price per million tokens.
     function priceText(model) {
         if (model.free) {
-            return i18n("free");
+            return l10n.i18n("free");
         }
         if (typeof model.input_price !== "number") {
             return "";
@@ -490,10 +490,10 @@ QtObject {
             return "";
         }
         if (offerings.free === offerings.models) {
-            return i18np("%1 model included", "%1 models included", offerings.models);
+            return l10n.i18np("%1 model included", "%1 models included", offerings.models);
         }
-        const count = i18np("%1 model", "%1 models", offerings.models);
-        return offerings.free === 0 ? count : count + " · " + i18np("%1 free", "%1 free", offerings.free);
+        const count = l10n.i18np("%1 model", "%1 models", offerings.models);
+        return offerings.free === 0 ? count : count + " · " + l10n.i18np("%1 free", "%1 free", offerings.free);
     }
 
     // A few free models by name, when only some are free.
@@ -505,9 +505,9 @@ QtObject {
         const shown = offerings.free_models.slice(0, 6).map(m => m.name);
         const more = offerings.free - shown.length;
         if (more > 0) {
-            shown.push(i18np("%1 more", "%1 more", more));
+            shown.push(l10n.i18np("%1 more", "%1 more", more));
         }
-        return i18n("Free: %1", shown.join(", "));
+        return l10n.i18n("Free: %1", shown.join(", "));
     }
 
     // The newest models, released in the last 30 days.
@@ -516,27 +516,27 @@ QtObject {
         if (!offerings || offerings.new_models.length === 0) {
             return "";
         }
-        return i18n("New: %1", offerings.new_models.slice(0, 4).map(m => m.name).join(", "));
+        return l10n.i18n("New: %1", offerings.new_models.slice(0, 4).map(m => m.name).join(", "));
     }
 
     function outcomeText(subscription) {
         // A rejected key also reads KEY_MISSING; its error class tells them apart.
         if (subscription.error_class === "KEY_REJECTED") {
-            return i18n("key rejected");
+            return l10n.i18n("key rejected");
         }
         switch (subscription.outcome) {
         case "PARTIAL":
-            return i18n("partial");
+            return l10n.i18n("partial");
         case "BROKEN":
-            return i18n("broken");
+            return l10n.i18n("broken");
         case "UNAVAILABLE":
-            return i18n("unavailable");
+            return l10n.i18n("unavailable");
         case "KEY_MISSING":
-            return i18n("key missing");
+            return l10n.i18n("key missing");
         case "LOCKED":
-            return i18n("locked");
+            return l10n.i18n("locked");
         case "UNSUPPORTED":
-            return i18n("unsupported");
+            return l10n.i18n("unsupported");
         }
         return "";
     }
@@ -544,20 +544,20 @@ QtObject {
     function fidelityText(subscription) {
         switch (subscription.fidelity) {
         case "DERIVED":
-            return i18n("derived");
+            return l10n.i18n("derived");
         case "OBSERVED":
-            return i18n("observed");
+            return l10n.i18n("observed");
         case "DECLARED":
-            return i18n("declared");
+            return l10n.i18n("declared");
         }
         return "";
     }
 
     function worstText() {
         if (worst === null) {
-            return shown.length === 0 ? i18n("No snapshot yet") : i18n("No windows to show");
+            return shown.length === 0 ? l10n.i18n("No snapshot yet") : l10n.i18n("No windows to show");
         }
-        const parts = [name(worst.subscription), windowLabel(worst.meter) + " " + i18n("%1% left", Math.round(leftOf(worst.meter)))];
+        const parts = [name(worst.subscription), windowLabel(worst.meter) + " " + l10n.i18n("%1% left", Math.round(leftOf(worst.meter)))];
         if (worst.meter.resets_at) {
             parts.push(countdown(worst.meter.resets_at));
         }

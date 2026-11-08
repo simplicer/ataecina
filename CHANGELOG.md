@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.31.0-unstable] - 2026-11-08
+
+### Added
+
+- A **Language** setting in the widget (General page): the desktop's (the
+  default), Español, Català, Euskara, Galego or English, for the popup and
+  the settings pages, with money, numbers and times in that language's
+  format. `"language"` in `config.json` does the same for desktop
+  notifications.
+
 ## [0.30.1-unstable] - 2026-11-08
 
 ### Fixed

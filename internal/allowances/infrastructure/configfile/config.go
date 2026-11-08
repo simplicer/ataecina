@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"time"
 
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
@@ -52,7 +53,10 @@ type Settings struct {
 	UseEnvironmentProxy bool
 	// Offers is whether `ataecina update` fetches the published coding
 	// plan offers (default true).
-	Offers        bool
+	Offers bool
+	// Language is the language of desktop notifications (es, ca, eu, gl
+	// or en); empty follows the session.
+	Language      string
 	Subscriptions []SubscriptionSettings
 }
 
@@ -96,6 +100,7 @@ type document struct {
 	Alerts          *alertsDocument        `json:"alerts"`
 	Network         *networkDocument       `json:"network"`
 	Offers          *bool                  `json:"offers"`
+	Language        *string                `json:"language"`
 	Subscriptions   []subscriptionDocument `json:"subscriptions"`
 }
 
@@ -174,6 +179,10 @@ func Decode(data []byte, sources catalog.Catalog) (Settings, error) {
 		settings.UseEnvironmentProxy = raw.Network.UseEnvironmentProxy
 	}
 	settings.Offers = valueOr(raw.Offers, true)
+	settings.Language = valueOr(raw.Language, "")
+	if raw.Language != nil && !slices.Contains([]string{"es", "ca", "eu", "gl", "en"}, settings.Language) {
+		return Settings{}, fmt.Errorf(`%w: "language" must be es, ca, eu, gl or en`, ErrInvalid)
+	}
 	seen := make(map[string]bool, len(raw.Subscriptions))
 	for _, item := range raw.Subscriptions {
 		subscription, err := decodeSubscription(item, sources)

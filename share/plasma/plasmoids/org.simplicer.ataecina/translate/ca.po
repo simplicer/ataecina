@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 12:37+0100\n"
+"POT-Creation-Date: 2026-11-08 13:25+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Catalan <https://codeberg.org/simplicer/ataecina>\n"
@@ -23,7 +23,7 @@ msgid "Checked %1"
 msgstr "Comprovat a les %1"
 
 #: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
-#: contents/ui/main.qml:45
+#: contents/ui/main.qml:53
 msgid "Refresh now"
 msgstr "Actualitza ara"
 
@@ -66,7 +66,7 @@ msgid "%1 of %2"
 msgstr "%1 de %2"
 
 #: contents/ui/Snapshot.qml:260 contents/ui/Snapshot.qml:401
-#: contents/ui/configKeys.qml:80
+#: contents/ui/configKeys.qml:81
 msgid "%1 left"
 msgstr "queden %1"
 
@@ -226,7 +226,7 @@ msgstr "Gratuïts: %1"
 msgid "New: %1"
 msgstr "Nous: %1"
 
-#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:47
+#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:48
 msgid "key rejected"
 msgstr "clau rebutjada"
 
@@ -300,183 +300,195 @@ msgid_plural "%1 warnings"
 msgstr[0] "%1 avís"
 msgstr[1] "%1 avisos"
 
-#: contents/ui/configGeneral.qml:15
+#: contents/ui/configGeneral.qml:27
+msgid "Language:"
+msgstr "Llengua:"
+
+#: contents/ui/configGeneral.qml:31
+msgid "The desktop's"
+msgstr "La de l'escriptori"
+
+#: contents/ui/configGeneral.qml:42
+msgid "Desktop notifications follow `language` in config.json, or the desktop."
+msgstr "Les notificacions de l'escriptori segueixen `language` de config.json, o l'escriptori."
+
+#: contents/ui/configGeneral.qml:50
 msgid "Command:"
 msgstr "Ordre:"
 
-#: contents/ui/configGeneral.qml:20
+#: contents/ui/configGeneral.qml:55
 msgid "Read the snapshot every (seconds):"
 msgstr "Llegeix la instantània cada (segons):"
 
-#: contents/ui/configGeneral.qml:26
+#: contents/ui/configGeneral.qml:61
 msgid "Show what is left in the panel"
 msgstr "Mostra el que queda al plafó"
 
-#: contents/ui/configGeneral.qml:30
+#: contents/ui/configGeneral.qml:65
 msgid "Subscriptions to show:"
 msgstr "Subscripcions que es mostren:"
 
-#: contents/ui/configGeneral.qml:31
+#: contents/ui/configGeneral.qml:66
 msgid "all, in configuration order"
 msgstr "totes, en l'ordre de la configuració"
 
-#: contents/ui/configGeneral.qml:34
+#: contents/ui/configGeneral.qml:69
 msgid "Comma-separated ids, in the order to show them."
 msgstr "Identificadors separats per comes, en l'ordre en què es mostren."
 
-#: contents/ui/configKeys.qml:50
+#: contents/ui/configKeys.qml:51
 msgid "no key"
 msgstr "sense clau"
 
-#: contents/ui/configKeys.qml:53
+#: contents/ui/configKeys.qml:54
 msgid "works"
 msgstr "funciona"
 
-#: contents/ui/configKeys.qml:56
+#: contents/ui/configKeys.qml:57
 msgid "key accepted, answer not understood"
 msgstr "clau acceptada, resposta no entesa"
 
-#: contents/ui/configKeys.qml:58
+#: contents/ui/configKeys.qml:59
 msgid "not read yet"
 msgstr "encara no llegida"
 
-#: contents/ui/configKeys.qml:78
+#: contents/ui/configKeys.qml:79
 msgid "no balance declared"
 msgstr "sense saldo declarat"
 
-#: contents/ui/configKeys.qml:87
+#: contents/ui/configKeys.qml:88
 msgid "API key for %1. It is sealed at once and never shown."
 msgstr "Clau API de %1. Se segella al moment i no es mostra mai."
 
-#: contents/ui/configKeys.qml:95
+#: contents/ui/configKeys.qml:96
 msgid "Current balance of %1, in US dollars:"
 msgstr "Saldo actual de %1, en dòlars dels EUA:"
 
-#: contents/ui/configKeys.qml:138 contents/ui/configSubscriptions.qml:138
+#: contents/ui/configKeys.qml:146 contents/ui/configSubscriptions.qml:146
 msgid "Saved. Reading the subscriptions again…"
 msgstr "Desat. Es tornen a llegir les subscripcions…"
 
-#: contents/ui/configKeys.qml:163
+#: contents/ui/configKeys.qml:171
 msgid "API keys"
 msgstr "Claus API"
 
-#: contents/ui/configKeys.qml:167
+#: contents/ui/configKeys.qml:175
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
 msgstr "Les claus van d'un diàleg emmascarat directament a `ataecina keys set`."
 
-#: contents/ui/configKeys.qml:167
+#: contents/ui/configKeys.qml:175
 msgid "The widget never sees them."
 msgstr "El giny no les veu mai."
 
-#: contents/ui/configKeys.qml:174
+#: contents/ui/configKeys.qml:182
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
 msgstr "Sense kdialog, poseu les claus en un terminal: `ataecina keys set <nom>`."
 
-#: contents/ui/configKeys.qml:180
+#: contents/ui/configKeys.qml:188
 msgid "No subscription needs a key."
 msgstr "Cap subscripció no necessita clau."
 
-#: contents/ui/configKeys.qml:204
+#: contents/ui/configKeys.qml:212
 msgid "Replace key…"
 msgstr "Canvia la clau…"
 
-#: contents/ui/configKeys.qml:204 contents/ui/configKeys.qml:266
+#: contents/ui/configKeys.qml:212 contents/ui/configKeys.qml:274
 msgid "Set key…"
 msgstr "Posa la clau…"
 
-#: contents/ui/configKeys.qml:212
+#: contents/ui/configKeys.qml:220
 msgid "Balances"
 msgstr "Saldos"
 
-#: contents/ui/configKeys.qml:234
+#: contents/ui/configKeys.qml:242
 msgid "Declare balance…"
 msgstr "Declara el saldo…"
 
-#: contents/ui/configKeys.qml:241
+#: contents/ui/configKeys.qml:249
 msgid "Intelligence index"
 msgstr "Índex d'intel·ligència"
 
-#: contents/ui/configKeys.qml:245
+#: contents/ui/configKeys.qml:253
 msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key."
 msgstr "Una clau gratuïta d'Artificial Analysis ordena els models de cada subscripció. Només la fa servir `ataecina update`. Sense ella, l'índex arriba a través d'OpenRouter si teniu clau d'OpenRouter."
 
-#: contents/ui/configKeys.qml:260
+#: contents/ui/configKeys.qml:268
 msgid "Get a key"
 msgstr "Obtén una clau"
 
-#: contents/ui/configSubscriptions.qml:59
+#: contents/ui/configSubscriptions.qml:60
 msgid "Cloudflare account id:"
 msgstr "Id del compte de Cloudflare:"
 
-#: contents/ui/configSubscriptions.qml:61
+#: contents/ui/configSubscriptions.qml:62
 msgid "GitHub login:"
 msgstr "Usuari de GitHub:"
 
-#: contents/ui/configSubscriptions.qml:63
+#: contents/ui/configSubscriptions.qml:64
 msgid "Monthly allowance (requests or credits):"
 msgstr "Assignació mensual (peticions o crèdits):"
 
-#: contents/ui/configSubscriptions.qml:65
+#: contents/ui/configSubscriptions.qml:66
 msgid "xAI team id:"
 msgstr "Id de l'equip d'xAI:"
 
-#: contents/ui/configSubscriptions.qml:67
+#: contents/ui/configSubscriptions.qml:68
 msgid "Your e-mail in the team:"
 msgstr "El vostre correu a l'equip:"
 
-#: contents/ui/configSubscriptions.qml:69
+#: contents/ui/configSubscriptions.qml:70
 msgid "Provider Heimdall follows:"
 msgstr "Proveïdor que segueix Heimdall:"
 
-#: contents/ui/configSubscriptions.qml:77
+#: contents/ui/configSubscriptions.qml:78
 msgid "The id takes lowercase letters, digits and dashes."
 msgstr "L'id admet minúscules, dígits i guions."
 
-#: contents/ui/configSubscriptions.qml:87
+#: contents/ui/configSubscriptions.qml:88
 msgid "Fill in every field."
 msgstr "Ompliu tots els camps."
 
-#: contents/ui/configSubscriptions.qml:138
+#: contents/ui/configSubscriptions.qml:146
 msgid "Added. Set its key on the Keys page."
 msgstr "Afegida. Poseu-ne la clau a la pàgina Claus."
 
-#: contents/ui/configSubscriptions.qml:159 contents/config/config.qml:11
+#: contents/ui/configSubscriptions.qml:167 contents/config/config.qml:11
 msgid "Subscriptions"
 msgstr "Subscripcions"
 
-#: contents/ui/configSubscriptions.qml:163
+#: contents/ui/configSubscriptions.qml:171
 msgid "Two subscriptions of the same provider need different ids, and each its own key."
 msgstr "Dues subscripcions del mateix proveïdor necessiten ids diferents i cadascuna la seva clau."
 
-#: contents/ui/configSubscriptions.qml:189
+#: contents/ui/configSubscriptions.qml:197
 msgid "Remove it"
 msgstr "Elimina-la"
 
-#: contents/ui/configSubscriptions.qml:189
+#: contents/ui/configSubscriptions.qml:197
 msgid "Remove…"
 msgstr "Elimina…"
 
-#: contents/ui/configSubscriptions.qml:196
+#: contents/ui/configSubscriptions.qml:204
 msgid "Add a subscription"
 msgstr "Afegeix una subscripció"
 
-#: contents/ui/configSubscriptions.qml:204
+#: contents/ui/configSubscriptions.qml:212
 msgid "Source:"
 msgstr "Font:"
 
-#: contents/ui/configSubscriptions.qml:219
+#: contents/ui/configSubscriptions.qml:227
 msgid "Id:"
 msgstr "Id:"
 
-#: contents/ui/configSubscriptions.qml:227
+#: contents/ui/configSubscriptions.qml:235
 msgid "Plan (optional):"
 msgstr "Pla (opcional):"
 
-#: contents/ui/configSubscriptions.qml:260
+#: contents/ui/configSubscriptions.qml:268
 msgid "Add"
 msgstr "Afegeix"
 
-#: contents/ui/main.qml:35
+#: contents/ui/main.qml:43
 msgid "Ataecina"
 msgstr "Ataecina"
 

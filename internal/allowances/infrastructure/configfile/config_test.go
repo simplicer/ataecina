@@ -40,6 +40,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	  "alerts": {"thresholds": [80, 90, 99]},
 	  "network": {"use_environment_proxy": true},
 	  "offers": false,
+	  "language": "eu",
 	  "subscriptions": [
 	    {"id": "codex", "source": "codex-logs", "plan": "plus", "app_server": true, "app_server_after_minutes": 30},
 	    {"id": "zai", "source": "zai-api", "key": "zai-coding"},
@@ -51,7 +52,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Interval != 10*time.Minute || !settings.UseEnvironmentProxy || settings.Offers || len(settings.Thresholds) != 3 {
+	if settings.Interval != 10*time.Minute || !settings.UseEnvironmentProxy || settings.Offers || settings.Language != "eu" || len(settings.Thresholds) != 3 {
 		t.Fatalf("settings = %+v", settings)
 	}
 	codex, zai, openrouter, gemini := settings.Subscriptions[0], settings.Subscriptions[1], settings.Subscriptions[2], settings.Subscriptions[3]
@@ -123,6 +124,7 @@ func TestStrictValidation(t *testing.T) {
 		"no email":            `{"version": 1, "subscriptions": [{"id": "a", "source": "cursor-admin-api"}]}`,
 		"bad email":           `{"version": 1, "subscriptions": [{"id": "a", "source": "cursor-admin-api", "email": "nobody"}]}`,
 		"email elsewhere":     `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "email": "a@b.co"}]}`,
+		"unknown language":    `{"version": 1, "language": "fr", "subscriptions": []}`,
 		"port elsewhere":      `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "port": 4001}]}`,
 	}
 	for name, text := range cases {

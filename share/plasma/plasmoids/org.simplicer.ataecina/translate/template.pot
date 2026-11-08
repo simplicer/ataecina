@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 12:37+0100\n"
+"POT-Creation-Date: 2026-11-08 13:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -28,7 +28,7 @@ msgid "Checked %1"
 msgstr ""
 
 #: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
-#: contents/ui/main.qml:45
+#: contents/ui/main.qml:53
 msgid "Refresh now"
 msgstr ""
 
@@ -71,7 +71,7 @@ msgid "%1 of %2"
 msgstr ""
 
 #: contents/ui/Snapshot.qml:260 contents/ui/Snapshot.qml:401
-#: contents/ui/configKeys.qml:80
+#: contents/ui/configKeys.qml:81
 msgid "%1 left"
 msgstr ""
 
@@ -233,7 +233,7 @@ msgstr ""
 msgid "New: %1"
 msgstr ""
 
-#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:47
+#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:48
 msgid "key rejected"
 msgstr ""
 
@@ -308,188 +308,200 @@ msgid_plural "%1 warnings"
 msgstr[0] ""
 msgstr[1] ""
 
-#: contents/ui/configGeneral.qml:15
-msgid "Command:"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:20
-msgid "Read the snapshot every (seconds):"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:26
-msgid "Show what is left in the panel"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:30
-msgid "Subscriptions to show:"
+#: contents/ui/configGeneral.qml:27
+msgid "Language:"
 msgstr ""
 
 #: contents/ui/configGeneral.qml:31
+msgid "The desktop's"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:42
+msgid "Desktop notifications follow `language` in config.json, or the desktop."
+msgstr ""
+
+#: contents/ui/configGeneral.qml:50
+msgid "Command:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:55
+msgid "Read the snapshot every (seconds):"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:61
+msgid "Show what is left in the panel"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:65
+msgid "Subscriptions to show:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:66
 msgid "all, in configuration order"
 msgstr ""
 
-#: contents/ui/configGeneral.qml:34
+#: contents/ui/configGeneral.qml:69
 msgid "Comma-separated ids, in the order to show them."
 msgstr ""
 
-#: contents/ui/configKeys.qml:50
+#: contents/ui/configKeys.qml:51
 msgid "no key"
 msgstr ""
 
-#: contents/ui/configKeys.qml:53
+#: contents/ui/configKeys.qml:54
 msgid "works"
 msgstr ""
 
-#: contents/ui/configKeys.qml:56
+#: contents/ui/configKeys.qml:57
 msgid "key accepted, answer not understood"
 msgstr ""
 
-#: contents/ui/configKeys.qml:58
+#: contents/ui/configKeys.qml:59
 msgid "not read yet"
 msgstr ""
 
-#: contents/ui/configKeys.qml:78
+#: contents/ui/configKeys.qml:79
 msgid "no balance declared"
 msgstr ""
 
-#: contents/ui/configKeys.qml:87
+#: contents/ui/configKeys.qml:88
 msgid "API key for %1. It is sealed at once and never shown."
 msgstr ""
 
-#: contents/ui/configKeys.qml:95
+#: contents/ui/configKeys.qml:96
 msgid "Current balance of %1, in US dollars:"
 msgstr ""
 
-#: contents/ui/configKeys.qml:138 contents/ui/configSubscriptions.qml:138
+#: contents/ui/configKeys.qml:146 contents/ui/configSubscriptions.qml:146
 msgid "Saved. Reading the subscriptions again…"
 msgstr ""
 
-#: contents/ui/configKeys.qml:163
+#: contents/ui/configKeys.qml:171
 msgid "API keys"
 msgstr ""
 
-#: contents/ui/configKeys.qml:167
+#: contents/ui/configKeys.qml:175
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
 msgstr ""
 
-#: contents/ui/configKeys.qml:167
+#: contents/ui/configKeys.qml:175
 msgid "The widget never sees them."
 msgstr ""
 
-#: contents/ui/configKeys.qml:174
+#: contents/ui/configKeys.qml:182
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
 msgstr ""
 
-#: contents/ui/configKeys.qml:180
+#: contents/ui/configKeys.qml:188
 msgid "No subscription needs a key."
 msgstr ""
 
-#: contents/ui/configKeys.qml:204
+#: contents/ui/configKeys.qml:212
 msgid "Replace key…"
 msgstr ""
 
-#: contents/ui/configKeys.qml:204 contents/ui/configKeys.qml:266
+#: contents/ui/configKeys.qml:212 contents/ui/configKeys.qml:274
 msgid "Set key…"
 msgstr ""
 
-#: contents/ui/configKeys.qml:212
+#: contents/ui/configKeys.qml:220
 msgid "Balances"
 msgstr ""
 
-#: contents/ui/configKeys.qml:234
+#: contents/ui/configKeys.qml:242
 msgid "Declare balance…"
 msgstr ""
 
-#: contents/ui/configKeys.qml:241
+#: contents/ui/configKeys.qml:249
 msgid "Intelligence index"
 msgstr ""
 
-#: contents/ui/configKeys.qml:245
+#: contents/ui/configKeys.qml:253
 msgid ""
 "A free Artificial Analysis key ranks the models of each subscription. Only "
 "`ataecina update` uses it. Without it, the index comes through OpenRouter "
 "when you have an OpenRouter key."
 msgstr ""
 
-#: contents/ui/configKeys.qml:260
+#: contents/ui/configKeys.qml:268
 msgid "Get a key"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:59
+#: contents/ui/configSubscriptions.qml:60
 msgid "Cloudflare account id:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:61
+#: contents/ui/configSubscriptions.qml:62
 msgid "GitHub login:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:63
+#: contents/ui/configSubscriptions.qml:64
 msgid "Monthly allowance (requests or credits):"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:65
+#: contents/ui/configSubscriptions.qml:66
 msgid "xAI team id:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:67
+#: contents/ui/configSubscriptions.qml:68
 msgid "Your e-mail in the team:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:69
+#: contents/ui/configSubscriptions.qml:70
 msgid "Provider Heimdall follows:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:77
+#: contents/ui/configSubscriptions.qml:78
 msgid "The id takes lowercase letters, digits and dashes."
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:87
+#: contents/ui/configSubscriptions.qml:88
 msgid "Fill in every field."
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:138
+#: contents/ui/configSubscriptions.qml:146
 msgid "Added. Set its key on the Keys page."
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:159 contents/config/config.qml:11
+#: contents/ui/configSubscriptions.qml:167 contents/config/config.qml:11
 msgid "Subscriptions"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:163
+#: contents/ui/configSubscriptions.qml:171
 msgid ""
 "Two subscriptions of the same provider need different ids, and each its own "
 "key."
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:189
+#: contents/ui/configSubscriptions.qml:197
 msgid "Remove it"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:189
+#: contents/ui/configSubscriptions.qml:197
 msgid "Remove…"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:196
+#: contents/ui/configSubscriptions.qml:204
 msgid "Add a subscription"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:204
+#: contents/ui/configSubscriptions.qml:212
 msgid "Source:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:219
+#: contents/ui/configSubscriptions.qml:227
 msgid "Id:"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:227
+#: contents/ui/configSubscriptions.qml:235
 msgid "Plan (optional):"
 msgstr ""
 
-#: contents/ui/configSubscriptions.qml:260
+#: contents/ui/configSubscriptions.qml:268
 msgid "Add"
 msgstr ""
 
-#: contents/ui/main.qml:35
+#: contents/ui/main.qml:43
 msgid "Ataecina"
 msgstr ""
 

@@ -33,26 +33,26 @@ PlasmaExtras.Representation {
 
         contentItem: RowLayout {
             PlasmaComponents3.Label {
-                text: snapshot.meta.snapshot_taken_at ? i18n("Checked %1", snapshot.clock(snapshot.meta.snapshot_taken_at)) : ""
+                text: snapshot.meta.snapshot_taken_at ? l10n.i18n("Checked %1", snapshot.clock(snapshot.meta.snapshot_taken_at)) : ""
                 opacity: 0.7
                 Layout.fillWidth: true
             }
             PlasmaComponents3.ToolButton {
                 icon.name: "view-refresh"
                 display: QQC2.AbstractButton.IconOnly
-                text: i18n("Refresh now")
+                text: l10n.i18n("Refresh now")
                 onClicked: root.refresh()
                 PlasmaComponents3.ToolTip {
-                    text: i18n("Refresh now")
+                    text: l10n.i18n("Refresh now")
                 }
             }
             PlasmaComponents3.ToolButton {
                 icon.name: "configure"
                 display: QQC2.AbstractButton.IconOnly
-                text: i18n("Configure Ataecina…")
+                text: l10n.i18n("Configure Ataecina…")
                 onClicked: root.configure()
                 PlasmaComponents3.ToolTip {
-                    text: i18n("Configure Ataecina…")
+                    text: l10n.i18n("Configure Ataecina…")
                 }
             }
         }
@@ -142,7 +142,7 @@ PlasmaExtras.Representation {
         width: parent.width - Kirigami.Units.gridUnit * 4
         visible: !scroll.visible
         iconName: snapshot.problem !== "" ? "dialog-warning" : "ataecina"
-        text: snapshot.problem !== "" ? snapshot.problem : i18n("No snapshot yet")
-        explanation: snapshot.problem !== "" ? "" : i18n("Run `ataecina collect`, or enable ataecina-collect.timer.")
+        text: snapshot.problem !== "" ? snapshot.problem : l10n.i18n("No snapshot yet")
+        explanation: snapshot.problem !== "" ? "" : l10n.i18n("Run `ataecina collect`, or enable ataecina-collect.timer.")
     }
 }
