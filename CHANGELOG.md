@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.25.1-unstable] - 2026-11-08
+
+### Fixed
+
+- OpenCode Zen without a declared balance no longer looks like a failing
+  source: instead of sitting among the warnings, it gets its row with the
+  money spent ("1,20 $ gastados"), a note to declare the balance in the
+  settings and, unfolded, its free models.
+
 ## [0.25.0-unstable] - 2026-11-08
 
 ### Added

@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.25.0-unstable` — early development: everything below
+**Current version:** `0.25.1-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -51,7 +51,8 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
   percentage left and `↻ 3 d 17 h` to the reset; click a row to unfold every
   bucket, the balance and the source's hint.
 - **Balances** — `$6.80 of $70.00` when the total is known, `≈` when the
-  figure is derived rather than reported.
+  figure is derived rather than reported, `$1.20 spent` while an OpenCode
+  Zen balance is not declared yet.
 - **Warnings** — subscriptions whose key is missing or rejected, or whose
   source answered something unexpected, fold under one line with the
   reason. Free providers without a plan appear only when they report

@@ -101,18 +101,26 @@ QtObject {
         return subscription.freshness === "FRESH" && !failed(subscription);
     }
 
-    // "row" when there is something left to show (windows, or money left),
-    // "warning" when the source failed or asks for something, and "hidden"
-    // when it answers but has nothing worth showing: a free credit used up,
-    // or only what was spent.
+    // "row" when there is something to show (windows, money left, or the
+    // spending of a source that cannot know what is left yet, such as an
+    // undeclared OpenCode Zen balance), "warning" when the source failed or
+    // asks for something it cannot do without, and "hidden" when it answers
+    // but has nothing worth showing: a free credit used up, or only what was
+    // spent of a finished one.
     function placement(subscription) {
         if (failed(subscription)) {
             return "warning";
         }
-        if (subscription.meters.length > 0 || moneyLeft(subscription) > 0) {
+        if (subscription.meters.length > 0 || moneyLeft(subscription) > 0 || spentOnly(subscription)) {
             return "row";
         }
         return subscription.outcome === "PARTIAL" && subscription.hint ? "warning" : "hidden";
+    }
+
+    // A partial reading that knows only the money spent.
+    function spentOnly(subscription) {
+        const balance = subscription.balance;
+        return subscription.outcome === "PARTIAL" && balance !== null && !balance.remaining && !!balance.spent;
     }
 
     // ----- windows -----
@@ -225,9 +233,13 @@ QtObject {
         return symbol === undefined ? currency : symbol;
     }
 
-    // "$6.80 of $70.00", or "$6.80 left" when the total is unknown; empty
-    // when nothing is left.
+    // "$6.80 of $70.00", or "$6.80 left" when the total is unknown, or
+    // "$1.20 spent" when only the spending is known; empty when nothing is
+    // left.
     function moneyLine(subscription) {
+        if (spentOnly(subscription)) {
+            return i18n("%1 spent", money(subscription.balance.spent));
+        }
         if (moneyLeft(subscription) <= 0) {
             return "";
         }
@@ -355,6 +367,9 @@ QtObject {
             default:
                 parts.push(i18n("Stale, observed %1", age(subscription.observed_at)));
             }
+        }
+        if (spentOnly(subscription) && subscription.source === "OPENCODE_ZEN") {
+            parts.push(i18n("Declare its balance in the settings to see what is left"));
         }
         if (subscription.banked_resets && subscription.banked_resets.available > 0) {
             parts.push(i18np("%1 banked reset", "%1 banked resets", subscription.banked_resets.available));

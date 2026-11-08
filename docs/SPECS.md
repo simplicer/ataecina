@@ -829,11 +829,13 @@ schemes and the accent colour like the battery or network widgets.
 - **What gets a row, a warning or nothing:** a subscription whose source
   failed (any outcome but `OK` and `PARTIAL`) is a **warning**; one with
   windows, or with money left (`balance.remaining` above zero), gets a
-  **row**; one that answers with nothing worth showing — a free credit used
-  up, or only what was spent — is **hidden**, unless its source asks for
-  something (`PARTIAL` with a hint, such as declaring the OpenCode Zen
-  balance), which makes it a warning. So a free provider without a plan
-  shows only when it reports free-model limits.
+  **row**; so does a `PARTIAL` reading that knows only what was spent (an
+  OpenCode Zen balance not declared yet: "$1.20 spent", with a note to
+  declare it in the settings); one that answers with nothing worth showing
+  — a free credit used up, or only what was spent of an `OK` reading — is
+  **hidden**, unless its source asks for something (`PARTIAL` with a hint
+  and no figure), which makes it a warning. So a free provider without a
+  plan shows only when it reports free-model limits.
 - **Full form (popup):** one rounded card with a row per
   listed subscription:
   - growth rings for what is known only: one per window of the first
