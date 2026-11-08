@@ -29,7 +29,7 @@ type NewSubscription struct {
 var (
 	numberOptions = map[string]bool{"monthly_allowance": true, "port": true, "app_server_after_minutes": true}
 	switchOptions = map[string]bool{"app_server": true}
-	topLevelOrder = []string{"version", "interval_minutes", "alerts", "network", "subscriptions"}
+	topLevelOrder = []string{"version", "interval_minutes", "alerts", "network", "offers", "subscriptions"}
 )
 
 // ErrNoSuchSubscription is a subscription id config.json does not have.

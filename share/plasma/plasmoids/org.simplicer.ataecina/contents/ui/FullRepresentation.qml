@@ -121,6 +121,19 @@ PlasmaExtras.Representation {
                     anchors.margins: Kirigami.Units.largeSpacing
                 }
             }
+
+            // Coding plan offers the maintainer publishes, folded.
+            Card {
+                visible: snapshot.offers.length > 0
+                Layout.fillWidth: true
+                implicitHeight: offersBlock.implicitHeight + Kirigami.Units.largeSpacing * 2
+
+                Offers {
+                    id: offersBlock
+                    anchors.fill: parent
+                    anchors.margins: Kirigami.Units.largeSpacing
+                }
+            }
         }
     }
 

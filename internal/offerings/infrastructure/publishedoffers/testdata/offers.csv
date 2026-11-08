@@ -1,0 +1,3 @@
+id,provider,plan,title,price,currency,period,url,sponsored,ends
+example-lite,Example AI,Coding Lite,"First month at half price, then 10 USD",5,USD,first month,https://example.com/plans?ref=ataecina,yes,2026-12-31
+example-pro,Example AI,Coding Pro,<b>Yearly</b> plan,90,USD,year,https://example.com/plans/pro,no,

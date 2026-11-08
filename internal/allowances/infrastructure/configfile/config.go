@@ -50,7 +50,10 @@ type Settings struct {
 	Interval            time.Duration
 	Thresholds          []int
 	UseEnvironmentProxy bool
-	Subscriptions       []SubscriptionSettings
+	// Offers is whether `ataecina update` fetches the published coding
+	// plan offers (default true).
+	Offers        bool
+	Subscriptions []SubscriptionSettings
 }
 
 // DomainSubscriptions lists the configured subscriptions in order.
@@ -92,6 +95,7 @@ type document struct {
 	IntervalMinutes *int                   `json:"interval_minutes"`
 	Alerts          *alertsDocument        `json:"alerts"`
 	Network         *networkDocument       `json:"network"`
+	Offers          *bool                  `json:"offers"`
 	Subscriptions   []subscriptionDocument `json:"subscriptions"`
 }
 
@@ -169,6 +173,7 @@ func Decode(data []byte, sources catalog.Catalog) (Settings, error) {
 	if raw.Network != nil {
 		settings.UseEnvironmentProxy = raw.Network.UseEnvironmentProxy
 	}
+	settings.Offers = valueOr(raw.Offers, true)
 	seen := make(map[string]bool, len(raw.Subscriptions))
 	for _, item := range raw.Subscriptions {
 		subscription, err := decodeSubscription(item, sources)

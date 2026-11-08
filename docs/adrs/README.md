@@ -18,6 +18,7 @@
 | [0014](0014-keys-from-the-widget-through-a-masked-dialog.md) | Keys and balances from the widget settings, through a masked dialog |
 | [0015](0015-model-catalogue-from-models-dev.md) | A daily model catalogue from models.dev |
 | [0016](0016-explicit-update-command.md) | An explicit `ataecina update` for what is not refreshed on its own |
+| [0017](0017-published-coding-plan-offers.md) | Coding plan offers published in the repository |
 
 Each ADR has Context, Decision, Consequences and Alternatives. A superseded
 ADR stays, marked `superseded by NNNN`.

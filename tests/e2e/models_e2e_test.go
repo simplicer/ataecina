@@ -20,6 +20,12 @@ const fakeRanking = `{"tier": "free", "intelligence_index_version": 5.0,
     {"name": "Coder Max (Low)", "evaluations": {"artificial_analysis_intelligence_index": 41}}
   ]}`
 
+// The published offers of the fake Codeberg: one sponsored, one not.
+const fakeOffers = `id,provider,plan,title,price,currency,period,url,sponsored,ends
+example-lite,Example AI,Coding Lite,Half price the first month,5,USD,first month,https://example.com/lite?ref=ataecina,yes,2099-12-31
+example-pro,Example AI,Coding Pro,Yearly plan,90,USD,year,https://example.com/pro,no,
+`
+
 func TestUpdateBringsTheModelsAndTheirIntelligence(t *testing.T) {
 	bin := binary(t, "ATAECINA_E2E_BINARY")
 	tr := newTree(t, `{"version": 1, "subscriptions": [{"id": "openrouter", "source": "openrouter-api"}]}`, nil)
@@ -35,6 +41,8 @@ func TestUpdateBringsTheModelsAndTheirIntelligence(t *testing.T) {
 			w.Write([]byte(catalogue))
 		case "/api/v2/language/models/free":
 			w.Write([]byte(fakeRanking))
+		case "/simplicer/ataecina/raw/branch/main/data/offers.csv":
+			w.Write([]byte(fakeOffers))
 		default:
 			http.NotFound(w, r)
 		}
@@ -49,7 +57,7 @@ func TestUpdateBringsTheModelsAndTheirIntelligence(t *testing.T) {
 		t.Fatalf("keys set = %d %s", code, stderr)
 	}
 	code, out, stderr := tr.runWithPassphrase(bin, "", phrase, "update")
-	if code != 0 || !strings.Contains(out, "model catalogue: up to date for 1 subscriptions") || !strings.Contains(out, "intelligence index: 2 models") {
+	if code != 0 || !strings.Contains(out, "model catalogue: up to date for 1 subscriptions") || !strings.Contains(out, "intelligence index: 2 models") || !strings.Contains(out, "offers: 2 current") {
 		t.Fatalf("update = %d %q %q", code, out, stderr)
 	}
 	mu.Lock()
@@ -90,5 +98,41 @@ func TestUpdateBringsTheModelsAndTheirIntelligence(t *testing.T) {
 	}
 	if listed.Meta["intelligence_index_version"] != "5" || listed.Meta["intelligence_url"] != "https://artificialanalysis.ai/" {
 		t.Fatalf("meta = %v", listed.Meta)
+	}
+}
+
+func TestOffersAreShownAndCanBeTurnedOff(t *testing.T) {
+	bin := binary(t, "ATAECINA_E2E_BINARY")
+	tr := newTree(t, `{"version": 1, "subscriptions": [{"id": "zen", "source": "opencode-zen"}]}`, nil)
+	asked := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/simplicer/ataecina/raw/branch/main/data/offers.csv" {
+			asked++
+			w.Write([]byte(fakeOffers))
+			return
+		}
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", server.URL)
+	tr.run(bin, "update")
+	_, out, _ := tr.run(bin, "offers", "--json")
+	var listed struct {
+		Data []struct {
+			ID        string  `json:"id"`
+			URL       string  `json:"url"`
+			Sponsored bool    `json:"sponsored"`
+			Ends      *string `json:"ends"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal([]byte(out), &listed); err != nil || len(listed.Data) != 2 || !listed.Data[0].Sponsored || listed.Data[1].Ends != nil {
+		t.Fatalf("offers = %s %v", out, err)
+	}
+	off := newTree(t, `{"version": 1, "offers": false, "subscriptions": [{"id": "zen", "source": "opencode-zen"}]}`, nil)
+	off.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", server.URL)
+	before := asked
+	_, out, _ = off.run(bin, "update")
+	if asked != before || strings.Contains(out, "offers:") {
+		t.Fatalf("offers fetched although turned off: %q", out)
 	}
 }

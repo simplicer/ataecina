@@ -32,6 +32,8 @@ QtObject {
     // (`ataecina models --json <id>`), and that document's meta.
     property var models: ({})
     property var modelsMeta: ({})
+    // The current coding plan offers (`ataecina offers --json`).
+    property var offers: []
 
     readonly property var sourceNames: ({
             "CLAUDE_STATUSLINE": "Claude",
@@ -422,6 +424,25 @@ QtObject {
         }
         models = next;
         modelsMeta = document.meta;
+    }
+
+    function readOffers(stdout) {
+        try {
+            offers = JSON.parse(stdout).data;
+        } catch (error) {
+            offers = [];
+        }
+    }
+
+    // "5,00 $ / first month"; known periods are translated.
+    function offerPrice(offer) {
+        if (!offer.price) {
+            return "";
+        }
+        const periods = {"month": i18n("month"), "year": i18n("year"), "first month": i18n("first month")};
+        const period = periods[offer.period] || offer.period;
+        const price = amountText(offer.price, offer.currency);
+        return period ? price + " / " + period : price;
     }
 
     // The models that can be used with what is left, best first; at most 40.

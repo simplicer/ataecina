@@ -330,7 +330,7 @@ func contractKeys(t *testing.T) map[string]bool {
 // snake_case or lower case after a dot must be a contract field, a
 // setting, or a name the widget declares itself.
 var platformMembers = []string{
-	"every", "filter", "find", "floor", "join", "length", "map", "max", "min",
+	"every", "filter", "find", "floor", "join", "length", "map", "max", "min", "underline",
 	"name", "parse", "push", "restart", "round", "split", "trim", "weight",
 	"view", "width", "height", "button", "expanded", "icon", "configuration",
 	"text", "value", "checked", "r", "g", "b", "fill", "margins",
@@ -339,13 +339,15 @@ var platformMembers = []string{
 
 // cliMembers are the properties of the other JSON documents the widget
 // reads: `ataecina sources --json`, `ataecina subscriptions --json` and
-// `ataecina models --json` (SPECS §8.5, §11).
+// `ataecina models --json` and `ataecina offers --json` (SPECS §8.5, §11,
+// §12).
 var cliMembers = []string{
 	"id", "label", "provider", "fidelity", "needs_key", "options", "required",
 	"takes_declarations", "source", "plan", "key",
 	"subscription", "catalogue", "something_left", "free", "input_price",
 	"output_price", "released_on", "intelligence", "available",
 	"intelligence_index_version", "intelligence_refreshed_at", "catalogue_refreshed_at",
+	"title", "price", "currency", "period", "url", "sponsored", "ends", "refreshed_at",
 }
 
 func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {

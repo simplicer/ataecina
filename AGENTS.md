@@ -171,8 +171,9 @@ feature (ADRs 0003–0006).
   are the ones listed in `docs/SPECS.md` §3, and only for enabled
   subscriptions, plus the public model catalogue `models.dev` (§11), at
   most once a day and without any key, and `artificialanalysis.ai`
-  (intelligence index, owner's key) only through `ataecina update`
-  (ADR 0016).
+  (intelligence index, owner's key) and the published offers on
+  `codeberg.org` (no key) only through `ataecina update` (ADR 0016,
+  ADR 0017).
 - When a provider says stop (rate limit, invalid key, policy), Ataecina
   stops asking until the time it announces.
 
@@ -352,4 +353,5 @@ further. `govulncheck` runs in `make check`.
   (ADR 0009). Build-time tools (nfpm) are pinned and never linked. Adding
   any dependency requires an ADR.
 - Executable scripts live in `bin/`; containers, systemd units and packaging
-  live in `infra/`.
+  live in `infra/`; data published for installed copies (the coding plan
+  offers, `data/offers.csv`) lives in `data/`.

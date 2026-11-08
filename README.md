@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.28.0-unstable` — early development: everything below
+**Current version:** `0.29.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -66,6 +66,12 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
   by the [Artificial Analysis](https://artificialanalysis.ai/)
   Intelligence Index, with its price per million tokens; "Update models"
   (or `ataecina update`) refreshes both.
+- **Offers** — coding plan offers the maintainer publishes in
+  [`data/offers.csv`](data/offers.csv), fetched by `ataecina update` and
+  folded under the subscriptions; a click opens the offer. Some links are
+  affiliate links, marked "Sponsored link": the maintainer may earn a
+  commission when you buy through them, at no extra cost to you. Set
+  `"offers": false` in `config.json` to never fetch them.
 - **Alerts** — a desktop notification when a window crosses 90 % and 95 %
   (once per window), and once when a source starts failing.
 - **Freshness and fidelity** — every figure knows when it was read and
@@ -194,13 +200,14 @@ was checked, is documented in [docs/SPECS.md](docs/SPECS.md) §3.
   and honours `Retry-After`. The only other host is the public model
   catalogue `models.dev`, asked at most once a day, revalidated with its
   ETag and never sent a key, and Artificial Analysis, only when you run
-  `ataecina update` with your own free key. No telemetry, no analytics, no
-  update checks.
+  `ataecina update` with your own free key; the same command reads the
+  published offers from Codeberg (which then sees your address, like any
+  download). No telemetry, no analytics, no update checks.
 - **Strict files.** Ataecina refuses to run if its configuration or key file
   is readable by anyone else, like ssh.
 
 The rules are in [SECURITY.md](SECURITY.md) and the decisions behind them in
-[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014 to 0016).
+[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014 to 0017).
 
 ## Install
 

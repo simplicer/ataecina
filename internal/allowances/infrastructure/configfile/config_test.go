@@ -39,6 +39,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	  "version": 1, "interval_minutes": 10,
 	  "alerts": {"thresholds": [80, 90, 99]},
 	  "network": {"use_environment_proxy": true},
+	  "offers": false,
 	  "subscriptions": [
 	    {"id": "codex", "source": "codex-logs", "plan": "plus", "app_server": true, "app_server_after_minutes": 30},
 	    {"id": "zai", "source": "zai-api", "key": "zai-coding"},
@@ -50,7 +51,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if settings.Interval != 10*time.Minute || !settings.UseEnvironmentProxy || len(settings.Thresholds) != 3 {
+	if settings.Interval != 10*time.Minute || !settings.UseEnvironmentProxy || settings.Offers || len(settings.Thresholds) != 3 {
 		t.Fatalf("settings = %+v", settings)
 	}
 	codex, zai, openrouter, gemini := settings.Subscriptions[0], settings.Subscriptions[1], settings.Subscriptions[2], settings.Subscriptions[3]
@@ -76,7 +77,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if codex.Port != 0 {
 		t.Fatalf("only heimdall has a port: %d", codex.Port)
 	}
-	if defaulted, err := decode(t, `{"version": 1, "subscriptions": [{"id": "groq", "source": "heimdall", "provider": "groq"}]}`); err != nil || defaulted.Subscriptions[0].Port != 4001 {
+	if defaulted, err := decode(t, `{"version": 1, "subscriptions": [{"id": "groq", "source": "heimdall", "provider": "groq"}]}`); err != nil || defaulted.Subscriptions[0].Port != 4001 || !defaulted.Offers {
 		t.Fatalf("Heimdall's default port = %+v, %v", defaulted.Subscriptions, err)
 	}
 }

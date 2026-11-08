@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 11:38+0100\n"
+"POT-Creation-Date: 2026-11-08 11:56+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Galician <https://codeberg.org/simplicer/ataecina>\n"
@@ -23,7 +23,7 @@ msgid "Checked %1"
 msgstr "Comprobado ás %1"
 
 #: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
-#: contents/ui/main.qml:44
+#: contents/ui/main.qml:45
 msgid "Refresh now"
 msgstr "Actualizar agora"
 
@@ -31,216 +31,234 @@ msgstr "Actualizar agora"
 msgid "Configure Ataecina…"
 msgstr "Configurar Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:526
+#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:547
 msgid "No snapshot yet"
 msgstr "Aínda non hai instantánea"
 
-#: contents/ui/FullRepresentation.qml:133
+#: contents/ui/FullRepresentation.qml:146
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr "Executa `ataecina collect` ou activa ataecina-collect.timer."
 
-#: contents/ui/Snapshot.qml:87
+#: contents/ui/Offers.qml:37
+msgid "%1 offer"
+msgid_plural "%1 offers"
+msgstr[0] "%1 oferta"
+msgstr[1] "%1 ofertas"
+
+#: contents/ui/Offers.qml:102
+msgid "Sponsored link"
+msgstr "Ligazón patrocinada"
+
+#: contents/ui/Snapshot.qml:89
 msgid "ataecina status failed: %1"
 msgstr "ataecina status fallou: %1"
 
-#: contents/ui/Snapshot.qml:96
+#: contents/ui/Snapshot.qml:98
 msgid "ataecina status gave something the widget cannot read"
 msgstr "ataecina status devolveu algo que o trebello non sabe ler"
 
-#: contents/ui/Snapshot.qml:248 contents/ui/Snapshot.qml:402
+#: contents/ui/Snapshot.qml:250 contents/ui/Snapshot.qml:404
 msgid "%1 spent"
 msgstr "%1 gastados"
 
-#: contents/ui/Snapshot.qml:256
+#: contents/ui/Snapshot.qml:258
 msgid "%1 of %2"
 msgstr "%1 de %2"
 
-#: contents/ui/Snapshot.qml:258 contents/ui/Snapshot.qml:399
+#: contents/ui/Snapshot.qml:260 contents/ui/Snapshot.qml:401
 #: contents/ui/configKeys.qml:80
 msgid "%1 left"
 msgstr "quedan %1"
 
-#: contents/ui/Snapshot.qml:285
+#: contents/ui/Snapshot.qml:287
 msgid "5 h"
 msgstr "5 h"
 
-#: contents/ui/Snapshot.qml:287
+#: contents/ui/Snapshot.qml:289
 msgid "day"
 msgstr "día"
 
-#: contents/ui/Snapshot.qml:289
+#: contents/ui/Snapshot.qml:291
 msgid "week"
 msgstr "semana"
 
-#: contents/ui/Snapshot.qml:291
+#: contents/ui/Snapshot.qml:293 contents/ui/Snapshot.qml:442
 msgid "month"
 msgstr "mes"
 
-#: contents/ui/Snapshot.qml:293
+#: contents/ui/Snapshot.qml:295
 msgid "cycle"
 msgstr "ciclo"
 
-#: contents/ui/Snapshot.qml:297
+#: contents/ui/Snapshot.qml:299
 msgid "%1 d"
 msgstr "%1 d"
 
-#: contents/ui/Snapshot.qml:300
+#: contents/ui/Snapshot.qml:302
 msgid "%1 h"
 msgstr "%1 h"
 
-#: contents/ui/Snapshot.qml:302
+#: contents/ui/Snapshot.qml:304
 msgid "%1 min"
 msgstr "%1 min"
 
-#: contents/ui/Snapshot.qml:321
+#: contents/ui/Snapshot.qml:323
 msgid "reborn"
 msgstr "renacida"
 
-#: contents/ui/Snapshot.qml:329
+#: contents/ui/Snapshot.qml:331
 msgid "%1 d %2 h"
 msgstr "%1 d %2 h"
 
-#: contents/ui/Snapshot.qml:332
+#: contents/ui/Snapshot.qml:334
 msgid "%1 h %2 m"
 msgstr "%1 h %2 m"
 
-#: contents/ui/Snapshot.qml:334
+#: contents/ui/Snapshot.qml:336
 msgid "%1 m"
 msgstr "%1 m"
 
-#: contents/ui/Snapshot.qml:347
+#: contents/ui/Snapshot.qml:349
 msgid "just now"
 msgstr "agora mesmo"
 
-#: contents/ui/Snapshot.qml:350
+#: contents/ui/Snapshot.qml:352
 msgid "%1 min ago"
 msgid_plural "%1 min ago"
 msgstr[0] "hai %1 min"
 msgstr[1] "hai %1 min"
 
-#: contents/ui/Snapshot.qml:353
+#: contents/ui/Snapshot.qml:355
 msgid "%1 hour ago"
 msgid_plural "%1 hours ago"
 msgstr[0] "hai %1 hora"
 msgstr[1] "hai %1 horas"
 
-#: contents/ui/Snapshot.qml:355
+#: contents/ui/Snapshot.qml:357
 msgid "%1 day ago"
 msgid_plural "%1 days ago"
 msgstr[0] "hai %1 día"
 msgstr[1] "hai %1 días"
 
-#: contents/ui/Snapshot.qml:369
+#: contents/ui/Snapshot.qml:371
 msgid "Updates when you use Claude Code"
 msgstr "Actualízase ao usar Claude Code"
 
-#: contents/ui/Snapshot.qml:372
+#: contents/ui/Snapshot.qml:374
 msgid "Updates when you use Codex"
 msgstr "Actualízase ao usar Codex"
 
-#: contents/ui/Snapshot.qml:375
+#: contents/ui/Snapshot.qml:377
 msgid "Stale, observed %1"
 msgstr "Desactualizado, observado %1"
 
-#: contents/ui/Snapshot.qml:379
+#: contents/ui/Snapshot.qml:381
 msgid "Declare its balance in the settings to see what is left"
 msgstr "Declara o seu saldo na configuración para ver o que queda"
 
-#: contents/ui/Snapshot.qml:382
+#: contents/ui/Snapshot.qml:384
 msgid "%1 banked reset"
 msgid_plural "%1 banked resets"
 msgstr[0] "%1 reinicio gardado"
 msgstr[1] "%1 reinicios gardados"
 
-#: contents/ui/Snapshot.qml:405
+#: contents/ui/Snapshot.qml:407
 msgid "unlimited credits"
 msgstr "créditos ilimitados"
 
-#: contents/ui/Snapshot.qml:405
+#: contents/ui/Snapshot.qml:407
 msgid "%1 credits"
 msgstr "%1 créditos"
 
-#: contents/ui/Snapshot.qml:445
+#: contents/ui/Snapshot.qml:442
+msgid "year"
+msgstr "ano"
+
+#: contents/ui/Snapshot.qml:442
+msgid "first month"
+msgstr "primeiro mes"
+
+#: contents/ui/Snapshot.qml:466
 msgid "free"
 msgstr "gratuíto"
 
-#: contents/ui/Snapshot.qml:461
+#: contents/ui/Snapshot.qml:482
 msgid "%1 model included"
 msgid_plural "%1 models included"
 msgstr[0] "%1 modelo incluído"
 msgstr[1] "%1 modelos incluídos"
 
-#: contents/ui/Snapshot.qml:463
+#: contents/ui/Snapshot.qml:484
 msgid "%1 model"
 msgid_plural "%1 models"
 msgstr[0] "%1 modelo"
 msgstr[1] "%1 modelos"
 
-#: contents/ui/Snapshot.qml:464
+#: contents/ui/Snapshot.qml:485
 msgid "%1 free"
 msgid_plural "%1 free"
 msgstr[0] "%1 gratuíto"
 msgstr[1] "%1 gratuítos"
 
-#: contents/ui/Snapshot.qml:476 contents/ui/SubscriptionRow.qml:305
+#: contents/ui/Snapshot.qml:497 contents/ui/SubscriptionRow.qml:305
 msgid "%1 more"
 msgid_plural "%1 more"
 msgstr[0] "%1 máis"
 msgstr[1] "%1 máis"
 
-#: contents/ui/Snapshot.qml:478
+#: contents/ui/Snapshot.qml:499
 msgid "Free: %1"
 msgstr "Gratuítos: %1"
 
-#: contents/ui/Snapshot.qml:487
+#: contents/ui/Snapshot.qml:508
 msgid "New: %1"
 msgstr "Novos: %1"
 
-#: contents/ui/Snapshot.qml:493 contents/ui/configKeys.qml:47
+#: contents/ui/Snapshot.qml:514 contents/ui/configKeys.qml:47
 msgid "key rejected"
 msgstr "chave rexeitada"
 
-#: contents/ui/Snapshot.qml:497
+#: contents/ui/Snapshot.qml:518
 msgid "partial"
 msgstr "parcial"
 
-#: contents/ui/Snapshot.qml:499
+#: contents/ui/Snapshot.qml:520
 msgid "broken"
 msgstr "roto"
 
-#: contents/ui/Snapshot.qml:501
+#: contents/ui/Snapshot.qml:522
 msgid "unavailable"
 msgstr "non dispoñible"
 
-#: contents/ui/Snapshot.qml:503
+#: contents/ui/Snapshot.qml:524
 msgid "key missing"
 msgstr "falta a chave"
 
-#: contents/ui/Snapshot.qml:505
+#: contents/ui/Snapshot.qml:526
 msgid "locked"
 msgstr "bloqueado"
 
-#: contents/ui/Snapshot.qml:507
+#: contents/ui/Snapshot.qml:528
 msgid "unsupported"
 msgstr "non compatible"
 
-#: contents/ui/Snapshot.qml:515
+#: contents/ui/Snapshot.qml:536
 msgid "derived"
 msgstr "derivado"
 
-#: contents/ui/Snapshot.qml:517
+#: contents/ui/Snapshot.qml:538
 msgid "observed"
 msgstr "observado"
 
-#: contents/ui/Snapshot.qml:519
+#: contents/ui/Snapshot.qml:540
 msgid "declared"
 msgstr "declarado"
 
-#: contents/ui/Snapshot.qml:526
+#: contents/ui/Snapshot.qml:547
 msgid "No windows to show"
 msgstr "Non hai ventás que amosar"
 
-#: contents/ui/Snapshot.qml:528 contents/ui/SubscriptionRow.qml:195
+#: contents/ui/Snapshot.qml:549 contents/ui/SubscriptionRow.qml:195
 msgid "%1% left"
 msgstr "queda un %1 %"
 
@@ -454,7 +472,7 @@ msgstr "Plan (opcional):"
 msgid "Add"
 msgstr "Engadir"
 
-#: contents/ui/main.qml:34
+#: contents/ui/main.qml:35
 msgid "Ataecina"
 msgstr "Ataecina"
 

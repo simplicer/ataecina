@@ -48,7 +48,7 @@ for subscriptions the owner enabled; the one other host is the public model
 catalogue `https://models.dev`, asked at most once a day without any key
 (§11), and, only when the owner runs `ataecina update` with its key, the
 Artificial Analysis Intelligence Index at `https://artificialanalysis.ai`
-(§11.1). **Undocumented** sources must be
+(§11.1) and the published offers at `https://codeberg.org` (§12). **Undocumented** sources must be
 re-verified with a live, manual call (owner's key) before an adapter is
 merged, and again whenever they report `CONTRACT_CHANGED`. Fields listed are
 the only ones read.
@@ -1034,6 +1034,7 @@ anything:
 | `alerts.thresholds` | 1–5 integers rising strictly within 1–100, default `[90, 95]` |
 | `subscriptions[].thresholds` | optional, same rules; replaces `alerts.thresholds` for that subscription |
 | `network.use_environment_proxy` | default `false` (ADR 0006) |
+| `offers` | default `true`; `false` keeps `ataecina update` from fetching the published offers (§12) |
 | `subscriptions[].id` | required, unique, `[a-z0-9][a-z0-9-]{0,31}` |
 | `subscriptions[].source` | required, a source id of §3 |
 | `subscriptions[].plan` | optional, any text, normalised to `UPPER_SNAKE_CASE`; a plan reported by the source wins |
@@ -1173,3 +1174,23 @@ The bounded context `offerings` keeps that, apart from the quotas.
   per 1M tokens or "free", credited to the Artificial Analysis Intelligence
   Index with a link to artificialanalysis.ai, and "Update models", which
   runs `ataecina update`. The Keys page sets the `artificial-analysis` key.
+
+## 12. Coding plan offers (ADR 0017)
+
+- The maintainer publishes offers of AI coding plans in `data/offers.csv`
+  of the public repository (format in `data/README.md`): `id, provider,
+  plan, title, price, currency, period, url, sponsored, ends`.
+- `ataecina update` fetches
+  `https://codeberg.org/simplicer/ataecina/raw/branch/main/data/offers.csv`
+  once, without any key (256 KiB, 15 s), unless `"offers": false` in
+  `config.json`. 404 is no offer; a malformed file (another header, a link
+  that is not `https`, a price or date that does not parse, more than 100
+  offers) is refused whole and the kept offers stay. Kept in
+  `$XDG_STATE_HOME/ataecina/offers.json` (`0600`).
+- `ataecina offers [--json]` lists the offers that have not ended: `{
+  "data": [ { "id", "provider", "plan", "title", "price", "currency",
+  "period", "url", "sponsored", "ends" } ], "meta": { "refreshed_at" } }`.
+- The widget shows them in a folded block under the warnings ("2 offers",
+  the providers): provider · plan, the price per period (`month`, `year`,
+  `first month` translated), the title, and "Sponsored link" for an
+  affiliate link; a click opens the link in the browser.

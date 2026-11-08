@@ -20,6 +20,7 @@ PlasmoidItem {
     readonly property string statusCommand: command + " status --json"
     readonly property string modelsPrefix: command + " models --json "
     readonly property string updateCommand: command + " update"
+    readonly property string offersCommand: command + " offers --json"
     property bool updating: false
     property string updateProblem: ""
     readonly property string refreshCommand: "systemctl --user start ataecina-collect.service"
@@ -57,8 +58,11 @@ PlasmoidItem {
                 snapshot.read(data["exit code"], data["stdout"], data["stderr"]);
             } else if (source.startsWith(root.modelsPrefix)) {
                 snapshot.readModels(data["stdout"]);
+            } else if (source === root.offersCommand) {
+                snapshot.readOffers(data["stdout"]);
             } else if (source === root.updateCommand) {
                 root.updating = false;
+                executable.connectSource(root.offersCommand);
                 root.updateProblem = data["exit code"] === 0 ? "" : (data["stderr"] || "").trim();
                 for (const id of Object.keys(snapshot.models)) {
                     root.loadModels(id);
@@ -76,6 +80,8 @@ PlasmoidItem {
         triggeredOnStart: true
         onTriggered: root.update()
     }
+
+    Component.onCompleted: executable.connectSource(offersCommand)
 
     Timer {
         // The collector usually answers within a few seconds.

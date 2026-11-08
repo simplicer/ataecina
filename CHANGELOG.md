@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.29.0-unstable] - 2026-11-08
+
+### Added
+
+- Coding plan offers: the maintainer publishes them in `data/offers.csv`
+  of the public repository; `ataecina update` fetches them (no key; off
+  with `"offers": false`), `ataecina offers [--json]` lists the current
+  ones and the widget folds them under the subscriptions, a click opening
+  the offer. Affiliate links are marked "Sponsored link" (ADR 0017).
+
 ## [0.28.0-unstable] - 2026-11-08
 
 ### Added

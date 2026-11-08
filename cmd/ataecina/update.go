@@ -28,8 +28,8 @@ import (
 const rankingKey = "artificial-analysis"
 
 // update refreshes, on the owner's request, what is not refreshed on its
-// own: the model catalogue at once and the intelligence ranking (ADR
-// 0016). It never touches the readings.
+// own: the model catalogue at once, the intelligence ranking (ADR 0016)
+// and the published offers (ADR 0017). It never touches the readings.
 func update(ctx context.Context, args []string, env environment) int {
 	flags := newFlags("update", env)
 	fd := passphraseFlag(flags)
@@ -53,6 +53,9 @@ func update(ctx context.Context, args []string, env environment) int {
 		code = exitFailure
 	}
 	updateRanking(ctx, paths, env, client, *fd)
+	if settings.Offers {
+		updateOffers(ctx, paths, env, client)
+	}
 	return code
 }
 
