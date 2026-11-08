@@ -23,6 +23,9 @@ var bySource = map[string]string{
 	"kimi-code-api":      "kimi-code-plan-global",
 	"xai-api":            "xai",
 	"kilo-api":           "kilo",
+	"groq-api":           "groq",
+	"nvidia-api":         "nvidia",
+	"gemini-api":         "google",
 }
 
 // ProviderFor names the catalogue provider whose models describe a

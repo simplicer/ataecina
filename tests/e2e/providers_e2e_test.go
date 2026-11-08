@@ -36,6 +36,9 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		"/v1/billing/teams/team-e2e/prepaid/balance": "xaiapi/testdata/balance.json",
 		"/teams/spend":                               "cursoradminapi/testdata/spend.json",
 		"/api.json":                                  "../../offerings/infrastructure/modelsdev/testdata/api.json",
+		"/openai/v1/models":                          "keycheck/testdata/groq-models.json",
+		"/v2/nvcf/functions":                         "keycheck/testdata/nvidia-functions.json",
+		"/v1beta/models":                             "keycheck/testdata/gemini-models.json",
 	}
 	bodies := make(map[string]string, len(routes))
 	for path, name := range routes {
@@ -50,7 +53,8 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 			return
 		}
 		mu.Lock()
-		seen[r.URL.Path] = r.Header.Get("Authorization") + " | " + r.Header.Get("User-Agent")
+		// Google takes the key in x-goog-api-key; nobody else sends it.
+		seen[r.URL.Path] = r.Header.Get("Authorization") + r.Header.Get("X-Goog-Api-Key") + " | " + r.Header.Get("User-Agent")
 		mu.Unlock()
 		w.Write([]byte(body))
 	}))
@@ -231,4 +235,60 @@ func versionOf(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return strings.TrimSpace(string(data))
+}
+
+func TestKeyChecksShowTheSubscriptionAndTheirKey(t *testing.T) {
+	bin := binary(t, "ATAECINA_E2E_BINARY")
+	tr := newTree(t, `{"version": 1, "subscriptions": [
+	  {"id": "groq", "source": "groq-api"},
+	  {"id": "nvidia", "source": "nvidia-api"},
+	  {"id": "gemini", "source": "gemini-api"}
+	]}`, nil)
+	origin, received := fakeProviders(t)
+	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", origin)
+	const phrase = "a synthetic passphrase"
+	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "init", "--unlocker", "passphrase"); code != 0 {
+		t.Fatalf("init = %d %s", code, stderr)
+	}
+	for _, name := range []string{"groq", "nvidia", "gemini"} {
+		if code, _, stderr := tr.runWithPassphrase(bin, "sk-synthetic-"+name+"\n", phrase, "keys", "set", name); code != 0 {
+			t.Fatalf("keys set %s = %d %s", name, code, stderr)
+		}
+	}
+	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "collect"); code != 0 {
+		t.Fatalf("collect = %d %s", code, stderr)
+	}
+	agent := " | ataecina/" + versionOf(t)
+	for path, want := range map[string]string{
+		"/openai/v1/models":  "Bearer sk-synthetic-groq" + agent,
+		"/v2/nvcf/functions": "Bearer sk-synthetic-nvidia" + agent,
+		"/v1beta/models":     "sk-synthetic-gemini" + agent,
+	} {
+		if got := received()[path]; got != want {
+			t.Fatalf("%s received %q, want %q", path, got, want)
+		}
+	}
+
+	_, out, _ := tr.run(bin, "status", "--json")
+	var doc struct {
+		Data struct {
+			Subscriptions []struct {
+				ID      string  `json:"id"`
+				Outcome string  `json:"outcome"`
+				Hint    *string `json:"hint"`
+				Meters  []any   `json:"meters"`
+			} `json:"subscriptions"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal([]byte(out), &doc); err != nil {
+		t.Fatal(err)
+	}
+	if len(doc.Data.Subscriptions) != 3 {
+		t.Fatalf("subscriptions = %+v", doc.Data.Subscriptions)
+	}
+	for _, s := range doc.Data.Subscriptions {
+		if s.Outcome != "UNSUPPORTED" || s.Hint == nil || !strings.Contains(*s.Hint, "the key works") || len(s.Meters) != 0 {
+			t.Fatalf("%s = %s, hint %v", s.ID, s.Outcome, s.Hint)
+		}
+	}
 }

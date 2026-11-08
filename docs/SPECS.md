@@ -81,6 +81,9 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `xai-api` | xAI API (Grok) prepaid credit | provider API | `https://management-api.x.ai/v1/billing/teams/<team>/prepaid/balance` (§3.5) | a management key (`Bearer`, console Settings → Management Keys) and the team id | `total.val` (US cents, string) | yes | REPORTED | docs 2026-11-08; sign convention live to verify |
 | `cursor-admin-api` | Cursor Teams / Enterprise (one member) | provider API | `POST https://api.cursor.com/teams/spend` (§3.5) | the team's Admin API key (Basic, key as user name) and the member's e-mail | `teamMemberSpend[].{email, spendCents, overallSpendCents, effectivePerUserLimitDollars, hardLimitOverrideDollars, monthlyLimitDollars}`, `subscriptionCycleStart` | yes | REPORTED | docs 2026-11-08; live to verify |
 | `kilo-api` | Kilo Gateway credit | provider API | `https://api.kilo.ai/api/profile/balance` (§3.5) | Kilo API key (`Bearer`) | `balance` (USD, to verify), `isDepleted` | no (answers the Kilo API key) | REPORTED | live 2026-11-08 (shape, a depleted account); amounts to verify |
+| `groq-api` | Groq (free tier or Developer) | provider API, key check only | `https://api.groq.com/openai/v1/models` (§3.7) | Groq API key (`Bearer`) | none: only that `data` is a list | yes | REPORTED (reading `UNSUPPORTED`) | live 2026-11-08 (200 with the key, 401 with a wrong one or none) |
+| `nvidia-api` | NVIDIA API catalog (build.nvidia.com) | provider API, key check only | `https://api.nvcf.nvidia.com/v2/nvcf/functions?visibility=private` (§3.7) | NVIDIA API key (`Bearer`) | none: only that `functions` is a list | yes (NVCF API) | REPORTED (reading `UNSUPPORTED`) | live 2026-11-08 (200 with the key, 401 with a wrong one or none; the public `integrate.api.nvidia.com/v1/models` answers any key) |
+| `gemini-api` | Google AI Studio (Gemini API key) | provider API, key check only | `https://generativelanguage.googleapis.com/v1beta/models?pageSize=1` (§3.7) | Gemini API key (`x-goog-api-key`) | none: only that `models` is a list | yes | REPORTED (reading `UNSUPPORTED`) | live 2026-11-08 (200 with the key, 400 with a wrong one, 403 with none) |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/balance` (§3.3) | Ollama API key (`Authorization: Bearer`) | `included.{balance_usd, allowance_usd, period.until}`; legacy plans `included.{session, weekly}.{remaining_percent, resets_at}`; `purchased.balance_usd` | yes (docs.ollama.com/api/balance) | REPORTED | docs and live 2026-11-08 (credit plan) |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
@@ -91,12 +94,12 @@ documentation) or `third-party` (issues or write-ups of other clients);
 
 | Provider | What exists (2026-11-06) | Decision |
 |---|---|---|
-| Google AI Studio (Gemini API keys) | Limits are per Google Cloud project, not per key; requests per day reset at midnight Pacific time (docs). Usage is shown only in the AI Studio console; reading Cloud quota metrics needs a Google OAuth or service-account credential. | `heimdall` (`OBSERVED`: `429 RESOURCE_EXHAUSTED`, daily rebirth at midnight Pacific), else `UNSUPPORTED` |
+| Google AI Studio (Gemini API keys) | Limits are per Google Cloud project, not per key; requests per day reset at midnight Pacific time (docs). Usage is shown only in the AI Studio console; reading Cloud quota metrics needs a Google OAuth or service-account credential. | `heimdall` (`OBSERVED`: `429 RESOURCE_EXHAUSTED`, daily rebirth at midnight Pacific), else `gemini-api` (§3.7: the key checked, the catalogue, `UNSUPPORTED`) |
 | Gemini CLI with a Google account | Quota is shown only inside a session (`/stats`); the CLI has no non-interactive usage command (`gemini --help`, 0.1.9) and its quota call needs the Google OAuth token (ADR 0003). | `UNSUPPORTED`. Candidate, to verify: a `DERIVED` request count from the CLI's opt-in local telemetry file (`telemetry.target: local`, prompts not logged), read for event names only |
 | Qwen Code (Qwen OAuth) | The free Qwen OAuth tier was discontinued on 2026-04-15 (`qwen auth` reports "removed" in 0.21.8). Qwen Code on a Model Studio plan is covered by `alibaba-cli`. | `UNSUPPORTED` |
-| NVIDIA (build.nvidia.com) | Trial credits and a per-minute rate limit, visible only in the console; no usage API. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
-| Groq | Documented `x-ratelimit-limit/remaining/reset-requests` (per day) and `-tokens` (per minute) headers on every inference response; no endpoint answers without spending a request. | `heimdall` (`OBSERVED` from the headers of traffic it already serves) |
-| LLM7 | Free-token quotas (tokens per day, requests per second/minute/hour) that may change without notice; only a models catalogue is documented. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
+| NVIDIA (build.nvidia.com) | Trial credits and a per-minute rate limit, visible only in the console; no usage API. | `heimdall` (`OBSERVED`), else `nvidia-api` (§3.7) |
+| Groq | Documented `x-ratelimit-limit/remaining/reset-requests` (per day) and `-tokens` (per minute) headers on every inference response; no endpoint answers without spending a request. | `heimdall` (`OBSERVED` from the headers of traffic it already serves), else `groq-api` (§3.7) |
+| LLM7 | Free-token quotas (tokens per day, requests per second/minute/hour) that may change without notice; only a models catalogue is documented; no free request checks a key (`/v1/models` answers anyone, verified 2026-11-08) and models.dev lists no LLM7 catalogue. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
 | Cursor individual plans (Free, Plus, Premium, Super, Ultra) | A weekly allowance shared by Cursor and Grok, relaunched on 2026-10-12, in multiples of Plus with no published figures. Usage is shown only in the dashboard and the IDE, through the session token (`cursor.com/api/usage-summary`); `api.cursor.com/v0/me` with a user API key gives no usage. | `UNSUPPORTED` (teams: `cursor-admin-api`) |
 | Windsurf / Devin Desktop (Free, Pro, Max, Teams) | Daily and weekly quotas since 2026-03-19, reset by calendar date; readable only with the browser or IDE session token. The Enterprise service-key API (`GetTeamCreditBalance`) still speaks of prompt credits, whose meaning under quotas is unknown. | `UNSUPPORTED` until an Enterprise owner verifies the service-key answer |
 | SuperGrok / X subscription | A weekly pool per seat, shown only in the account. No API, no CLI. | `UNSUPPORTED` (the API credit: `xai-api`) |
@@ -468,6 +471,34 @@ wiped.
   `currentPeriodEnd`) are optional: with both, a `BILLING_CYCLE` meter shows
   `spent / (spent + remaining)` until the period end; without them the
   reading is `PARTIAL`.
+
+### 3.7 Key checks: Groq, NVIDIA, Google AI Studio (ADR 0019)
+
+These providers publish no allowance a key can read without spending a
+request (table below), yet an owner who holds a key wants to see the
+subscription, what it offers and whether the key still works. The
+`keycheck` sources send **one free, read-only GET** that only a valid key is
+answered, read nothing of the answer but the presence of its list, and
+give a reading `UNSUPPORTED` with the hint "<provider> publishes no
+allowance a key can read without spending a request; the key works". The
+models come from the model catalogue (§11), as for any subscription; with
+no figures, "Models you can use" lists the free ones (§11.1).
+
+- `groq-api`: `GET https://api.groq.com/openai/v1/models`, `Bearer`; `401`
+  → `KEY_REJECTED`. The rate-limit headers Groq documents come only with
+  inference answers, so they are not read.
+- `nvidia-api`: `GET https://api.nvcf.nvidia.com/v2/nvcf/functions?visibility=private`,
+  `Bearer`: the key owner's private NVCF functions, usually none (16
+  bytes); `401` → `KEY_REJECTED`. The public functions listing is about
+  150 KiB, over the 64 KiB cap.
+- `gemini-api`: `GET https://generativelanguage.googleapis.com/v1beta/models?pageSize=1`
+  with the key in `x-goog-api-key` (never in the URL); Google answers an
+  unknown key with `400` (`INVALID_ARGUMENT`) and a missing one with `403`,
+  both `KEY_REJECTED`.
+
+Every other status follows §4.3 (`429` honoured, `5xx` `UNAVAILABLE`,
+anything else `CONTRACT_CHANGED`); a missing list, a non-JSON answer or
+more than 64 KiB is `CONTRACT_CHANGED`.
 
 ### 3.6 Heimdall (local, milestone 9)
 
@@ -1176,7 +1207,8 @@ The bounded context `offerings` keeps that, apart from the quotas.
   `orcarouter-api` → `orcarouter`, `cloudflare-api` →
   `cloudflare-workers-ai`, `moonshot-api` → `moonshotai`, `moonshot-cn-api`
   → `moonshotai-cn`, `kimi-code-api` → `kimi-code-plan-global`, `xai-api` → `xai`, `kilo-api` →
-  `kilo`; a
+  `kilo`, `groq-api` → `groq`, `nvidia-api` → `nvidia`, `gemini-api` →
+  `google`; a
   `heimdall` subscription uses the provider it
   follows (`google`, `nvidia`, `groq`, `kilo`…). Claude and Codex have
   none. The owner may name another with `"catalogue": "<provider id>"` in

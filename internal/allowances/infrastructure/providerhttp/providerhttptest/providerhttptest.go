@@ -107,6 +107,9 @@ type Case struct {
 	Path         string
 	OK           string
 	Also         map[string]Answer
+	// KeyHeader names the header that carries the bare key, for providers
+	// that do not take it as "Authorization: Bearer".
+	KeyHeader string
 }
 
 // Conformance checks one GET path; see Check.
@@ -142,7 +145,11 @@ func Check(t *testing.T, c Case, build Build) {
 		t.Fatalf("reading for %s", reading.Subscription())
 	}
 	first := provider.Received()[0]
-	if first.Header.Get("Authorization") != "Bearer "+Key || first.Header.Get("User-Agent") != "ataecina/test" || first.Method != method {
+	keyHeader, keyValue := "Authorization", "Bearer "+Key
+	if c.KeyHeader != "" {
+		keyHeader, keyValue = c.KeyHeader, Key
+	}
+	if first.Header.Get(keyHeader) != keyValue || first.Header.Get("User-Agent") != "ataecina/test" || first.Method != method {
 		t.Fatalf("request = %s %v", first.Method, first.Header)
 	}
 

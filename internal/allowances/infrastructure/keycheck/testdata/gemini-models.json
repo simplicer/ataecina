@@ -1,0 +1,1 @@
+{"models":[{"name":"models/synthetic-model","version":"001","displayName":"Synthetic Model","inputTokenLimit":4096,"outputTokenLimit":1024,"supportedGenerationMethods":["generateContent"]}],"nextPageToken":"synthetic-page-token"}

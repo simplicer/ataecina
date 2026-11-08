@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.33.0-unstable] - 2026-11-08
+
+### Added
+
+- `groq-api`, `nvidia-api` and `gemini-api`: subscriptions for Groq, the
+  NVIDIA API catalog and Google AI Studio keys. None of them publishes
+  an allowance a key can read without spending a request, so Ataecina
+  sends one free request that only a valid key is answered, shows the
+  subscription with its models from the catalogue, and warns when the
+  key is rejected.
+
 ## [0.32.2-unstable] - 2026-11-08
 
 ### Fixed

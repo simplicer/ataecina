@@ -1,0 +1,1 @@
+{"object":"list","data":[{"id":"synthetic-model-a","object":"model","created":1700000000,"owned_by":"Synthetic","active":true,"context_window":8192},{"id":"synthetic-model-b","object":"model","created":1700000000,"owned_by":"Synthetic","active":true,"context_window":131072}]}

@@ -18,6 +18,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/cursoradminapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/keycheck"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kiloapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kimicodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
@@ -163,6 +164,9 @@ func standardSources() sourceRegistry {
 		}),
 		"commandcode-api": viaAPI(commandcodeapi.Origin, commandcodeapi.New),
 		"ollama-api":      viaAPI(ollamaapi.Origin, ollamaapi.New),
+		"groq-api":        viaAPI(keycheck.Groq.Origin, keycheck.Groq.NewSource),
+		"nvidia-api":      viaAPI(keycheck.NVIDIA.Origin, keycheck.NVIDIA.NewSource),
+		"gemini-api":      viaAPI(keycheck.Gemini.Origin, keycheck.Gemini.NewSource),
 		"orcarouter-api":  viaAPI(orcarouterapi.Origin, orcarouterapi.New),
 		"cloudflare-api": viaEndpoint(cloudflareapi.Origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
 			return cloudflareapi.New(endpoint, c.keys, domain.KeyName(settings.Key), settings.Account, c.env.clock.Now)
