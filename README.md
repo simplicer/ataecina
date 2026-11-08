@@ -142,7 +142,7 @@ and the hints the sources write are in English. Translations are welcome
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
 | Alibaba Model Studio Token Plan | every window the plan reports (5-hour, weekly, monthly…) | official `bl usage token-plan` | `bl`'s own console login | reported | to verify |
 | Alibaba Model Studio Coding Plan | 5-hour, weekly and monthly requests, plan | official `bl usage coding-plan` | `bl`'s own console login | reported | to verify |
-| Free tiers served by [Heimdall](https://codeberg.org/simplicer/heimdall) (Gemini keys, NVIDIA, Groq…) | cooldowns and resets observed while serving | Heimdall admin API on loopback | Heimdall admin token | observed | waits for Heimdall |
+| Free tiers served by a local Heimdall gateway (Gemini keys, NVIDIA, Groq…) | cooldowns and resets observed while serving | Heimdall admin API on loopback | Heimdall admin token | observed | waits for Heimdall |
 | Gemini CLI (Google account), Qwen Code (Qwen OAuth) | — | nothing readable without the tool's login token | — | — | unsupported |
 | Cursor individual plans, Windsurf, SuperGrok | — | usage only behind the dashboard's session; no API key or CLI gives it | — | — | unsupported |
 
@@ -573,9 +573,7 @@ vulnerability, in [SECURITY.md](SECURITY.md).
 ## About
 
 Ataecina is designed and written by **Antonio Villamarín** (2026), as part
-of [Simplicer](https://codeberg.org/simplicer), together with its sibling
-project [Heimdall](https://codeberg.org/simplicer/heimdall), the model relay
-that spends those quotas in the right order.
+of [Simplicer](https://codeberg.org/simplicer).
 
 **The name.** Ataecina (also *Ataegina* or *Adaegina*) was a goddess of the
 pre-Roman peoples of the west of the Iberian Peninsula, with her main
