@@ -8,6 +8,14 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.20.2-unstable] - 2026-11-08
+
+### Fixed
+
+- The Spanish Keys settings page showed its explanation twice, joined to
+  an older translation; so did the message for a missing kdialog.
+  `tests/widget` now fails when a translation holds another one.
+
 ### Added
 
 - Ataecina is free software under the GNU General Public License,

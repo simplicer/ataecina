@@ -89,8 +89,6 @@ msgstr "Claves API"
 #: contents/ui/configKeys.qml:153
 msgid "Keys go from a masked dialog straight to `ataecina keys set`."
 msgstr "Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
-"Las claves se escriben en un diálogo enmascarado y van directas a `ataecina "
-"keys set`; el widget nunca las ve."
 
 #: contents/ui/configKeys.qml:153
 msgid "The widget never sees them."
@@ -99,8 +97,6 @@ msgstr "El widget nunca las ve."
 #: contents/ui/configKeys.qml:160
 msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
 msgstr "Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
-"kdialog no está instalado: pon las claves en una terminal con `ataecina keys "
-"set <nombre>`."
 
 #: contents/ui/configKeys.qml:166
 msgid "No subscription needs a key."

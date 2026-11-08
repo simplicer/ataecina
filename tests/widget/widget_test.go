@@ -204,6 +204,61 @@ func messages(t *testing.T, path string) map[string]string {
 	return found
 }
 
+var (
+	poField        = regexp.MustCompile(`^(msgid|msgid_plural|msgstr(?:\[\d+\])?) "(.*)"$`)
+	poContinuation = regexp.MustCompile(`^"(.*)"$`)
+)
+
+// fullMessages reads every msgid → msgstr pair of a PO file with their
+// continuation lines; plural entries keep their first form.
+func fullMessages(t *testing.T, path string) map[string]string {
+	t.Helper()
+	found := map[string]string{}
+	fields, field := map[string]string{}, ""
+	keep := func() {
+		if id := fields["msgid"]; id != "" {
+			if translation, ok := fields["msgstr"]; ok {
+				found[id] = translation
+			} else {
+				found[id] = fields["msgstr[0]"]
+			}
+		}
+		fields, field = map[string]string{}, ""
+	}
+	for _, line := range strings.Split(read(t, path), "\n") {
+		if match := poField.FindStringSubmatch(line); match != nil {
+			field = match[1]
+			fields[field] = match[2]
+			continue
+		}
+		if match := poContinuation.FindStringSubmatch(line); match != nil && field != "" {
+			fields[field] += match[1]
+			continue
+		}
+		if strings.TrimSpace(line) == "" {
+			keep()
+		}
+	}
+	keep()
+	return found
+}
+
+// A translation merged with an older one (msgmerge's fuzzy matching) shows
+// both texts joined in the widget.
+func TestNoTranslationJoinsAnother(t *testing.T) {
+	spanish := fullMessages(t, plasmoid+"/translate/es.po")
+	for msgid, translation := range spanish {
+		if len(translation) > 2*len(msgid)+20 {
+			t.Errorf("es.po translates %q into something far longer: %q", msgid, translation)
+		}
+		for other, otherTranslation := range spanish {
+			if other != msgid && len(otherTranslation) > 15 && strings.Contains(translation, otherTranslation) {
+				t.Errorf("es.po's translation of %q holds the one of %q", msgid, other)
+			}
+		}
+	}
+}
+
 func TestEveryStringIsInTheTemplateAndTranslated(t *testing.T) {
 	template := messages(t, plasmoid+"/translate/template.pot")
 	spanish := messages(t, plasmoid+"/translate/es.po")
