@@ -17,6 +17,8 @@ const (
 	OptionLogin            Option = "login"
 	OptionMonthlyAllowance Option = "monthly_allowance"
 	OptionPort             Option = "port"
+	OptionTeam             Option = "team"
+	OptionEmail            Option = "email"
 )
 
 // Entry describes one source.
@@ -70,6 +72,10 @@ func Standard() Catalog {
 		{Source: "moonshot-api", Provider: "moonshot", Fidelity: reported, NeedsKey: true},
 		{Source: "moonshot-cn-api", Provider: "moonshot", Fidelity: reported, NeedsKey: true},
 		{Source: "kimi-code-api", Provider: "kimi", Fidelity: reported, NeedsKey: true},
+		{Source: "xai-api", Provider: "xai", Fidelity: reported, NeedsKey: true,
+			Options: []Option{OptionTeam}, Requires: []Option{OptionTeam}},
+		{Source: "cursor-admin-api", Provider: "cursor", Fidelity: reported, NeedsKey: true,
+			Options: []Option{OptionEmail}, Requires: []Option{OptionEmail}},
 		{Source: "cloudflare-api", Provider: "cloudflare", Fidelity: reported, NeedsKey: true,
 			Options: []Option{OptionAccount}, Requires: []Option{OptionAccount}},
 		{Source: "heimdall", Fidelity: observed, NeedsKey: true, Options: []Option{OptionProvider, OptionPort}},

@@ -75,6 +75,8 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `opencode-console` | OpenCode Go, OpenCode Console budgets | official CLI | `opencode api experimental.usage.limits --standalone` (fixed argv, no shell) (§3.4) | OpenCode's own sign-in to an OpenCode Console workspace | `data` (null when signed out); `data.go.{rolling,weekly,monthly}.{percent,limited,resetsAt}`; `data.budgets[].{limit,spent,resetsAt}` | experimental operation of OpenCode's local server, schema in the opencode 2.2.5 binary | REPORTED | local 2026-11-08 (signed-out answer); Go and budgets to verify |
 | `moonshot-api`, `moonshot-cn-api` | Moonshot AI (Kimi) open platform | provider API | `https://api.moonshot.ai/v1/users/me/balance` (USD) or `https://api.moonshot.cn/…` (CNY) (§3.5) | platform API key (`Bearer`), valid only on its own platform | `code`, `status`, `data.{available_balance, voucher_balance, cash_balance}` | yes | REPORTED | docs 2026-11-08; live to verify |
 | `kimi-code-api` | Kimi Code membership (Kimi Plus, Pro, Max, Ultra) | provider API | `https://api.kimi.com/coding/v1/usages` (§3.5) | an API key created in the Kimi Code Console (`Bearer`); never the OAuth token of `kimi login` | `usage.{limit, remaining, resetTime}` (weekly), `limits[].{window.{duration, timeUnit}, detail.{limit, remaining | used, resetTime}}`, `user.membership.level` | no (called by the official kimi-cli `/usage`) | REPORTED | official CLI source 2026-11-08; live to verify |
+| `xai-api` | xAI API (Grok) prepaid credit | provider API | `https://management-api.x.ai/v1/billing/teams/<team>/prepaid/balance` (§3.5) | a management key (`Bearer`, console Settings → Management Keys) and the team id | `total.val` (US cents, string) | yes | REPORTED | docs 2026-11-08; sign convention live to verify |
+| `cursor-admin-api` | Cursor Teams / Enterprise (one member) | provider API | `POST https://api.cursor.com/teams/spend` (§3.5) | the team's Admin API key (Basic, key as user name) and the member's e-mail | `teamMemberSpend[].{email, spendCents, overallSpendCents, effectivePerUserLimitDollars, hardLimitOverrideDollars, monthlyLimitDollars}`, `subscriptionCycleStart` | yes | REPORTED | docs 2026-11-08; live to verify |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/balance` (§3.3) | Ollama API key (`Authorization: Bearer`) | `included.{balance_usd, allowance_usd, period.until}`; legacy plans `included.{session, weekly}.{remaining_percent, resets_at}`; `purchased.balance_usd` | yes (docs.ollama.com/api/balance) | REPORTED | docs and live 2026-11-08 (credit plan) |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
@@ -91,6 +93,9 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | NVIDIA (build.nvidia.com) | Trial credits and a per-minute rate limit, visible only in the console; no usage API. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
 | Groq | Documented `x-ratelimit-limit/remaining/reset-requests` (per day) and `-tokens` (per minute) headers on every inference response; no endpoint answers without spending a request. | `heimdall` (`OBSERVED` from the headers of traffic it already serves) |
 | LLM7 | Free-token quotas (tokens per day, requests per second/minute/hour) that may change without notice; only a models catalogue is documented. | `heimdall` (`OBSERVED`), else `UNSUPPORTED` |
+| Cursor individual plans (Free, Plus, Premium, Super, Ultra) | A weekly allowance shared by Cursor and Grok, relaunched on 2026-10-12, in multiples of Plus with no published figures. Usage is shown only in the dashboard and the IDE, through the session token (`cursor.com/api/usage-summary`); `api.cursor.com/v0/me` with a user API key gives no usage. | `UNSUPPORTED` (teams: `cursor-admin-api`) |
+| Windsurf / Devin Desktop (Free, Pro, Max, Teams) | Daily and weekly quotas since 2026-03-19, reset by calendar date; readable only with the browser or IDE session token. The Enterprise service-key API (`GetTeamCreditBalance`) still speaks of prompt credits, whose meaning under quotas is unknown. | `UNSUPPORTED` until an Enterprise owner verifies the service-key answer |
+| SuperGrok / X subscription | A weekly pool per seat, shown only in the account. No API, no CLI. | `UNSUPPORTED` (the API credit: `xai-api`) |
 | Kilo Gateway | The documented gateway API has chat, FIM, models and providers only; the balance is shown in the Kilo app, whose profile call uses the app's device-login token (ADR 0003). Free models: 200 requests/hour per IP. | `heimdall` (`OBSERVED`: `402` balance, `429` free models), else `UNSUPPORTED` |
 
 ### 3.1 Claude in detail (verified 2026-11-06, Claude Code 2.1.319)
@@ -401,6 +406,27 @@ wiped.
   `used` or `limit − remaining`, as a share of `limit`; `resetTime` is RFC
   3339. `user.membership.level` minus `LEVEL_` is the plan. The new plans'
   shared monthly credit pool is not in this answer.
+- **`xai-api`.** The documented Management API with a management key
+  (`Bearer`; created in the console with *Management Keys* read access)
+  and the team id declared in `config.json` (`team`; it is also the
+  `team_id` that `GET https://api.x.ai/v1/api-key` gives for any of the
+  team's API keys). `total.val` is the prepaid balance in US cents as a
+  string; purchases are recorded as negative changes, so the money left is
+  the total's magnitude (sign convention to verify live). No window.
+- **`cursor-admin-api`.** Cursor's documented Admin API for Teams and
+  Enterprise plans, with the team's Admin API key as the Basic user name
+  and an empty password. One `POST /teams/spend` with `{ "searchTerm":
+  <email>, "pageSize": 100 }` (the e-mail of the member, declared in
+  `config.json` as `email`; it is sent only to Cursor) gives the member's
+  row: `spendCents` (on-demand, billed beyond the plan) and
+  `overallSpendCents` (with the included usage), in cents, and the member's
+  on-demand limit in dollars (`effectivePerUserLimitDollars`, else
+  `hardLimitOverrideDollars`, else `monthlyLimitDollars`). With a limit: a
+  `BILLING_CYCLE` meter `on_demand` = on-demand ÷ limit, reborn at the
+  next monthly anniversary of `subscriptionCycleStart` (epoch ms), money
+  left = limit − on-demand, spent = overall. Without a limit: `PARTIAL`,
+  the spending only. A member not in the answer is `UNAVAILABLE`. Cursor
+  publishes no "remaining" of the included weekly allowance.
 - **`commandcode-api`.** `/alpha/billing/credits` is required:
   remaining = `monthlyCredits + purchasedCredits + freeCredits` (read as USD,
   to verify), `fiveHour` and `weekly` windows as `used / cap`, reset at
@@ -958,6 +984,8 @@ anything:
 | `subscriptions[].provider` | only for `heimdall`, where it is required |
 | `subscriptions[].account` | only for `cloudflare-api`, where it is required: the 32 lowercase hexadecimal digits of the account id |
 | `subscriptions[].login`, `monthly_allowance` | only for `copilot-gh`, where both are required: the GitHub login and the plan's monthly premium requests or AI credits (above 0, at most 1 000 000) |
+| `subscriptions[].team` | only for `xai-api`, required: the xAI team id |
+| `subscriptions[].email` | only for `cursor-admin-api`, required: the member's e-mail, sent only to Cursor |
 | `subscriptions[].port` | only for `heimdall`: its admin port on loopback, 1–65535, default 4001 |
 
 Unknown keys, and options given to a source that does not take them, are
@@ -1041,7 +1069,7 @@ The bounded context `offerings` keeps that, apart from the quotas.
   `ollama-api` → `ollama-cloud`, `copilot-gh` → `github-copilot`,
   `orcarouter-api` → `orcarouter`, `cloudflare-api` →
   `cloudflare-workers-ai`, `moonshot-api` → `moonshotai`, `moonshot-cn-api`
-  → `moonshotai-cn`, `kimi-code-api` → `kimi-code-plan-global`; a
+  → `moonshotai-cn`, `kimi-code-api` → `kimi-code-plan-global`, `xai-api` → `xai`; a
   `heimdall` subscription uses the provider it
   follows (`google`, `nvidia`, `groq`, `kilo`…). Claude and Codex have
   none. The owner may name another with `"catalogue": "<provider id>"` in

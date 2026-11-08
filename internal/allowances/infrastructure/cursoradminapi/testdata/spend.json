@@ -1,0 +1,17 @@
+{
+  "teamMemberSpend": [
+    {
+      "userId": 101, "email": "someone.else@example.com", "role": "member",
+      "spendCents": 0, "overallSpendCents": 1200, "fastPremiumRequests": 40,
+      "hardLimitOverrideDollars": 0, "monthlyLimitDollars": null
+    },
+    {
+      "userId": 102, "email": "Member@Example.com", "role": "member",
+      "spendCents": 1250.5, "overallSpendCents": 4250.5, "fastPremiumRequests": 310,
+      "hardLimitOverrideDollars": 0, "monthlyLimitDollars": 100, "effectivePerUserLimitDollars": 50
+    }
+  ],
+  "subscriptionCycleStart": 1793577600000,
+  "totalMembers": 2,
+  "totalPages": 1
+}

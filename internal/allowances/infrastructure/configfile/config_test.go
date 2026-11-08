@@ -117,6 +117,11 @@ func TestStrictValidation(t *testing.T) {
 		"key on copilot":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 300, "key": "a"}]}`,
 		"bad port":            `{"version": 1, "subscriptions": [{"id": "a", "source": "heimdall", "provider": "google", "port": 70000}]}`,
 		"bad catalogue":       `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "catalogue": "../x"}]}`,
+		"no team":             `{"version": 1, "subscriptions": [{"id": "a", "source": "xai-api"}]}`,
+		"bad team":            `{"version": 1, "subscriptions": [{"id": "a", "source": "xai-api", "team": "a/b"}]}`,
+		"no email":            `{"version": 1, "subscriptions": [{"id": "a", "source": "cursor-admin-api"}]}`,
+		"bad email":           `{"version": 1, "subscriptions": [{"id": "a", "source": "cursor-admin-api", "email": "nobody"}]}`,
+		"email elsewhere":     `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "email": "a@b.co"}]}`,
 		"port elsewhere":      `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "port": 4001}]}`,
 	}
 	for name, text := range cases {

@@ -16,6 +16,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/commandcodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/cursoradminapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kimicodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
@@ -26,6 +27,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/openrouterapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/orcarouterapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/vercelapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/xaiapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/zaiapi"
 	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
 	"codeberg.org/simplicer/ataecina/internal/platform/pathlookup"
@@ -147,6 +149,12 @@ func standardSources() sourceRegistry {
 		"moonshot-api":    viaAPI(moonshotapi.Global.Origin, moonshotapi.New(moonshotapi.Global)),
 		"moonshot-cn-api": viaAPI(moonshotapi.China.Origin, moonshotapi.New(moonshotapi.China)),
 		"kimi-code-api":   viaAPI(kimicodeapi.Origin, kimicodeapi.New),
+		"xai-api": viaEndpoint(xaiapi.Origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
+			return xaiapi.New(endpoint, c.keys, domain.KeyName(settings.Key), settings.Team, c.env.clock.Now)
+		}),
+		"cursor-admin-api": viaEndpoint(cursoradminapi.Origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
+			return cursoradminapi.New(endpoint, c.keys, domain.KeyName(settings.Key), settings.Email, c.env.clock.Now)
+		}),
 		"commandcode-api": viaAPI(commandcodeapi.Origin, commandcodeapi.New),
 		"ollama-api":      viaAPI(ollamaapi.Origin, ollamaapi.New),
 		"orcarouter-api":  viaAPI(orcarouterapi.Origin, orcarouterapi.New),

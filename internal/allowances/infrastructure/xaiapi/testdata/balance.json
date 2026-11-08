@@ -1,0 +1,7 @@
+{
+  "changes": [
+    { "amount": { "val": "-2500" }, "changeOrigin": "PURCHASE", "createTime": "2026-10-02T10:00:00Z" },
+    { "amount": { "val": "750" }, "changeOrigin": "SPEND", "createTime": "2026-11-01T00:00:00Z" }
+  ],
+  "total": { "val": "-1750" }
+}

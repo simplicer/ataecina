@@ -6,6 +6,7 @@ package providerhttp
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -21,17 +22,32 @@ import (
 // Fetch sends one GET with "Authorization: Bearer <key>" and returns the
 // body of a 2xx answer; anything else is a *domain.SourceFailure.
 func Fetch(ctx context.Context, endpoint httpclient.Endpoint, path string, key secret.Key, now time.Time) ([]byte, error) {
-	return ask(ctx, endpoint, http.MethodGet, path, key, nil, now)
+	return ask(ctx, endpoint, http.MethodGet, path, "Bearer "+string(key.Reveal()), nil, now)
 }
 
 // Post sends one POST of a fixed JSON document, like Fetch.
 func Post(ctx context.Context, endpoint httpclient.Endpoint, path string, key secret.Key, document []byte, now time.Time) ([]byte, error) {
-	return ask(ctx, endpoint, http.MethodPost, path, key, document, now)
+	return ask(ctx, endpoint, http.MethodPost, path, "Bearer "+string(key.Reveal()), document, now)
 }
 
-func ask(ctx context.Context, endpoint httpclient.Endpoint, method, path string, key secret.Key, document []byte, now time.Time) ([]byte, error) {
+// PostBasic is Post for providers that take the key as the Basic user
+// name with an empty password ("Authorization: Basic base64(key:)").
+func PostBasic(ctx context.Context, endpoint httpclient.Endpoint, path string, key secret.Key, document []byte, now time.Time) ([]byte, error) {
+	return ask(ctx, endpoint, http.MethodPost, path, "Basic "+basicCredentials(key), document, now)
+}
+
+// basicCredentials encodes "key:" from a private copy, wiped once encoded,
+// so the key's own bytes are never appended to.
+func basicCredentials(key secret.Key) string {
+	credentials := make([]byte, 0, key.Len()+1)
+	credentials = append(append(credentials, key.Reveal()...), ':')
+	defer clear(credentials)
+	return base64.StdEncoding.EncodeToString(credentials)
+}
+
+func ask(ctx context.Context, endpoint httpclient.Endpoint, method, path, authorization string, document []byte, now time.Time) ([]byte, error) {
 	header := http.Header{}
-	header.Set("Authorization", "Bearer "+string(key.Reveal()))
+	header.Set("Authorization", authorization)
 	var body io.Reader
 	if document != nil {
 		header.Set("Content-Type", "application/json")

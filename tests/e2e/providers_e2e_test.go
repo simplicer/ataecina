@@ -3,6 +3,7 @@
 package e2e
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,21 +19,23 @@ import (
 func fakeProviders(t *testing.T) (string, func() map[string]string) {
 	t.Helper()
 	routes := map[string]string{
-		"/api/v1/key":                        "openrouterapi/testdata/key.json",
-		"/api/v1/credits":                    "openrouterapi/testdata/credits.json",
-		"/v1/credits":                        "vercelapi/testdata/credits.json",
-		"/api/monitor/usage/quota/limit":     "zaiapi/testdata/quota.json",
-		"/v1/token_plan/remains":             "minimaxapi/testdata/remains.json",
-		"/alpha/billing/credits":             "commandcodeapi/testdata/credits.json",
-		"/alpha/usage/summary":               "commandcodeapi/testdata/summary.json",
-		"/alpha/billing/subscriptions":       "commandcodeapi/testdata/subscriptions.json",
-		"/api/balance":                       "ollamaapi/testdata/balance.json",
-		"/v1/dashboard/billing/subscription": "orcarouterapi/testdata/subscription.json",
-		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
-		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
-		"/v1/users/me/balance":               "moonshotapi/testdata/balance.json",
-		"/coding/v1/usages":                  "kimicodeapi/testdata/usages.json",
-		"/api.json":                          "../../offerings/infrastructure/modelsdev/testdata/api.json",
+		"/api/v1/key":                                "openrouterapi/testdata/key.json",
+		"/api/v1/credits":                            "openrouterapi/testdata/credits.json",
+		"/v1/credits":                                "vercelapi/testdata/credits.json",
+		"/api/monitor/usage/quota/limit":             "zaiapi/testdata/quota.json",
+		"/v1/token_plan/remains":                     "minimaxapi/testdata/remains.json",
+		"/alpha/billing/credits":                     "commandcodeapi/testdata/credits.json",
+		"/alpha/usage/summary":                       "commandcodeapi/testdata/summary.json",
+		"/alpha/billing/subscriptions":               "commandcodeapi/testdata/subscriptions.json",
+		"/api/balance":                               "ollamaapi/testdata/balance.json",
+		"/v1/dashboard/billing/subscription":         "orcarouterapi/testdata/subscription.json",
+		"/v1/dashboard/billing/usage":                "orcarouterapi/testdata/usage.json",
+		"/client/v4/graphql":                         "cloudflareapi/testdata/neurons.json",
+		"/v1/users/me/balance":                       "moonshotapi/testdata/balance.json",
+		"/coding/v1/usages":                          "kimicodeapi/testdata/usages.json",
+		"/v1/billing/teams/team-e2e/prepaid/balance": "xaiapi/testdata/balance.json",
+		"/teams/spend":                               "cursoradminapi/testdata/spend.json",
+		"/api.json":                                  "../../offerings/infrastructure/modelsdev/testdata/api.json",
 	}
 	bodies := make(map[string]string, len(routes))
 	for path, name := range routes {
@@ -75,7 +78,9 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	  {"id": "orca", "source": "orcarouter-api"},
 	  {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"},
 	  {"id": "moonshot", "source": "moonshot-api"},
-	  {"id": "kimi", "source": "kimi-code-api"}
+	  {"id": "kimi", "source": "kimi-code-api"},
+	  {"id": "xai", "source": "xai-api", "team": "team-e2e"},
+	  {"id": "cursor", "source": "cursor-admin-api", "email": "member@example.com"}
 	]}`, nil)
 	origin, received := fakeProviders(t)
 	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", origin)
@@ -83,7 +88,7 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "init", "--unlocker", "passphrase"); code != 0 {
 		t.Fatalf("init = %d %s", code, stderr)
 	}
-	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command", "ollama", "orca", "workers-ai", "moonshot", "kimi"} {
+	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command", "ollama", "orca", "workers-ai", "moonshot", "kimi", "xai", "cursor"} {
 		if code, _, stderr := tr.runWithPassphrase(bin, "sk-synthetic-"+name+"\n", phrase, "keys", "set", name); code != 0 {
 			t.Fatalf("keys set %s = %d %s", name, code, stderr)
 		}
@@ -97,6 +102,13 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	}
 	for path, header := range received() {
 		if path == "/api.json" {
+			continue
+		}
+		if path == "/teams/spend" {
+			// Cursor takes the key as the Basic user name.
+			if !strings.HasPrefix(header, "Basic "+base64.StdEncoding.EncodeToString([]byte("sk-synthetic-cursor:"))) {
+				t.Fatalf("Cursor received %q", header)
+			}
 			continue
 		}
 		if !strings.HasPrefix(header, "Bearer sk-synthetic-") || !strings.HasSuffix(header, "| ataecina/"+versionOf(t)) {
@@ -156,6 +168,12 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	}
 	if kimi := subscriptions[byID["kimi"]]; *kimi.Plan != "INTERMEDIATE" || len(kimi.Meters) != 2 {
 		t.Fatalf("kimi = %+v", kimi)
+	}
+	if b := subscriptions[byID["xai"]].Balance; b == nil || b.Remaining.Amount != 17.5 {
+		t.Fatalf("xai balance = %+v", b)
+	}
+	if cursor := subscriptions[byID["cursor"]]; len(cursor.Meters) != 1 || cursor.Balance == nil || cursor.Balance.Remaining.Amount != 37.495 {
+		t.Fatalf("cursor = %+v", cursor)
 	}
 	if b := subscriptions[byID["vercel"]].Balance; b == nil || b.Remaining.Amount != 95.5 {
 		t.Fatalf("vercel balance = %+v", b)

@@ -34,6 +34,8 @@ var (
 	defaultThresholds = []int{90, 95}
 	cloudflareAccount = regexp.MustCompile(`^[0-9a-f]{32}$`)
 	catalogueProvider = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{0,63}$`)
+	xaiTeam           = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
+	memberEmail       = regexp.MustCompile(`^[^@\s"]{1,64}@[^@\s"]{1,190}\.[^@\s"]{2,63}$`)
 	githubLogin       = regexp.MustCompile(`^[A-Za-z0-9](?:[A-Za-z0-9]|-[A-Za-z0-9]){0,38}$`)
 )
 
@@ -72,6 +74,10 @@ type SubscriptionSettings struct {
 	// premium requests or AI credits of its Copilot plan (copilot-gh).
 	Login            string
 	MonthlyAllowance float64
+	// Team is the xAI team id (xai-api); Email is the member whose
+	// spending a Cursor team reports (cursor-admin-api).
+	Team  string
+	Email string
 	// Port is Heimdall's admin port on loopback (heimdall).
 	Port int
 	// Catalogue is the models.dev provider that lists the subscription's
@@ -109,6 +115,8 @@ type subscriptionDocument struct {
 	Login                 *string  `json:"login"`
 	MonthlyAllowance      *float64 `json:"monthly_allowance"`
 	Port                  *int     `json:"port"`
+	Team                  *string  `json:"team"`
+	Email                 *string  `json:"email"`
 	Catalogue             *string  `json:"catalogue"`
 	Thresholds            []int    `json:"thresholds"`
 }
@@ -219,6 +227,8 @@ func decodeSubscription(item subscriptionDocument, sources catalog.Catalog) (Sub
 		{catalog.OptionLogin, item.Login != nil},
 		{catalog.OptionMonthlyAllowance, item.MonthlyAllowance != nil},
 		{catalog.OptionPort, item.Port != nil},
+		{catalog.OptionTeam, item.Team != nil},
+		{catalog.OptionEmail, item.Email != nil},
 	}
 	present := make(map[catalog.Option]bool, len(options))
 	for _, option := range options {
@@ -282,6 +292,14 @@ func sourceOptions(item subscriptionDocument, entry catalog.Entry, settings *Sub
 	settings.MonthlyAllowance = valueOr(item.MonthlyAllowance, 0)
 	if item.MonthlyAllowance != nil && (settings.MonthlyAllowance <= 0 || settings.MonthlyAllowance > maxMonthlyAllowance) {
 		return fmt.Errorf(`"monthly_allowance" must be above 0 and at most %d`, maxMonthlyAllowance)
+	}
+	settings.Team = valueOr(item.Team, "")
+	if item.Team != nil && !xaiTeam.MatchString(settings.Team) {
+		return errors.New(`"team" must be an xAI team id`)
+	}
+	settings.Email = valueOr(item.Email, "")
+	if item.Email != nil && !memberEmail.MatchString(settings.Email) {
+		return errors.New(`"email" must be the member's e-mail address`)
 	}
 	if !entry.Accepts(catalog.OptionPort) {
 		return nil

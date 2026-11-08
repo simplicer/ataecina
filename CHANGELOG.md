@@ -8,6 +8,18 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.24.0-unstable] - 2026-11-08
+
+### Added
+
+- `xai-api`: the prepaid credit of an xAI (Grok API) team, with a
+  management key and the team id (`team`).
+- `cursor-admin-api`: on Cursor Teams and Enterprise plans, one member's
+  on-demand spending against their limit this cycle, with the team's
+  Admin API key and the member's e-mail (`email`). Individual Cursor
+  plans, Windsurf and SuperGrok stay unsupported: their usage is only
+  behind a browser session.
+
 ## [0.23.0-unstable] - 2026-11-08
 
 ### Added
