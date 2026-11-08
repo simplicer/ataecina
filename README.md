@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.21.1-unstable` — early development: everything below
+**Current version:** `0.22.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -56,6 +56,10 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
   source answered something unexpected, fold under one line with the
   reason. Free providers without a plan appear only when they report
   free-model limits.
+- **Models** — unfold a row to see how many models its plan or provider
+  offers, which are free ("374 models · 16 free", or "7 models included"
+  for a coding plan) and which came out in the last 30 days, from the
+  public [models.dev](https://models.dev) catalogue, refreshed once a day.
 - **Alerts** — a desktop notification when a window crosses 90 % and 95 %
   (once per window), and once when a source starts failing.
 - **Freshness and fidelity** — every figure knows when it was read and
@@ -172,12 +176,14 @@ was checked, is documented in [docs/SPECS.md](docs/SPECS.md) §3.
   never appear in arguments, the environment, logs, the snapshot or errors.
 - **Short leash on the network.** Each adapter reaches one fixed HTTPS
   host, follows no redirect, caps every answer at 64 KiB, makes one attempt
-  and honours `Retry-After`. No telemetry, no analytics, no update checks.
+  and honours `Retry-After`. The only other host is the public model
+  catalogue `models.dev`, asked at most once a day, revalidated with its
+  ETag and never sent a key. No telemetry, no analytics, no update checks.
 - **Strict files.** Ataecina refuses to run if its configuration or key file
   is readable by anyone else, like ssh.
 
 The rules are in [SECURITY.md](SECURITY.md) and the decisions behind them in
-[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014).
+[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014, 0015).
 
 ## Install
 
@@ -335,6 +341,7 @@ others only through their ports.
 | `allowances` | subscriptions, meters, balances, readings, fidelity, freshness, the snapshot; one adapter per source |
 | `keys` | sealed keys, the master key and its unlockers |
 | `alerts` | thresholds, alerts once per window, failing sources, notifications |
+| `offerings` | the daily model catalogue: models per provider, prices, free and new ones |
 
 ```text
 cmd/ataecina/                    composition root: subcommands and wiring

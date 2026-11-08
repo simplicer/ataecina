@@ -16,6 +16,7 @@
 | [0012](0012-one-redacting-secret-type.md) | One redacting secret type shared by the contexts |
 | [0013](0013-heimdall-on-loopback.md) | Heimdall is read on loopback |
 | [0014](0014-keys-from-the-widget-through-a-masked-dialog.md) | Keys and balances from the widget settings, through a masked dialog |
+| [0015](0015-model-catalogue-from-models-dev.md) | A daily model catalogue from models.dev |
 
 Each ADR has Context, Decision, Consequences and Alternatives. A superseded
 ADR stays, marked `superseded by NNNN`.

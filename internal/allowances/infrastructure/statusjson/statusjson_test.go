@@ -123,6 +123,52 @@ func TestPropertiesAreSnakeCaseAndEnumsUpperSnakeCase(t *testing.T) {
 	}
 }
 
+func TestTheModelCatalogueIsShownPerSubscription(t *testing.T) {
+	free := make([]statusjson.Model, 60)
+	for i := range free {
+		free[i] = statusjson.Model{ID: "m", Name: "M"}
+	}
+	about := statusjson.Meta{Version: "x", GeneratedAt: taken, OfferingsRefreshedAt: taken.Add(-time.Hour), Offerings: map[string]statusjson.Offerings{
+		"openrouter": {Catalogue: "openrouter", Name: "OpenRouter", Models: 374, FreeModels: free,
+			NewModels: []statusjson.Model{{ID: "n", Name: "N", ReleasedOn: time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC)}}},
+	}}
+	var out bytes.Buffer
+	if err := statusjson.Write(&out, report(t), about); err != nil {
+		t.Fatal(err)
+	}
+	var doc struct {
+		Data struct {
+			Subscriptions []struct {
+				ID        string `json:"id"`
+				Offerings *struct {
+					Catalogue  string `json:"catalogue"`
+					Models     int    `json:"models"`
+					Free       int    `json:"free"`
+					FreeModels []any  `json:"free_models"`
+					NewModels  []struct {
+						ReleasedOn string `json:"released_on"`
+					} `json:"new_models"`
+				} `json:"offerings"`
+			} `json:"subscriptions"`
+		} `json:"data"`
+		Meta map[string]any `json:"meta"`
+	}
+	if err := json.Unmarshal(out.Bytes(), &doc); err != nil {
+		t.Fatal(err)
+	}
+	claude, openrouter := doc.Data.Subscriptions[0], doc.Data.Subscriptions[1]
+	if claude.Offerings != nil || openrouter.Offerings == nil {
+		t.Fatalf("offerings = %+v, %+v", claude.Offerings, openrouter.Offerings)
+	}
+	shown := openrouter.Offerings
+	if shown.Catalogue != "openrouter" || shown.Models != 374 || shown.Free != 60 || len(shown.FreeModels) != 50 || shown.NewModels[0].ReleasedOn != "2026-10-30" {
+		t.Fatalf("openrouter offerings = %+v", shown)
+	}
+	if doc.Meta["offerings_refreshed_at"] != "2026-11-06T18:40:00Z" {
+		t.Fatalf("meta = %v", doc.Meta)
+	}
+}
+
 func TestAnEmptyReportIsStillADocument(t *testing.T) {
 	var out bytes.Buffer
 	if err := statusjson.Write(&out, domain.Snapshot{}.StatusAt(taken), statusjson.Meta{Version: "x", GeneratedAt: taken}); err != nil {

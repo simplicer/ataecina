@@ -155,7 +155,10 @@ func status(args []string, env environment) int {
 		return fail("snapshot-unreadable", "The snapshot cannot be read", err)
 	}
 	if *asJSON {
-		err = statusjson.Write(env.stdout, report, statusjson.Meta{Version: version, GeneratedAt: env.clock.Now()})
+		offerings, refreshedAt := offeringsOf(paths, env)
+		err = statusjson.Write(env.stdout, report, statusjson.Meta{
+			Version: version, GeneratedAt: env.clock.Now(), Offerings: offerings, OfferingsRefreshedAt: refreshedAt,
+		})
 	} else {
 		err = terminal.Render(env.stdout, report, env.clock.Now(), env.terminal && env.getenv("NO_COLOR") == "")
 	}
@@ -232,5 +235,6 @@ func collect(ctx context.Context, args []string, env environment) int {
 		return exitFailure
 	}
 	raiseAlerts(ctx, snapshot, settings, paths, env, logger)
+	refreshOfferings(ctx, settings, paths, env, logger)
 	return exitOK
 }

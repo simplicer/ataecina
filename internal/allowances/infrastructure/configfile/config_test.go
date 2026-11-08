@@ -45,7 +45,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	    {"id": "openrouter", "source": "openrouter-api", "thresholds": [50]},
 	    {"id": "gemini", "source": "heimdall", "provider": "google", "port": 4101},
 	    {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"},
-	    {"id": "copilot", "source": "copilot-gh", "login": "octo-cat", "monthly_allowance": 300}
+	    {"id": "copilot", "source": "copilot-gh", "login": "octo-cat", "monthly_allowance": 300, "catalogue": "github-copilot"}
 	  ]}`)
 	if err != nil {
 		t.Fatal(err)
@@ -70,7 +70,7 @@ func TestEveryOptionIsRead(t *testing.T) {
 	if workers.Account != "0123456789abcdef0123456789abcdef" || workers.Key != "workers-ai" {
 		t.Fatalf("workers-ai = %+v", workers)
 	}
-	if copilot.Login != "octo-cat" || copilot.MonthlyAllowance != 300 || copilot.Key != "" {
+	if copilot.Login != "octo-cat" || copilot.MonthlyAllowance != 300 || copilot.Key != "" || copilot.Catalogue != "github-copilot" || codex.Catalogue != "" {
 		t.Fatalf("copilot = %+v", copilot)
 	}
 	if codex.Port != 0 {
@@ -116,6 +116,7 @@ func TestStrictValidation(t *testing.T) {
 		"huge allowance":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 1e9}]}`,
 		"key on copilot":      `{"version": 1, "subscriptions": [{"id": "a", "source": "copilot-gh", "login": "octo", "monthly_allowance": 300, "key": "a"}]}`,
 		"bad port":            `{"version": 1, "subscriptions": [{"id": "a", "source": "heimdall", "provider": "google", "port": 70000}]}`,
+		"bad catalogue":       `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "catalogue": "../x"}]}`,
 		"port elsewhere":      `{"version": 1, "subscriptions": [{"id": "a", "source": "zai-api", "port": 4001}]}`,
 	}
 	for name, text := range cases {

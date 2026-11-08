@@ -209,6 +209,32 @@ ColumnLayout {
             Layout.fillWidth: true
             wrapMode: Text.Wrap
         }
+        // The model catalogue: names come from models.dev, so they are
+        // only ever shown as plain text.
+        PlasmaComponents3.Label {
+            visible: text !== ""
+            text: snapshot.modelsText(row.subscription)
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+        }
+        PlasmaComponents3.Label {
+            visible: text !== ""
+            text: snapshot.freeModelsText(row.subscription)
+            textFormat: Text.PlainText
+            font: Kirigami.Theme.smallFont
+            opacity: 0.8
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+        }
+        PlasmaComponents3.Label {
+            visible: text !== ""
+            text: snapshot.newModelsText(row.subscription)
+            textFormat: Text.PlainText
+            font: Kirigami.Theme.smallFont
+            opacity: 0.8
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+        }
         PlasmaComponents3.Label {
             visible: text !== ""
             text: [snapshot.fidelityText(row.subscription), snapshot.outcomeText(row.subscription)].filter(s => s !== "").join(" · ")

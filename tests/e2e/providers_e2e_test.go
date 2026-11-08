@@ -30,6 +30,7 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		"/v1/dashboard/billing/subscription": "orcarouterapi/testdata/subscription.json",
 		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
 		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
+		"/api.json":                          "../../offerings/infrastructure/modelsdev/testdata/api.json",
 	}
 	bodies := make(map[string]string, len(routes))
 	for path, name := range routes {
@@ -86,7 +87,14 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "collect"); code != 0 {
 		t.Fatalf("collect = %d %s", code, stderr)
 	}
+	// The model catalogue is public: it never receives a key.
+	if got := received()["/api.json"]; got != " | ataecina/"+versionOf(t) {
+		t.Fatalf("the model catalogue received %q", got)
+	}
 	for path, header := range received() {
+		if path == "/api.json" {
+			continue
+		}
 		if !strings.HasPrefix(header, "Bearer sk-synthetic-") || !strings.HasSuffix(header, "| ataecina/"+versionOf(t)) {
 			t.Fatalf("%s received %q", path, header)
 		}
@@ -111,6 +119,11 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 						Amount float64 `json:"amount"`
 					} `json:"remaining"`
 				} `json:"balance"`
+				Offerings *struct {
+					Catalogue string `json:"catalogue"`
+					Models    int    `json:"models"`
+					Free      int    `json:"free"`
+				} `json:"offerings"`
 			} `json:"subscriptions"`
 		} `json:"data"`
 	}
@@ -127,6 +140,12 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	subscriptions := doc.Data.Subscriptions
 	if b := subscriptions[byID["openrouter"]].Balance; b == nil || b.Remaining.Amount != 8.42 {
 		t.Fatalf("openrouter balance = %+v", b)
+	}
+	if o := subscriptions[byID["openrouter"]].Offerings; o == nil || o.Catalogue != "openrouter" || o.Models != 3 || o.Free != 1 {
+		t.Fatalf("openrouter offerings = %+v", o)
+	}
+	if o := subscriptions[byID["zai"]].Offerings; o == nil || o.Catalogue != "zai-coding-plan" || o.Free != o.Models {
+		t.Fatalf("zai offerings = %+v", o)
 	}
 	if b := subscriptions[byID["vercel"]].Balance; b == nil || b.Remaining.Amount != 95.5 {
 		t.Fatalf("vercel balance = %+v", b)

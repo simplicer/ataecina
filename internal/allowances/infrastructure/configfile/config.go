@@ -33,6 +33,7 @@ const (
 var (
 	defaultThresholds = []int{90, 95}
 	cloudflareAccount = regexp.MustCompile(`^[0-9a-f]{32}$`)
+	catalogueProvider = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{0,63}$`)
 	githubLogin       = regexp.MustCompile(`^[A-Za-z0-9](?:[A-Za-z0-9]|-[A-Za-z0-9]){0,38}$`)
 )
 
@@ -73,6 +74,9 @@ type SubscriptionSettings struct {
 	MonthlyAllowance float64
 	// Port is Heimdall's admin port on loopback (heimdall).
 	Port int
+	// Catalogue is the models.dev provider that lists the subscription's
+	// models, when the owner names one; empty uses the source's own.
+	Catalogue string
 	// Thresholds are the subscription's own, or the global ones.
 	Thresholds []int
 }
@@ -105,6 +109,7 @@ type subscriptionDocument struct {
 	Login                 *string  `json:"login"`
 	MonthlyAllowance      *float64 `json:"monthly_allowance"`
 	Port                  *int     `json:"port"`
+	Catalogue             *string  `json:"catalogue"`
 	Thresholds            []int    `json:"thresholds"`
 }
 
@@ -243,6 +248,10 @@ func decodeSubscription(item subscriptionDocument, sources catalog.Catalog) (Sub
 		Subscription:   domain.NewSubscription(id, provider, source, entry.Fidelity, domain.NewPlan(valueOr(item.Plan, ""))),
 		AppServer:      valueOr(item.AppServer, false),
 		AppServerAfter: time.Duration(valueOr(item.AppServerAfterMinutes, defaultAppServerAfter)) * time.Minute,
+	}
+	settings.Catalogue = valueOr(item.Catalogue, "")
+	if item.Catalogue != nil && !catalogueProvider.MatchString(settings.Catalogue) {
+		return SubscriptionSettings{}, fmt.Errorf(`%w: subscription %q: "catalogue" must be a models.dev provider id`, ErrInvalid, id)
 	}
 	if settings.AppServerAfter < time.Minute {
 		return SubscriptionSettings{}, fmt.Errorf("%w: subscription %q: \"app_server_after_minutes\" must be at least 1", ErrInvalid, id)

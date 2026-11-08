@@ -70,6 +70,29 @@ func TestBodiesAreCappedAfterDecompression(t *testing.T) {
 	if _, err := e.Get(context.Background(), "/", nil); !errors.Is(err, httpclient.ErrTooLarge) {
 		t.Fatalf("large body = %v", err)
 	}
+	larger := e.Larger(2*httpclient.MaxBodyBytes, time.Second)
+	if response, err := larger.Get(context.Background(), "/", nil); err != nil || len(response.Body) != httpclient.MaxBodyBytes+1 {
+		t.Fatalf("larger endpoint = %d bytes, %v", len(response.Body), err)
+	}
+	if _, err := e.Larger(1, time.Millisecond).Get(context.Background(), "/", nil); !errors.Is(err, httpclient.ErrTooLarge) {
+		t.Fatalf("Larger lowered the cap: %v", err)
+	}
+}
+
+func TestEachEndpointHasItsOwnDeadline(t *testing.T) {
+	release := make(chan struct{})
+	e := endpoint(t, func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case <-release:
+		case <-r.Context().Done():
+		}
+	}, httpclient.Options{})
+	defer close(release)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+	if _, err := e.Get(ctx, "/", nil); err == nil {
+		t.Fatal("a request outlived its deadline")
+	}
 }
 
 func TestProxiesAreIgnoredUnlessEnabled(t *testing.T) {

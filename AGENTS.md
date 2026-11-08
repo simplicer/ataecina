@@ -26,7 +26,9 @@ is reborn (resets). It:
 3. shows the **snapshot** in the terminal, as JSON, in a KDE Plasma widget
    (first-class) and in a StatusNotifierItem tray for other desktops;
 4. raises **alerts** when a meter crosses its thresholds;
-5. ships as `.deb`, `.rpm` and an Arch package, plus a source build.
+5. keeps a daily **model catalogue** per subscription (which models, which
+   free, which new) from the public models.dev catalogue (ADR 0015);
+6. ships as `.deb`, `.rpm` and an Arch package, plus a source build.
 
 The domain is **subscription allowances and their renewal** — not HTTP, not
 D-Bus, not desktops.
@@ -36,7 +38,8 @@ D-Bus, not desktops.
 Use these words verbatim in code, docs and commits (defined in
 `docs/SPECS.md` §1): subscription, provider, allowance, meter, window,
 balance, reading, source, fidelity, freshness, snapshot, reset (rebirth),
-threshold, alert, sealed key, unlocker, collector, display.
+threshold, alert, sealed key, unlocker, collector, display, offering,
+model catalogue.
 
 ## Architecture
 
@@ -53,6 +56,7 @@ threshold, alert, sealed key, unlocker, collector, display.
 | `allowances` | subscriptions, meters, balances, readings, fidelity, freshness, the snapshot; collecting and reporting them | hold or unseal keys; draw anything |
 | `keys` | sealed provider keys, unlockers, sealing and unsealing | know what a quota is |
 | `alerts` | thresholds, alert state per window, notifications | collect readings |
+| `offerings` | the model catalogue: which models each provider offers, their list price, which are free and which are new; refreshing and reporting it | read quotas, hold keys, send any credential |
 | `outages` *(planned)* | provider status pages and incidents | read quotas |
 
 - `internal/platform/` holds shared technical infrastructure only (hardened
@@ -154,7 +158,8 @@ feature (ADRs 0003–0006).
   override it; redirects are refused;
   proxy environment variables are ignored unless the owner enables them in
   `config.json`; every response body is capped (64 KiB after
-  decompression); timeouts are explicit; one attempt per refresh, no
+  decompression; only the public model catalogue, fetched without any
+  key, may reach 24 MiB, ADR 0015); timeouts are explicit; one attempt per refresh, no
   retries; a `429` or `Retry-After` is honoured by skipping that source
   until then.
 - **Local data of other tools** (Codex logs, Claude status line input,
@@ -163,7 +168,8 @@ feature (ADRs 0003–0006).
   Prompt or response content never leaves the process and is never stored.
 - **No telemetry, no update checks, no analytics.** The only hosts contacted
   are the ones listed in `docs/SPECS.md` §3, and only for enabled
-  subscriptions.
+  subscriptions, plus the public model catalogue `models.dev` (§11), at
+  most once a day and without any key.
 - When a provider says stop (rate limit, invalid key, policy), Ataecina
   stops asking until the time it announces.
 
@@ -203,7 +209,7 @@ the repository's `etc/`/`var/` convention for an installed desktop tool:
 | Sealed keys | `$XDG_CONFIG_HOME/ataecina/keys.json` |
 | Snapshot | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` |
 | Hook signals (Claude limits) | `$XDG_RUNTIME_DIR/ataecina/signals/` |
-| Alert state, declared balances | `$XDG_STATE_HOME/ataecina/` |
+| Alert state, declared balances, model catalogue | `$XDG_STATE_HOME/ataecina/` |
 | Logs | `$XDG_STATE_HOME/ataecina/ataecina.log` |
 
 In the repository, `etc/ataecina.example.json` is the documented example

@@ -385,6 +385,45 @@ QtObject {
         return parts.join(" · ");
     }
 
+    // ----- model catalogue -----
+
+    // How many models the subscription's provider lists and how many are
+    // free; a plan whose every model costs nothing includes them all.
+    function modelsText(subscription) {
+        const offerings = subscription.offerings;
+        if (!offerings || offerings.models === 0) {
+            return "";
+        }
+        if (offerings.free === offerings.models) {
+            return i18np("%1 model included", "%1 models included", offerings.models);
+        }
+        const count = i18np("%1 model", "%1 models", offerings.models);
+        return offerings.free === 0 ? count : count + " · " + i18np("%1 free", "%1 free", offerings.free);
+    }
+
+    // A few free models by name, when only some are free.
+    function freeModelsText(subscription) {
+        const offerings = subscription.offerings;
+        if (!offerings || offerings.free === 0 || offerings.free === offerings.models) {
+            return "";
+        }
+        const shown = offerings.free_models.slice(0, 6).map(m => m.name);
+        const more = offerings.free - shown.length;
+        if (more > 0) {
+            shown.push(i18np("%1 more", "%1 more", more));
+        }
+        return i18n("Free: %1", shown.join(", "));
+    }
+
+    // The newest models, released in the last 30 days.
+    function newModelsText(subscription) {
+        const offerings = subscription.offerings;
+        if (!offerings || offerings.new_models.length === 0) {
+            return "";
+        }
+        return i18n("New: %1", offerings.new_models.slice(0, 4).map(m => m.name).join(", "));
+    }
+
     function outcomeText(subscription) {
         // A rejected key also reads KEY_MISSING; its error class tells them apart.
         if (subscription.error_class === "KEY_REJECTED") {

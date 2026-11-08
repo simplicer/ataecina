@@ -1,8 +1,9 @@
 // Package httpclient is the only way Ataecina talks to a provider (ADR
 // 0006): one fixed HTTPS origin per endpoint, no redirects, no proxy
 // unless the owner enables it, explicit timeouts, responses capped at
-// 64 KiB after decompression, a plain `ataecina/<version>` User-Agent and
-// never a retry.
+// 64 KiB after decompression (a larger cap only for the public model
+// catalogue, which carries no key, ADR 0015), a plain
+// `ataecina/<version>` User-Agent and never a retry.
 package httpclient
 
 import (
@@ -26,7 +27,7 @@ const (
 
 // Errors of an exchange; none carries a body or a header value.
 var (
-	ErrTooLarge   = errors.New("the response is larger than 64 KiB")
+	ErrTooLarge   = errors.New("the response is larger than the endpoint accepts")
 	ErrRedirected = errors.New("the provider answered with a redirect, which is refused")
 	ErrBadOrigin  = errors.New("an endpoint needs an https origin without path, query or credentials")
 )
@@ -63,8 +64,8 @@ func New(options Options) Client {
 	}
 	return Client{
 		http: &http.Client{
+			// Each request carries its endpoint's own deadline.
 			Transport: transport,
-			Timeout:   requestTimeout,
 			CheckRedirect: func(*http.Request, []*http.Request) error {
 				return ErrRedirected
 			},
@@ -76,8 +77,10 @@ func New(options Options) Client {
 
 // Endpoint is a client bound to one origin compiled into an adapter.
 type Endpoint struct {
-	client Client
-	origin *url.URL
+	client  Client
+	origin  *url.URL
+	maxBody int
+	timeout time.Duration
 }
 
 // For binds the client to an origin such as "https://openrouter.ai".
@@ -89,7 +92,7 @@ func (c Client) For(origin string) (Endpoint, error) {
 	if parsed.Scheme != "https" && !(c.plainHTTP && parsed.Scheme == "http") {
 		return Endpoint{}, fmt.Errorf("%w: %q", ErrBadOrigin, origin)
 	}
-	return Endpoint{client: c, origin: &url.URL{Scheme: parsed.Scheme, Host: parsed.Host}}, nil
+	return Endpoint{client: c, origin: &url.URL{Scheme: parsed.Scheme, Host: parsed.Host}, maxBody: MaxBodyBytes, timeout: requestTimeout}, nil
 }
 
 // ForLoopback binds the client to a local service on 127.0.0.1 (ADR 0013):
@@ -100,7 +103,15 @@ func (c Client) ForLoopback(port int) (Endpoint, error) {
 		return Endpoint{}, fmt.Errorf("%w: loopback port %d", ErrBadOrigin, port)
 	}
 	host := net.JoinHostPort("127.0.0.1", fmt.Sprint(port))
-	return Endpoint{client: c, origin: &url.URL{Scheme: "http", Host: host}}, nil
+	return Endpoint{client: c, origin: &url.URL{Scheme: "http", Host: host}, maxBody: MaxBodyBytes, timeout: requestTimeout}, nil
+}
+
+// Larger is the endpoint with a larger body cap and more time: only for
+// a public catalogue fetched without any key (ADR 0015). It never
+// lowers either limit.
+func (e Endpoint) Larger(maxBody int, timeout time.Duration) Endpoint {
+	e.maxBody, e.timeout = max(e.maxBody, maxBody), max(e.timeout, timeout)
+	return e
 }
 
 // Host is the endpoint's host, for messages.
@@ -128,6 +139,8 @@ func (e Endpoint) Do(ctx context.Context, method, path string, header http.Heade
 	if err != nil || target.Host != e.origin.Host || target.Scheme != e.origin.Scheme {
 		return Response{}, fmt.Errorf("%w: path %q", ErrBadOrigin, path)
 	}
+	ctx, cancel := context.WithTimeout(ctx, e.timeout)
+	defer cancel()
 	request, err := http.NewRequestWithContext(ctx, method, target.String(), body)
 	if err != nil {
 		return Response{}, err
@@ -147,11 +160,11 @@ func (e Endpoint) Do(ctx context.Context, method, path string, header http.Heade
 		return Response{}, err
 	}
 	defer response.Body.Close()
-	data, err := io.ReadAll(io.LimitReader(response.Body, MaxBodyBytes+1))
+	data, err := io.ReadAll(io.LimitReader(response.Body, int64(e.maxBody)+1))
 	if err != nil {
 		return Response{}, err
 	}
-	if len(data) > MaxBodyBytes {
+	if len(data) > e.maxBody {
 		return Response{}, ErrTooLarge
 	}
 	return Response{Status: response.StatusCode, Header: response.Header, Body: data}, nil

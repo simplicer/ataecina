@@ -26,6 +26,8 @@ decisions.
 | **Unlocker** | A way to hold the master key: Secret Service, passphrase, or systemd credential. |
 | **Collector** | The one-shot process that reads sources, unseals keys and writes the snapshot. |
 | **Display** | Anything that shows the snapshot: terminal table, JSON, Plasma widget, tray. |
+| **Offering** | A model a provider offers, with its list price and release day; **free** when priced at 0, **new** when released in the last 30 days. |
+| **Model catalogue** | The offerings of the providers that describe the configured subscriptions, refreshed once a day from models.dev (§11). |
 
 ## 2. Scope
 
@@ -42,7 +44,9 @@ pricing comparisons (models.dev may be added later as an explicit feature).
 ## 3. Sources
 
 Each source is one adapter. Only the hosts below are ever contacted, and only
-for subscriptions the owner enabled. **Undocumented** sources must be
+for subscriptions the owner enabled; the one other host is the public model
+catalogue `https://models.dev`, asked at most once a day without any key
+(§11). **Undocumented** sources must be
 re-verified with a live, manual call (owner's key) before an adapter is
 merged, and again whenever they report `CONTRACT_CHANGED`. Fields listed are
 the only ones read.
@@ -717,10 +721,16 @@ Contract details:
   `BILLING_CYCLE`); on a subscription, `credits`
   (`{ "available": <decimal>, "unlimited": <bool> }`, provider credits that
   are not money), `banked_resets` (`{ "available": <int> }`, information
-  only), `error_class` (why the latest attempt failed, §4.3) and `hint` (a
-  short sentence for the owner); in `meta`, `snapshot_taken_at` (`null`
-  before the first collection) and `worst_used_percent` (`null` without
-  meters).
+  only), `error_class` (why the latest attempt failed, §4.3), `hint` (a
+  short sentence for the owner) and `offerings` (§11; `null` when the
+  catalogue has nothing for the subscription): `{ "catalogue": <models.dev
+  provider id>, "name", "models": <int>, "free": <int>, "free_models":
+  [ { "id", "name", "released_on" } ] (at most 50), "new_models": [ … ]
+  (released in the last 30 days, newest first, at most 10) }`, where
+  `released_on` is a date (`2026-10-30`) or `null`; in `meta`,
+  `snapshot_taken_at` (`null` before the first collection),
+  `worst_used_percent` (`null` without meters) and
+  `offerings_refreshed_at` (`null` before the catalogue was first read).
 - `used_percent` may exceed 100 when a provider allows overage.
 - Before the first collection the document has an empty `subscriptions`
   list; this is not an error.
@@ -886,7 +896,7 @@ extension.
 | `…/keys.json` | sealed keys and wrapped master key | `0600` |
 | `$XDG_RUNTIME_DIR/ataecina/snapshot.json` | latest readings (figures only) | `0600` |
 | `$XDG_RUNTIME_DIR/ataecina/signals/` | signals written by hooks (Claude limits), read by the collector | `0700` / `0600` |
-| `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, log offsets, log | `0700` / `0600` |
+| `$XDG_STATE_HOME/ataecina/` | alert state, declared balances, model catalogue (`offerings.json`, §11), log offsets, log | `0700` / `0600` |
 
 `config.json` example (`etc/ataecina.example.json`):
 
@@ -923,6 +933,7 @@ anything:
 | `subscriptions[].id` | required, unique, `[a-z0-9][a-z0-9-]{0,31}` |
 | `subscriptions[].source` | required, a source id of §3 |
 | `subscriptions[].plan` | optional, any text, normalised to `UPPER_SNAKE_CASE`; a plan reported by the source wins |
+| `subscriptions[].catalogue` | optional, any source: the models.dev provider id whose models describe the subscription (§11), lowercase letters, digits, dots and dashes; default the source's own |
 | `subscriptions[].key` | only for sources that need a key; the sealed key's name, default the subscription id |
 | `subscriptions[].app_server`, `app_server_after_minutes` | only for `codex-logs`; default `false` and 60 (≥ 1) |
 | `subscriptions[].provider` | only for `heimdall`, where it is required |
@@ -974,3 +985,50 @@ machine; `make install-deb` then installs it with `apt`.
 - Single static binary (`CGO_ENABLED=0`); runtime dependencies: none beyond
   the session D-Bus.
 - Linux only. Plasma 6 is the reference desktop; others through the tray.
+
+## 11. Model catalogue
+
+Besides what is left, the owner wants to know **which models each
+subscription offers, which of them are free and which are new** (ADR 0015).
+The bounded context `offerings` keeps that, apart from the quotas.
+
+- **Source.** `GET https://models.dev/api.json`, the public, MIT-licensed
+  catalogue of providers and models (235 providers and 8 940 models, about
+  6 MB, 0.6 MB compressed, on 2026-11-08). It needs no key and none is ever
+  sent. Each provider id maps to `{ "id", "name", "models": { <model id>:
+  { "id", "name", "status"?, "release_date", "cost"?: { "input",
+  "output", … } } } }`, prices in USD per million tokens. Coding plans are
+  listed as providers of their own (`zai-coding-plan`,
+  `minimax-coding-plan`, `alibaba-token-plan`, `kimi-code-plan-global`,
+  `opencode-go`…) whose models cost 0: they are included in the plan.
+- **When.** The collector refreshes it after collecting the readings, at
+  most once a day, an hour after a failed attempt, and at once when the
+  configured subscriptions need other providers. The ETag is sent back as
+  `If-None-Match`, so an unchanged catalogue answers `304` with no body.
+  The download has its own 25 s deadline and a 24 MiB cap after
+  decompression (the only exception to the 64 KiB cap of §3, ADR 0015).
+  A failure is logged and never affects the readings or the snapshot.
+- **What is kept.** Only the providers of the configured subscriptions,
+  without deprecated models: each model's id, name, input and output price
+  (or none) and release day, in `$XDG_STATE_HOME/ataecina/offerings.json`
+  (`0600`), with which provider describes each subscription. Texts are
+  kept as plain text (no control or markup characters, at most 120
+  characters).
+- **Which provider.** By source: `zai-api` → `zai-coding-plan`,
+  `minimax-api` → `minimax-coding-plan`, `alibaba-cli` →
+  `alibaba-token-plan`, `commandcode-api` → `commandcode`,
+  `openrouter-api` → `openrouter`, `vercel-api` → `vercel`,
+  `opencode-zen` → `opencode`, `opencode-console` → `opencode-go`,
+  `ollama-api` → `ollama-cloud`, `copilot-gh` → `github-copilot`,
+  `orcarouter-api` → `orcarouter`, `cloudflare-api` →
+  `cloudflare-workers-ai`; a `heimdall` subscription uses the provider it
+  follows (`google`, `nvidia`, `groq`, `kilo`…). Claude and Codex have
+  none. The owner may name another with `"catalogue": "<provider id>"` in
+  the subscription (an Alibaba Coding Plan: `alibaba-coding-plan`).
+- **Free** means priced at 0 for input and output; a model without a price
+  is not free (its price is unknown). **New** means released in the last 30
+  days. models.dev marks no promotions, so none are claimed.
+- **Displays.** `status --json` adds `offerings` to each subscription
+  (§8.2). The widget's unfolded row says "7 models included" when every
+  model is free (a plan), else "374 models · 16 free", then a few free
+  models by name and the newest ones, always as plain text.

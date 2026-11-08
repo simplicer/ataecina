@@ -296,7 +296,11 @@ func contractKeys(t *testing.T) map[string]bool {
 		t.Fatal(err)
 	}
 	var out bytes.Buffer
-	if err := statusjson.Write(&out, snapshot.StatusAt(at), statusjson.Meta{Version: "0.0.0", GeneratedAt: at}); err != nil {
+	model := statusjson.Model{ID: "m", Name: "M", ReleasedOn: at}
+	catalogue := map[string]statusjson.Offerings{"example": {
+		Catalogue: "example", Name: "Example", Models: 2, FreeModels: []statusjson.Model{model}, NewModels: []statusjson.Model{model},
+	}}
+	if err := statusjson.Write(&out, snapshot.StatusAt(at), statusjson.Meta{Version: "0.0.0", GeneratedAt: at, Offerings: catalogue, OfferingsRefreshedAt: at}); err != nil {
 		t.Fatal(err)
 	}
 	var document any

@@ -1,0 +1,40 @@
+{
+  "openrouter": {
+    "id": "openrouter", "env": ["OPENROUTER_API_KEY"], "npm": "@openrouter/ai-sdk-provider",
+    "api": "https://openrouter.ai/api/v1", "name": "OpenRouter", "doc": "https://openrouter.ai/models",
+    "models": {
+      "example/coder-mini:free": {
+        "id": "example/coder-mini:free", "name": "Coder Mini (free)", "family": "coder",
+        "attachment": false, "reasoning": true, "tool_call": true, "temperature": true,
+        "release_date": "2026-10-30", "last_updated": "2026-10-30",
+        "modalities": { "input": ["text"], "output": ["text"] }, "open_weights": true,
+        "limit": { "context": 131072, "output": 32768 }, "cost": { "input": 0, "output": 0 }
+      },
+      "example/coder-max": {
+        "id": "example/coder-max", "name": "Coder Max", "family": "coder",
+        "attachment": true, "reasoning": true, "tool_call": true, "temperature": true,
+        "release_date": "2026-03", "last_updated": "2026-05-01",
+        "modalities": { "input": ["text", "image"], "output": ["text"] }, "open_weights": false,
+        "limit": { "context": 262144, "output": 65536 }, "cost": { "input": 1.25, "output": 5, "cache_read": 0.125 }
+      },
+      "example/old:free": {
+        "id": "example/old:free", "name": "Old (free)", "status": "deprecated",
+        "release_date": "2024-01-01", "cost": { "input": 0, "output": 0 }
+      },
+      "example/router": {
+        "id": "example/router", "name": "<b>Router</b>\u0007", "release_date": "unknown"
+      }
+    }
+  },
+  "zai-coding-plan": {
+    "id": "zai-coding-plan", "name": "Z.AI Coding Plan", "api": "https://api.z.ai/api/coding/paas/v4",
+    "models": {
+      "glm-a": { "id": "glm-a", "name": "GLM A", "release_date": "2026-09-15", "cost": { "input": 0, "output": 0 } },
+      "glm-b": { "id": "glm-b", "name": "GLM B", "release_date": "2026-07-01", "cost": { "input": 0, "output": 0, "cache_read": 0 } }
+    }
+  },
+  "elsewhere": {
+    "id": "elsewhere", "name": "Elsewhere",
+    "models": { "x": { "id": "x", "name": "X", "cost": { "input": -1, "output": 0 } } }
+  }
+}

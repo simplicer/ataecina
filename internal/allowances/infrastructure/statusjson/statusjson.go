@@ -13,11 +13,37 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/readingjson"
 )
 
-// Meta describes the program that produced the document.
+// Meta describes the program that produced the document, and what the
+// model catalogue says of each subscription (by subscription id).
 type Meta struct {
-	Version     string
-	GeneratedAt time.Time
+	Version              string
+	GeneratedAt          time.Time
+	Offerings            map[string]Offerings
+	OfferingsRefreshedAt time.Time
 }
+
+// Offerings is what the model catalogue says of one subscription's
+// provider: how many models it lists, how many are free, some of the
+// free ones and the newest ones.
+type Offerings struct {
+	Catalogue  string
+	Name       string
+	Models     int
+	FreeModels []Model
+	NewModels  []Model
+}
+
+// Model is one model of the catalogue; ReleasedOn is zero when unknown.
+type Model struct {
+	ID         string
+	Name       string
+	ReleasedOn time.Time
+}
+
+const (
+	maxFreeModels = 50
+	maxNewModels  = 10
+)
 
 type document struct {
 	Data data `json:"data"`
@@ -43,6 +69,22 @@ type subscription struct {
 	BankedResets *readingjson.BankedResets `json:"banked_resets"`
 	ErrorClass   *string                   `json:"error_class"`
 	Hint         *string                   `json:"hint"`
+	Offerings    *offerings                `json:"offerings"`
+}
+
+type offerings struct {
+	Catalogue  string  `json:"catalogue"`
+	Name       string  `json:"name"`
+	Models     int     `json:"models"`
+	Free       int     `json:"free"`
+	FreeModels []model `json:"free_models"`
+	NewModels  []model `json:"new_models"`
+}
+
+type model struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	ReleasedOn *string `json:"released_on"`
 }
 
 type meta struct {
@@ -50,6 +92,7 @@ type meta struct {
 	GeneratedAt      readingjson.Instant  `json:"generated_at"`
 	SnapshotTakenAt  *readingjson.Instant `json:"snapshot_taken_at"`
 	WorstUsedPercent *float64             `json:"worst_used_percent"`
+	OfferingsAt      *readingjson.Instant `json:"offerings_refreshed_at"`
 }
 
 // Write renders the status report as the public JSON document.
@@ -72,6 +115,7 @@ func Write(w io.Writer, report domain.StatusReport, about Meta) error {
 			BankedResets: reading.BankedResets,
 			ErrorClass:   reading.ErrorClass,
 			Hint:         reading.Hint,
+			Offerings:    encodeOfferings(about.Offerings, reading.Subscription),
 		})
 	}
 	takenAt, taken := report.TakenAt()
@@ -79,12 +123,39 @@ func Write(w io.Writer, report domain.StatusReport, about Meta) error {
 		Version:         about.Version,
 		GeneratedAt:     readingjson.Instant{Time: about.GeneratedAt},
 		SnapshotTakenAt: readingjson.InstantOf(takenAt, taken),
+		OfferingsAt:     readingjson.InstantOf(about.OfferingsRefreshedAt, true),
 	}
 	if worst, ok := report.WorstUsed(); ok {
 		value := worst.Float64()
 		doc.Meta.WorstUsedPercent = &value
 	}
 	return encode(w, doc)
+}
+
+// encodeOfferings shows at most 50 free and 10 new models; the free
+// count is always the whole one.
+func encodeOfferings(all map[string]Offerings, subscription string) *offerings {
+	found, ok := all[subscription]
+	if !ok {
+		return nil
+	}
+	return &offerings{
+		Catalogue: found.Catalogue, Name: found.Name, Models: found.Models, Free: len(found.FreeModels),
+		FreeModels: encodeModels(found.FreeModels, maxFreeModels), NewModels: encodeModels(found.NewModels, maxNewModels),
+	}
+}
+
+func encodeModels(models []Model, limit int) []model {
+	encoded := make([]model, 0, min(len(models), limit))
+	for _, item := range models[:min(len(models), limit)] {
+		var released *string
+		if !item.ReleasedOn.IsZero() {
+			day := item.ReleasedOn.Format(time.DateOnly)
+			released = &day
+		}
+		encoded = append(encoded, model{ID: item.ID, Name: item.Name, ReleasedOn: released})
+	}
+	return encoded
 }
 
 // Problem is an RFC 9457 problem object, written on stderr.

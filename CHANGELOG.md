@@ -8,6 +8,20 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.22.0-unstable] - 2026-11-08
+
+### Added
+
+- A daily model catalogue: for each subscription, how many models its plan
+  or provider offers, which are free and which are new (released in the
+  last 30 days), from the public models.dev catalogue. The collector asks
+  for it at most once a day, revalidates it with its ETag and never sends
+  a key; it is kept in `$XDG_STATE_HOME/ataecina/offerings.json`.
+  `status --json` adds `offerings` to each subscription and
+  `meta.offerings_refreshed_at`; the widget shows it when a row unfolds.
+  A subscription may name another catalogue provider with `"catalogue"`
+  (ADR 0015).
+
 ## [0.21.1-unstable] - 2026-11-08
 
 ### Fixed
