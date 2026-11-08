@@ -147,7 +147,7 @@ deb:
 # Installs (or reinstalls) that .deb system-wide with apt; asks for sudo.
 install-deb: deb
 	sudo apt install --reinstall ./$(DEB_FILE)
-	@echo "next, as yourself: ataecina init, then see README \"Install\" (config.json, keys, timer, widget or tray)"
+	@echo "next, as yourself: ataecina init, then see README \"First set-up, step by step\" (subscriptions, keys, timer, widget or tray)"
 
 uninstall-deb:
 	sudo apt remove ataecina

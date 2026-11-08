@@ -214,33 +214,199 @@ The rules are in [SECURITY.md](SECURITY.md) and the decisions behind them in
 
 ## Install
 
-No packages are published yet; build the one for your distribution from a
-checkout (Go 1.27 and gettext's `msgfmt` needed). Packages are reproducible:
-the same commit always gives byte-identical files.
+No binary packages are published yet: you build the one for your
+distribution from the source, which takes a minute. Packages are
+reproducible — the same commit always gives byte-identical files.
+
+**1. Get the tools and the source.** Go (1.21 or newer: it fetches the
+exact toolchain the project pins by itself), `make`, `git` and gettext (for
+`msgfmt`, which compiles the widget's translations):
+
+```sh
+sudo apt install golang make git gettext        # Debian, Ubuntu, KDE neon, Kubuntu
+sudo dnf install golang make git gettext        # Fedora
+sudo pacman -S go make git gettext              # Arch, Manjaro, EndeavourOS
+
+git clone https://codeberg.org/simplicer/ataecina.git
+cd ataecina
+```
+
+**2. Build and install the package for your system.**
 
 | Distribution | Build | Install |
 |---|---|---|
-| Debian, Ubuntu, KDE neon, Kubuntu | `make deb` | `make install-deb` (or `sudo apt install ./dist/ataecina_*.deb`) |
+| Debian, Ubuntu, KDE neon, Kubuntu | `make deb` | `make install-deb` (runs `sudo apt install` on the package it built) |
 | Fedora, openSUSE | `make package` | `sudo dnf install ./dist/ataecina-*.x86_64.rpm` |
 | Arch, Manjaro, EndeavourOS | `make package`, or the `PKGBUILD` in `infra/packaging/arch/` | `sudo pacman -U dist/ataecina-*.pkg.tar.zst` |
-| Anything else, or no root | `make install-user` | into `~/.local` (`make uninstall-user` removes it) |
+| Anything else, or no root | `make install-user` | installs into `~/.local`, then `systemctl --user daemon-reload`; `make uninstall-user` removes it |
 
-Packages install the `ataecina` binary, the collector's systemd user units,
-the Plasma widget, the icon, the tray launcher and the docs. Nothing is
-enabled for you.
+A package installs the `ataecina` command, the collector's systemd user
+units, the Plasma widget, the icon, the tray launcher for other desktops
+and the documentation. Nothing is enabled or configured for you.
 
-## Set up
+**3. On Plasma, reload the shell** so it sees the new widget:
 
 ```sh
-ataecina init                                         # ~/.config/ataecina, 0700, and the master key
-ataecina subscriptions add zai --source zai-api       # or edit ~/.config/ataecina/config.json (see below)
-systemctl --user enable --now ataecina-collect.timer  # collect every 5 minutes
-ataecina doctor                                       # checks permissions, keyring, keys and sources
+systemctl --user restart plasma-plasmashell
 ```
 
-A configuration lists the subscriptions to follow; validation is strict and
-unknown keys are errors. The full reference is in
-[docs/SPECS.md](docs/SPECS.md) §9 and
+## First set-up, step by step
+
+**1. Create the configuration and the master key.**
+
+```sh
+ataecina init
+```
+
+This creates `~/.config/ataecina/` (only you can read it) and a random
+master key that seals your API keys. On a desktop session the master key
+goes into your keyring (KWallet or GNOME Keyring), unlocked when you log
+in; without one, `ataecina init --unlocker passphrase` asks for a
+passphrase instead.
+
+**2. Add your subscriptions.** On Plasma, the easiest way is the widget's
+settings: right-click the widget, **Configure Ataecina… → Subscriptions**,
+pick the source, keep or change the suggested id and fill in what that
+source asks for. In a terminal:
+
+```sh
+ataecina sources                                   # every source and what it needs
+ataecina subscriptions add zai --source zai-api
+ataecina subscriptions add minimax --source minimax-api
+ataecina subscriptions add minimax-2 --source minimax-api   # a second plan of the same provider
+ataecina subscriptions add copilot --source copilot-gh --set login=octocat --set monthly_allowance=300
+ataecina subscriptions                             # what you have
+```
+
+Pick the source from the table in [Supported subscriptions](#supported-subscriptions).
+Two subscriptions of the same provider are simply two ids, each with its
+own key.
+
+**3. Seal the API keys.** For each subscription whose source needs a key —
+the widget's **Keys** page, "Set key…", opens a masked dialog; or in a
+terminal, where the key is read without echo:
+
+```sh
+ataecina keys set zai          # paste the key, then Enter
+ataecina keys set minimax-2    # the key name is the subscription id
+```
+
+Keys are encrypted at once and never shown again; `ataecina keys list`
+shows their names and dates only.
+
+**4. Start the collector.** It reads every subscription every five minutes:
+
+```sh
+systemctl --user enable --now ataecina-collect.timer
+ataecina doctor                # checks permissions, keyring, keys and every source
+```
+
+**5. Show it.** On **KDE Plasma**, put the widget in the system tray —
+right-click the tray's arrow, **Configure System Tray… → Entries →
+Ataecina: Always shown** — or in a panel (**Add Widgets…**). On **other
+desktops** (XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar, GNOME with the
+AppIndicator extension), start **Ataecina** from the applications menu or
+run `ataecina tray`; to start it with your session:
+
+```sh
+mkdir -p ~/.config/autostart
+cp /usr/share/applications/org.simplicer.ataecina.desktop ~/.config/autostart/
+```
+
+**6. Optional extras.**
+
+- **Claude Code.** Claude Code hands its rate limits to your status line
+  command. Add one line to your status line script, right after it reads
+  its input (it is silent and runs in the background):
+
+  ```sh
+  printf '%s' "$input" | ataecina hook claude-statusline &
+  ```
+
+  or, without a status line of your own, let Ataecina be it, in
+  `~/.claude/settings.json`:
+
+  ```json
+  { "statusLine": { "type": "command", "command": "ataecina hook claude-statusline --print" } }
+  ```
+
+- **Codex.** Its figures come from its session logs. Add
+  `"app_server": true` to the Codex subscription so that Ataecina also asks
+  the official `codex app-server` when the logs are older than an hour.
+- **OpenCode Zen.** Declare your balance once — the widget's **Keys** page,
+  "Declare balance…", or `ataecina balance declare zen --balance 20` (or
+  `--top-up 10` after adding money) — and Ataecina subtracts what OpenCode
+  records as spent.
+- **OpenCode Go.** Add a subscription with the `opencode-console` source and
+  sign OpenCode in to OpenCode Console once (`opencode auth login`).
+- **Alibaba Model Studio.** Install Alibaba's official `bl` CLI and sign it
+  in once (`bl auth login --console`); the plan's API key alone cannot read
+  the quota.
+- **Intelligence index.** For the ranking of each subscription's models, get
+  a free key at [artificialanalysis.ai](https://artificialanalysis.ai/) and
+  seal it with `ataecina keys set artificial-analysis`. Without it, an
+  OpenRouter subscription is enough: the same index comes through
+  OpenRouter, for fewer models.
+- **Headless machines.** Hold the master key with a TPM-bound systemd
+  credential, so the timer needs no passphrase:
+
+  ```sh
+  ataecina unlockers add systemd-creds && systemctl --user daemon-reload
+  ```
+
+## Use
+
+**The widget.** Click the icon for the popup. Each subscription shows its
+rings and, for every window (5 h, week, month, cycle), what is left and when
+it is reborn; click a row to unfold every window, the balance, the source's
+hint and **Models you can use**: the models you can use with what is left,
+best first by intelligence, with their price per million tokens. **Update
+models** refreshes the model catalogue and the intelligence index. Failing
+sources fold under the **warnings** line, and coding plan **offers**, when
+there are any, fold under it too; a click opens an offer. ⟳ (or a
+middle-click on the icon) collects now. The icon's ring shows what is left
+of the window closest to running out.
+
+**The widget's settings** (right-click, **Configure Ataecina…**):
+
+| Page | What it does |
+|---|---|
+| General | **Language** (the desktop's, Español, Català, Euskara, Galego, English), the command, how often to read, the figure in the panel, which subscriptions to show and in what order |
+| Subscriptions | add and remove subscriptions |
+| Keys | set or replace each key, declare the OpenCode Zen balance, set the Artificial Analysis key |
+
+**The terminal.**
+
+| Command | What it does |
+|---|---|
+| `ataecina` or `ataecina status [--json]` | the snapshot: a table, or the JSON contract |
+| `ataecina collect` | read every subscription now (what the timer runs) |
+| `ataecina models [--all] [--json] [<id>]` | each subscription's models, best first, and which you can use now |
+| `ataecina update` | refresh now the model catalogue, the intelligence index and the offers |
+| `ataecina offers [--json]` | the current coding plan offers |
+| `ataecina subscriptions [--json]` | your subscriptions; `add <id> --source <source> [--plan <p>] [--key <name>] [--set <option>=<value>]…`, `remove <id>` |
+| `ataecina sources [--json]` | every source Ataecina reads and the options it needs |
+| `ataecina keys set <name>` / `list` / `forget <name>` | seal a key read from stdin without echo, list names, forget one |
+| `ataecina balance declare <id> --balance <n>` / `--top-up <n>` | the OpenCode Zen balance |
+| `ataecina unlockers list` / `add <kind>` / `remove <kind>` | how the master key is held: `secret-service`, `passphrase`, `systemd-creds` |
+| `ataecina doctor` | check permissions, configuration, keyring, keys and sources |
+| `ataecina hook claude-statusline [--print]` | record Claude Code's limits from its status line |
+| `ataecina tray` | the tray icon for any desktop, until Quit |
+| `ataecina init`, `version`, `help` | set up, version, help |
+
+Commands that unlock the master key accept `--passphrase-fd <n>` to read a
+passphrase from a file descriptor instead of the terminal.
+
+`ataecina status --json` is a public, versioned contract
+([docs/SPECS.md](docs/SPECS.md) §8.2): `snake_case` fields,
+`UPPER_SNAKE_CASE` enums, RFC 3339 dates in UTC and money as
+`{"amount": 6.8, "currency": "USD"}`, so status bars and scripts can rely
+on it. The terminal table is for people and may change.
+
+**The configuration file.** `~/.config/ataecina/config.json` (mode `0600`)
+is written by `ataecina subscriptions` and the widget, and can be edited by
+hand; validation is strict and unknown keys are errors. The full reference
+is [docs/SPECS.md](docs/SPECS.md) §9; an example is
 [etc/ataecina.example.json](etc/ataecina.example.json):
 
 ```json
@@ -248,116 +414,50 @@ unknown keys are errors. The full reference is in
   "version": 1,
   "interval_minutes": 5,
   "alerts": { "thresholds": [90, 95] },
+  "language": "es",
+  "offers": true,
   "subscriptions": [
     { "id": "claude", "source": "claude-statusline", "plan": "PRO" },
     { "id": "codex", "source": "codex-logs", "app_server": true },
     { "id": "zai", "source": "zai-api" },
     { "id": "openrouter", "source": "openrouter-api" },
-    { "id": "zen", "source": "opencode-zen" },
-    { "id": "opencode-go", "source": "opencode-console" }
+    { "id": "zen", "source": "opencode-zen" }
   ]
 }
 ```
 
-**Subscriptions from the widget.** On Plasma, the widget's settings
-(right-click, "Configure Ataecina…", **Subscriptions**) list your
-subscriptions and add or remove them: pick the source, keep or change the
-suggested id — two MiniMax plans are simply `minimax` and `minimax-2`,
-each with its own key — and fill in what that source needs. In a
-terminal, `ataecina sources` lists every source and
-`ataecina subscriptions add <id> --source <source>` does the same.
+`alerts.thresholds` are the percentages used at which a desktop notification
+is sent (once per window); `language` sets the notifications' language;
+`"offers": false` keeps `ataecina update` from fetching offers.
 
-**API keys.** For each subscription that needs one, either type it in a
-terminal or, on Plasma, use the widget's settings (right-click the widget,
-"Configure Ataecina…", **Keys**, "Set key…"):
+## Update and uninstall
+
+**Update.** Pull and build again, then reinstall the package and reload the
+shell; your configuration, keys and history stay:
 
 ```sh
-ataecina keys set zai          # paste the key; it is read without echo and sealed
+cd ataecina && git pull
+make deb && make install-deb          # or make package / make install-user
+systemctl --user restart plasma-plasmashell
 ```
 
-**Models and their intelligence.** `ataecina models` lists each
-subscription's models; for the intelligence index, get a free key at
-[artificialanalysis.ai](https://artificialanalysis.ai/), seal it with
-`ataecina keys set artificial-analysis` (or the widget's **Keys** page) and
-run `ataecina update` (or "Update models" in the widget). Without that key,
-an OpenRouter subscription is enough: the same index comes through
-OpenRouter, for fewer models. Intelligence data: Artificial Analysis
-Intelligence Index.
+**Uninstall.** Remove the package (`sudo apt remove ataecina`,
+`sudo dnf remove ataecina`, `sudo pacman -R ataecina`) or run
+`make uninstall-user`. Your data stays until you delete it:
+`~/.config/ataecina/` (configuration and sealed keys),
+`~/.local/state/ataecina/` (alerts, declared balances, catalogues, log)
+and the master key in your keyring (`ataecina unlockers remove
+secret-service` before uninstalling).
 
-**Claude Code.** Claude Code hands its rate limits to your status line
-command; add one line to your status line script, right after it reads its
-input — it is silent and runs in the background:
+## Troubleshooting
 
-```sh
-printf '%s' "$input" | ataecina hook claude-statusline &
-```
-
-or, without a status line of your own, let Ataecina be it:
-
-```json
-{ "statusLine": { "type": "command", "command": "ataecina hook claude-statusline --print" } }
-```
-
-Claude's figures refresh whenever Claude Code draws its status line.
-
-**Codex.** Codex's figures come from its session logs; with
-`"app_server": true` Ataecina also asks the official `codex app-server` when
-the logs are older than an hour, so Codex stays fresh even when you do not
-use it.
-
-**OpenCode Zen.** Declare your balance once — from the widget's **Keys**
-page ("Declare balance…") or a terminal — and Ataecina subtracts what
-OpenCode records as spent:
-
-```sh
-ataecina balance declare zen --balance 20   # or --top-up 10 after adding money
-```
-
-**Headless machines.** Hold the master key with the TPM-bound systemd
-credential so the timer needs no passphrase:
-
-```sh
-ataecina unlockers add systemd-creds && systemctl --user daemon-reload
-```
-
-## Use
-
-**KDE Plasma.** Put the widget in the system tray — right-click the tray's
-arrow, "Configure System Tray…", "Entries", **Ataecina**: "Always shown" —
-or in a panel ("Add Widgets…"). Click the icon for the popup; middle-click,
-or the ⟳ button, to collect now. The icon's ring shows what is left of the
-window closest to running out.
-
-**Other desktops** (XFCE, Cinnamon, MATE, LXQt, Budgie, Waybar, GNOME with
-the AppIndicator extension): start **Ataecina** from the applications menu,
-or `ataecina tray`. Its menu lists every subscription, "Refresh now" and
-"Quit". To start it with your session:
-
-```sh
-mkdir -p ~/.config/autostart
-cp /usr/share/applications/org.simplicer.ataecina.desktop ~/.config/autostart/
-```
-
-**Terminal and scripts.**
-
-```text
-ataecina [status] [--json]          the snapshot: a table, or the JSON contract
-ataecina collect                    read every subscription now (what the timer runs)
-ataecina hook claude-statusline     record the Claude limits Claude Code passes to its status line
-ataecina balance declare            record a top-up or the balance of OpenCode Zen
-ataecina init                       create ~/.config/ataecina and the master key
-ataecina keys set|list|forget       manage sealed keys (set reads stdin without echo)
-ataecina unlockers add|list|remove  manage how the master key is held
-ataecina doctor                     check permissions, keyring, keys and sources
-ataecina tray                       tray icon for any desktop, until Quit
-ataecina version | help
-```
-
-`ataecina status --json` is a public, versioned contract
-([docs/SPECS.md](docs/SPECS.md) §8.2): `snake_case` fields,
-`UPPER_SNAKE_CASE` enums, RFC 3339 dates in UTC and money as
-`{"amount": 6.8, "currency": "USD"}`, so status bars and scripts can rely
-on it. The terminal table is for people and may change.
+| What you see | What to do |
+|---|---|
+| The widget says "No snapshot yet" | `systemctl --user enable --now ataecina-collect.timer`, or `ataecina collect` once |
+| The widget does not appear after installing | `systemctl --user restart plasma-plasmashell` |
+| A subscription is under **warnings** with "key missing" or "key rejected" | set the key again (**Keys** page or `ataecina keys set <id>`); a rejected key may also lack a permission, which the hint names |
+| "… is not on PATH" (`opencode`, `gh`, `bl`, `codex`) | the collector runs with a short `PATH`; install the tool in `~/.local/bin` or add a drop-in to `ataecina-collect.service` |
+| Anything else | `ataecina doctor`, then the log: `~/.local/state/ataecina/ataecina.log` |
 
 ## Performance
 
