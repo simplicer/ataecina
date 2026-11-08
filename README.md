@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.31.0-unstable` — early development: everything below
+**Current version:** `0.32.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -131,6 +131,7 @@ and the hints the sources write are in English. Translations are welcome
 | Moonshot AI (Kimi) open platform | prepaid balance (USD or CNY) | Moonshot balance API | platform API key | reported | to verify |
 | xAI API (Grok) | prepaid credit left | xAI Management API | management key + team id | reported | to verify |
 | Cursor Teams / Enterprise | your on-demand spending against your limit this cycle | Cursor Admin API | team Admin API key + your e-mail | reported | to verify |
+| Kilo Gateway | credit left | Kilo balance API (undocumented) | API key | reported | to verify |
 | Cloudflare Workers AI | neurons used today of the free 10 000 | Cloudflare GraphQL Analytics | analytics-only token + account id | reported | to verify |
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
 | Alibaba Model Studio Token Plan | every window the plan reports (5-hour, weekly, monthly…) | official `bl usage token-plan` | `bl`'s own console login | reported | to verify |

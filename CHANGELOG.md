@@ -8,6 +8,12 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.32.0-unstable] - 2026-11-08
+
+### Added
+
+- `kilo-api`: the Kilo Gateway credit left, with the Kilo API key.
+
 ## [0.31.0-unstable] - 2026-11-08
 
 ### Added

@@ -18,6 +18,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/cursoradminapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kiloapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kimicodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/moonshotapi"
@@ -152,6 +153,7 @@ func standardSources() sourceRegistry {
 		"moonshot-api":    viaAPI(moonshotapi.Global.Origin, moonshotapi.New(moonshotapi.Global)),
 		"moonshot-cn-api": viaAPI(moonshotapi.China.Origin, moonshotapi.New(moonshotapi.China)),
 		"kimi-code-api":   viaAPI(kimicodeapi.Origin, kimicodeapi.New),
+		"kilo-api":        viaAPI(kiloapi.Origin, kiloapi.New),
 		"xai-api": viaEndpoint(xaiapi.Origin, func(endpoint httpclient.Endpoint, settings configfile.SubscriptionSettings, c collection) domain.Source {
 			return xaiapi.New(endpoint, c.keys, domain.KeyName(settings.Key), settings.Team, c.env.clock.Now)
 		}),

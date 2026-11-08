@@ -22,6 +22,7 @@ var bySource = map[string]string{
 	"moonshot-cn-api":    "moonshotai-cn",
 	"kimi-code-api":      "kimi-code-plan-global",
 	"xai-api":            "xai",
+	"kilo-api":           "kilo",
 }
 
 // ProviderFor names the catalogue provider whose models describe a

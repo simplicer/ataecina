@@ -78,6 +78,7 @@ func Standard() Catalog {
 		{Source: "moonshot-api", Provider: "moonshot", Fidelity: reported, NeedsKey: true},
 		{Source: "moonshot-cn-api", Provider: "moonshot", Fidelity: reported, NeedsKey: true},
 		{Source: "kimi-code-api", Provider: "kimi", Fidelity: reported, NeedsKey: true},
+		{Source: "kilo-api", Provider: "kilo", Fidelity: reported, NeedsKey: true},
 		{Source: "xai-api", Provider: "xai", Fidelity: reported, NeedsKey: true,
 			Options: []Option{OptionTeam}, Requires: []Option{OptionTeam}},
 		{Source: "cursor-admin-api", Provider: "cursor", Fidelity: reported, NeedsKey: true,
