@@ -1185,7 +1185,9 @@ tag, and creates the release with every file of `dist/` and the
 version's CHANGELOG section on Codeberg (through its API, with the
 maintainer's token from `CODEBERG_TOKEN_FILE`, never on a command line)
 and on the GitHub mirror (`gh`). A version with a suffix is a
-pre-release.
+pre-release. It refuses to start when Codeberg's Releases unit is off,
+and it resumes after a failure: a tag that already names the commit is
+kept, an existing release only gets the files it lacks.
 
 ## 10. Constraints
 

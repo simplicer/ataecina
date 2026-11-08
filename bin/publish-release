@@ -12,6 +12,10 @@
 # `gh` logged in to GitHub. The release notes are the version's CHANGELOG
 # section.
 #
+# It can be run again after a failure: a tag that already names this
+# commit is kept, and a release that already exists only gets the files
+# it lacks.
+#
 # Usage: bin/publish-release [--dry-run]
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -39,14 +43,20 @@ git diff --quiet && git diff --cached --quiet || fail "the working tree is not c
 git fetch --quiet origin main
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || fail "origin does not have this commit yet: git push origin main"
 bin/check-version >/dev/null || fail "VERSION does not match the history"
-! git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null || fail "$tag already exists"
-[ -z "$(git ls-remote --tags origin "refs/tags/$tag")" ] || fail "$tag already exists on origin"
+git fetch --quiet origin "refs/tags/$tag:refs/tags/$tag" 2>/dev/null || true
+tagged=false
+if git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null; then
+	[ "$(git rev-parse "$tag^{commit}")" = "$(git rev-parse HEAD)" ] || fail "$tag already names another commit"
+	tagged=true
+fi
 for tool in curl jq gh; do
 	command -v "$tool" >/dev/null || fail "$tool is needed"
 done
 token_file=${CODEBERG_TOKEN_FILE:-$HOME/.config/codeberg/token}
 [ -r "$token_file" ] || fail "no Codeberg token in $token_file (set CODEBERG_TOKEN_FILE)"
 gh auth status >/dev/null 2>&1 || fail "gh is not logged in"
+[ "$(curl --silent --show-error --fail "$codeberg" | jq -r '.has_releases')" = true ] ||
+	fail "releases are off on Codeberg: turn on Releases in the repository's settings (Units)"
 
 notes=$(mktemp)
 headers=$(mktemp)
@@ -82,23 +92,37 @@ if $dry_run; then
 	exit 0
 fi
 
-git tag --annotate "$tag" --message "Ataecina $version"
+if ! $tagged; then
+	git tag --annotate "$tag" --message "Ataecina $version"
+fi
 git push --quiet origin "refs/tags/$tag"
 
 # The token goes to curl through a header file, never through argv.
 (umask 077 && printf 'Authorization: token %s\n' "$(tr -d '[:space:]' <"$token_file")" >"$headers")
-release=$(jq -n --arg tag "$tag" --arg name "Ataecina $version" --rawfile body "$notes" --argjson pre "$prerelease" \
-	'{tag_name: $tag, name: $name, body: $body, prerelease: $pre, draft: false}' |
-	curl --silent --show-error --fail-with-body -H @"$headers" -H 'Content-Type: application/json' \
-		--data-binary @- "$codeberg/releases" | jq -r '.id')
+existing=$(curl --silent --show-error -H @"$headers" "$codeberg/releases/tags/$tag")
+release=$(jq -r '.id // empty' <<<"$existing")
+if [ -z "$release" ]; then
+	release=$(jq -n --arg tag "$tag" --arg name "Ataecina $version" --rawfile body "$notes" --argjson pre "$prerelease" \
+		'{tag_name: $tag, name: $name, body: $body, prerelease: $pre, draft: false}' |
+		curl --silent --show-error --fail-with-body -H @"$headers" -H 'Content-Type: application/json' \
+			--data-binary @- "$codeberg/releases" | jq -r '.id')
+	existing='{"assets": []}'
+fi
 [[ $release =~ ^[0-9]+$ ]] || fail "Codeberg did not create the release"
 for file in "${files[@]}"; do
+	if jq -e --arg name "$file" 'any(.assets[]?; .name == $name)' <<<"$existing" >/dev/null; then
+		continue
+	fi
 	curl --silent --show-error --fail-with-body -H @"$headers" -F "attachment=@dist/$file" \
 		"$codeberg/releases/$release/assets?name=$file" >/dev/null
 done
 echo "publish-release: https://codeberg.org/$repository/releases/tag/$tag"
 
-github_flags=(--repo "$repository" --title "Ataecina $version" --notes-file "$notes" --verify-tag)
-$prerelease && github_flags+=(--prerelease)
-(cd dist && gh release create "$tag" "${files[@]}" "${github_flags[@]}" >/dev/null)
+if gh release view "$tag" --repo "$repository" >/dev/null 2>&1; then
+	(cd dist && gh release upload "$tag" "${files[@]}" --repo "$repository" --clobber >/dev/null)
+else
+	github_flags=(--repo "$repository" --title "Ataecina $version" --notes-file "$notes" --verify-tag)
+	$prerelease && github_flags+=(--prerelease)
+	(cd dist && gh release create "$tag" "${files[@]}" "${github_flags[@]}" >/dev/null)
+fi
 echo "publish-release: https://github.com/$repository/releases/tag/$tag"

@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.35.1-unstable] - 2026-11-08
+
+### Fixed
+
+- `bin/publish-release` stopped with a bare 404 when the Codeberg
+  repository had its Releases unit off; it now says so before building,
+  and it can be run again after a failure: a tag that already names the
+  commit is kept and an existing release only gets the files it lacks.
+
 ## [0.35.0-unstable] - 2026-11-08
 
 ### Added
