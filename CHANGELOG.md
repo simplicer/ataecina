@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.34.2-unstable] - 2026-11-08
+
+### Fixed
+
+- The widget showed a subscription's name in red when its money was
+  spent even though a window still had room (OpenRouter with its credit
+  spent and every free request left). The name is red only when nothing
+  can be used: a window the row shows at 100 % with no money left, or a
+  balance without windows at zero.
+
 ## [0.34.1-unstable] - 2026-11-08
 
 ### Fixed

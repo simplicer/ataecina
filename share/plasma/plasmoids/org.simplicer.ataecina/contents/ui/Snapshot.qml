@@ -148,16 +148,20 @@ QtObject {
             && subscription.freshness === "FRESH" && !subscription.error_class;
     }
 
-    // Nothing left to use now: a window at 100 % or no money left.
+    // Nothing left to use now: one of the windows the row shows at 100 %
+    // with no money left beside it, or, without windows, no money left.
+    // OpenRouter with its credit spent but free requests left is not.
     function exhausted(subscription) {
         if (!lively(subscription)) {
             return false;
         }
-        if (subscription.meters.some(meter => meter.used_percent >= 100)) {
-            return true;
-        }
         const balance = subscription.balance;
-        return !!balance && !!balance.remaining && Number(balance.remaining.amount) <= 0;
+        const moneyKnown = !!balance && !!balance.remaining;
+        const noMoney = !moneyKnown || Number(balance.remaining.amount) <= 0;
+        if (subscription.meters.length > 0) {
+            return noMoney && windows(subscription).some(meter => meter.used_percent >= 100);
+        }
+        return moneyKnown && noMoney;
     }
 
     // ----- peak and off-peak hours (SPECS §13) -----

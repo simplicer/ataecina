@@ -926,8 +926,10 @@ schemes and the accent colour like the battery or network widgets.
     (`Updates when you use Claude Code`, `Updates when you use Codex`,
     else `Stale, observed 2 hours ago`) and banked resets;
   - the row is tinted green while its plan is off-peak (§13), and the
-    name turns red while nothing is left to use (a window at 100 % or
-    more, or no money left);
+    name turns red while nothing is left to use: one of the windows the
+    row shows at 100 % or more with no money left beside it, or, for a
+    balance without windows, no money left (OpenRouter with its credit
+    spent but free requests left stays as it is);
   - a click unfolds every bucket and window (label, bar of what is left,
     `% left`, countdown), the balance and credits, fidelity and outcome,
     the hint and the reading's age.
