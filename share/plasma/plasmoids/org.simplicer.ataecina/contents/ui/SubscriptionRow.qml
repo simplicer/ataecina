@@ -192,7 +192,8 @@ ColumnLayout {
                     text: i18n("%1 % left", snapshot.leftText(modelData))
                     color: row.figureColor(modelData.used_percent)
                     horizontalAlignment: Text.AlignRight
-                    Layout.preferredWidth: Kirigami.Units.gridUnit * 4
+                    // Translations can be longer than "100 % left".
+                    Layout.preferredWidth: Math.max(implicitWidth, Kirigami.Units.gridUnit * 4)
                 }
                 PlasmaComponents3.Label {
                     text: snapshot.resetText(modelData)

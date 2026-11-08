@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.20.3-unstable] - 2026-11-08
+
+### Fixed
+
+- The Keys settings page shows a declared balance as money with two
+  decimals in your locale ("quedan 14,20 USD"), not the raw amount.
+- In an unfolded row, a long translation of "100 % left" ("quedan 100 %")
+  no longer overlaps the bar beside it.
+
 ## [0.20.2-unstable] - 2026-11-08
 
 ### Fixed

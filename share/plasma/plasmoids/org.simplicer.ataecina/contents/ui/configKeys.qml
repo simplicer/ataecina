@@ -73,7 +73,10 @@ KCM.SimpleKCM {
 
     function balanceState(subscription) {
         const remaining = subscription.balance ? subscription.balance.remaining : null;
-        return remaining ? i18n("%1 left", remaining.amount + " " + remaining.currency) : i18n("no balance declared");
+        if (!remaining) {
+            return i18n("no balance declared");
+        }
+        return i18n("%1 left", Number(remaining.amount).toLocaleString(Qt.locale(), "f", 2) + " " + remaining.currency);
     }
 
     function setKey(subscription) {
