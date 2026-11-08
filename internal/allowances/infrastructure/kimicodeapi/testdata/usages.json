@@ -1,0 +1,10 @@
+{
+  "usage": { "limit": "100", "remaining": "64", "resetTime": "2026-11-09T11:16:04.416717Z" },
+  "limits": [
+    {
+      "window": { "duration": 300, "timeUnit": "TIME_UNIT_MINUTE" },
+      "detail": { "limit": "100", "remaining": "88", "resetTime": "2026-11-06T22:10:00.000000Z" }
+    }
+  ],
+  "user": { "membership": { "level": "LEVEL_INTERMEDIATE" } }
+}

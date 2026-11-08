@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.22.0-unstable` — early development: everything below
+**Current version:** `0.23.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -110,6 +110,8 @@ hints the collector writes are in English. Translations are welcome
 | OpenCode Zen | balance left | your declared balance minus the cost `opencode stats` records | none | derived | verified |
 | OpenCode Go, OpenCode Console budgets | rolling, weekly and monthly Go windows; what is left of each budget | official `opencode api experimental.usage.limits` | OpenCode's own sign-in to the Console | reported | to verify |
 | Ollama Cloud | included credit left this period and its renewal (5-hour and weekly windows on legacy plans), purchased credit | ollama.com balance API | API key | reported | verified |
+| Kimi Code (Plus, Pro, Max, Ultra) | 5-hour and weekly windows, plan | Kimi Code usage API (undocumented, used by the official CLI) | Kimi Code Console API key | reported | to verify |
+| Moonshot AI (Kimi) open platform | prepaid balance (USD or CNY) | Moonshot balance API | platform API key | reported | to verify |
 | Cloudflare Workers AI | neurons used today of the free 10 000 | Cloudflare GraphQL Analytics | analytics-only token + account id | reported | to verify |
 | GitHub Copilot | premium requests or AI credits this month | official `gh api` billing report | `gh`'s own login | derived | to verify |
 | Alibaba Model Studio Token Plan | 5-hour, weekly and monthly windows | official `bl usage token-plan` | `bl`'s own login | reported | to verify |

@@ -17,6 +17,9 @@ var bySource = map[string]string{
 	"copilot-gh":       "github-copilot",
 	"orcarouter-api":   "orcarouter",
 	"cloudflare-api":   "cloudflare-workers-ai",
+	"moonshot-api":     "moonshotai",
+	"moonshot-cn-api":  "moonshotai-cn",
+	"kimi-code-api":    "kimi-code-plan-global",
 }
 
 // ProviderFor names the catalogue provider whose models describe a

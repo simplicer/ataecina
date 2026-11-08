@@ -30,6 +30,8 @@ func fakeProviders(t *testing.T) (string, func() map[string]string) {
 		"/v1/dashboard/billing/subscription": "orcarouterapi/testdata/subscription.json",
 		"/v1/dashboard/billing/usage":        "orcarouterapi/testdata/usage.json",
 		"/client/v4/graphql":                 "cloudflareapi/testdata/neurons.json",
+		"/v1/users/me/balance":               "moonshotapi/testdata/balance.json",
+		"/coding/v1/usages":                  "kimicodeapi/testdata/usages.json",
 		"/api.json":                          "../../offerings/infrastructure/modelsdev/testdata/api.json",
 	}
 	bodies := make(map[string]string, len(routes))
@@ -71,7 +73,9 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	  {"id": "commandcode", "source": "commandcode-api", "key": "command"},
 	  {"id": "ollama", "source": "ollama-api"},
 	  {"id": "orca", "source": "orcarouter-api"},
-	  {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"}
+	  {"id": "workers-ai", "source": "cloudflare-api", "account": "0123456789abcdef0123456789abcdef"},
+	  {"id": "moonshot", "source": "moonshot-api"},
+	  {"id": "kimi", "source": "kimi-code-api"}
 	]}`, nil)
 	origin, received := fakeProviders(t)
 	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", origin)
@@ -79,7 +83,7 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "init", "--unlocker", "passphrase"); code != 0 {
 		t.Fatalf("init = %d %s", code, stderr)
 	}
-	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command", "ollama", "orca", "workers-ai"} {
+	for _, name := range []string{"openrouter", "vercel", "zai", "minimax", "command", "ollama", "orca", "workers-ai", "moonshot", "kimi"} {
 		if code, _, stderr := tr.runWithPassphrase(bin, "sk-synthetic-"+name+"\n", phrase, "keys", "set", name); code != 0 {
 			t.Fatalf("keys set %s = %d %s", name, code, stderr)
 		}
@@ -146,6 +150,12 @@ func TestEveryAPISourceWithSealedKeys(t *testing.T) {
 	}
 	if o := subscriptions[byID["zai"]].Offerings; o == nil || o.Catalogue != "zai-coding-plan" || o.Free != o.Models {
 		t.Fatalf("zai offerings = %+v", o)
+	}
+	if b := subscriptions[byID["moonshot"]].Balance; b == nil || b.Remaining.Amount != 12.75 {
+		t.Fatalf("moonshot balance = %+v", b)
+	}
+	if kimi := subscriptions[byID["kimi"]]; *kimi.Plan != "INTERMEDIATE" || len(kimi.Meters) != 2 {
+		t.Fatalf("kimi = %+v", kimi)
 	}
 	if b := subscriptions[byID["vercel"]].Balance; b == nil || b.Remaining.Amount != 95.5 {
 		t.Fatalf("vercel balance = %+v", b)

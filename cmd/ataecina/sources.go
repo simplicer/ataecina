@@ -17,7 +17,9 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/copilotgh"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/heimdallplans"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/kimicodeapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/minimaxapi"
+	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/moonshotapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/ollamaapi"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodeconsole"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/opencodezen"
@@ -142,6 +144,9 @@ func standardSources() sourceRegistry {
 		"vercel-api":      viaAPI(vercelapi.Origin, vercelapi.New),
 		"zai-api":         viaAPI(zaiapi.Origin, zaiapi.New),
 		"minimax-api":     viaAPI(minimaxapi.Origin, minimaxapi.New),
+		"moonshot-api":    viaAPI(moonshotapi.Global.Origin, moonshotapi.New(moonshotapi.Global)),
+		"moonshot-cn-api": viaAPI(moonshotapi.China.Origin, moonshotapi.New(moonshotapi.China)),
+		"kimi-code-api":   viaAPI(kimicodeapi.Origin, kimicodeapi.New),
 		"commandcode-api": viaAPI(commandcodeapi.Origin, commandcodeapi.New),
 		"ollama-api":      viaAPI(ollamaapi.Origin, ollamaapi.New),
 		"orcarouter-api":  viaAPI(orcarouterapi.Origin, orcarouterapi.New),

@@ -8,6 +8,17 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.23.0-unstable] - 2026-11-08
+
+### Added
+
+- `moonshot-api` and `moonshot-cn-api`: the prepaid balance of the
+  Moonshot AI (Kimi) open platform, in USD or CNY, with a platform key.
+- `kimi-code-api`: the five-hour and weekly windows of a Kimi Code
+  membership and its plan, with an API key from the Kimi Code Console
+  (never the `kimi login` token). Both are built from public sources and
+  wait for a live check.
+
 ## [0.22.0-unstable] - 2026-11-08
 
 ### Added

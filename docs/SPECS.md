@@ -73,6 +73,8 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `vercel-api` | Vercel AI Gateway | provider API | `https://ai-gateway.vercel.sh/v1/credits` (§3.5) | API key (`Bearer`) | `balance`, `total_used` (USD decimal strings) | yes | REPORTED | docs 2026-11-06 |
 | `opencode-zen` | OpenCode Zen | official CLI + declaration | `opencode stats --all --models --limit 1000 --json --standalone` (fixed argv, no shell), entries with `model.providerID = "opencode"` | none | per-model `cost` to date, against the declared balance (§3.4) | yes (CLI help) | DERIVED | local 2026-11-06 (opencode 2.2.5 `--help`); JSON shape and `--standalone` to verify |
 | `opencode-console` | OpenCode Go, OpenCode Console budgets | official CLI | `opencode api experimental.usage.limits --standalone` (fixed argv, no shell) (§3.4) | OpenCode's own sign-in to an OpenCode Console workspace | `data` (null when signed out); `data.go.{rolling,weekly,monthly}.{percent,limited,resetsAt}`; `data.budgets[].{limit,spent,resetsAt}` | experimental operation of OpenCode's local server, schema in the opencode 2.2.5 binary | REPORTED | local 2026-11-08 (signed-out answer); Go and budgets to verify |
+| `moonshot-api`, `moonshot-cn-api` | Moonshot AI (Kimi) open platform | provider API | `https://api.moonshot.ai/v1/users/me/balance` (USD) or `https://api.moonshot.cn/…` (CNY) (§3.5) | platform API key (`Bearer`), valid only on its own platform | `code`, `status`, `data.{available_balance, voucher_balance, cash_balance}` | yes | REPORTED | docs 2026-11-08; live to verify |
+| `kimi-code-api` | Kimi Code membership (Kimi Plus, Pro, Max, Ultra) | provider API | `https://api.kimi.com/coding/v1/usages` (§3.5) | an API key created in the Kimi Code Console (`Bearer`); never the OAuth token of `kimi login` | `usage.{limit, remaining, resetTime}` (weekly), `limits[].{window.{duration, timeUnit}, detail.{limit, remaining | used, resetTime}}`, `user.membership.level` | no (called by the official kimi-cli `/usage`) | REPORTED | official CLI source 2026-11-08; live to verify |
 | `ollama-api` | Ollama Cloud | provider API | `https://ollama.com/api/balance` (§3.3) | Ollama API key (`Authorization: Bearer`) | `included.{balance_usd, allowance_usd, period.until}`; legacy plans `included.{session, weekly}.{remaining_percent, resets_at}`; `purchased.balance_usd` | yes (docs.ollama.com/api/balance) | REPORTED | docs and live 2026-11-08 (credit plan) |
 | `copilot-gh` | GitHub Copilot | official CLI | `gh api` (fixed argv, no shell) → `https://api.github.com/users/<login>/settings/billing/premium_request/usage?year=<Y>&month=<M>`, or the AI-credit usage report for a user (same schema, path to verify) (§3.3) | `gh`'s own login, which needs the "Plan" read permission (scope to verify) | `usageItems[]` with `product` Copilot: `grossQuantity`, `discountQuantity`, `netQuantity`, `netAmount`; monthly allowance declared in `config.json` | yes (GitHub REST API `2026-03-10`) | DERIVED | docs 2026-11-06; live to verify |
 | `orcarouter-api` | Orca Router | provider API | `https://api.orcarouter.ai/v1/dashboard/billing/subscription`, `/v1/dashboard/billing/usage` | API key (`sk-orca-…`) | remaining allowance and expiry; cumulative usage (`TotalUsage`; JSON names and units to verify) | yes (OrcaRouter "Billing & usage") | REPORTED | docs 2026-11-06; live to verify |
@@ -382,6 +384,23 @@ wiped.
   and no percentage is skipped. `base_resp.status_code` 1004 or 2049 is
   `KEY_REJECTED`, any other non-zero is `CONTRACT_CHANGED`; no window at all
   is `UNREADABLE`.
+- **`moonshot-api`, `moonshot-cn-api`.** The documented balance of the
+  Moonshot open platform: `available_balance` (= cash + vouchers; at zero or
+  below, inference stops) is the money left, in USD on `api.moonshot.ai`
+  and in CNY on `api.moonshot.cn`; `cash_balance` below zero (money owed)
+  adds a hint. `code` other than 0 or `status` false is `CONTRACT_CHANGED`.
+  It is prepaid: there is no window and no reset.
+- **`kimi-code-api`.** The Kimi Code membership's windows, as the official
+  kimi-cli reads them for `/usage`, with a key from the Kimi Code Console
+  (`Bearer`; the OAuth token `kimi login` stores is never read). Each
+  `limits[]` entry is a window of `duration` × `timeUnit`
+  (`TIME_UNIT_MINUTE`, `_HOUR`, `_DAY`; 300 minutes → `FIVE_HOURS`, 7 days
+  → `WEEKLY`, else `OTHER`); the top-level `usage` is the weekly window
+  (legacy plans; new plans have only the five-hour one) and is skipped when
+  a `limits[]` entry already gave it. Numbers may be strings; used =
+  `used` or `limit − remaining`, as a share of `limit`; `resetTime` is RFC
+  3339. `user.membership.level` minus `LEVEL_` is the plan. The new plans'
+  shared monthly credit pool is not in this answer.
 - **`commandcode-api`.** `/alpha/billing/credits` is required:
   remaining = `monthlyCredits + purchasedCredits + freeCredits` (read as USD,
   to verify), `fiveHour` and `weekly` windows as `used / cap`, reset at
@@ -1021,7 +1040,9 @@ The bounded context `offerings` keeps that, apart from the quotas.
   `opencode-zen` → `opencode`, `opencode-console` → `opencode-go`,
   `ollama-api` → `ollama-cloud`, `copilot-gh` → `github-copilot`,
   `orcarouter-api` → `orcarouter`, `cloudflare-api` →
-  `cloudflare-workers-ai`; a `heimdall` subscription uses the provider it
+  `cloudflare-workers-ai`, `moonshot-api` → `moonshotai`, `moonshot-cn-api`
+  → `moonshotai-cn`, `kimi-code-api` → `kimi-code-plan-global`; a
+  `heimdall` subscription uses the provider it
   follows (`google`, `nvidia`, `groq`, `kilo`…). Claude and Codex have
   none. The owner may name another with `"catalogue": "<provider id>"` in
   the subscription (an Alibaba Coding Plan: `alibaba-coding-plan`).
