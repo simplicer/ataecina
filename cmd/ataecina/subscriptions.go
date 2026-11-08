@@ -10,6 +10,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/catalog"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
+	keysapp "codeberg.org/simplicer/ataecina/internal/keys/application"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
 
@@ -207,6 +208,10 @@ func addSubscription(args []string, paths xdg.Paths, env environment) int {
 	err := configfile.AddSubscription(paths.ConfigFile(), env.sources.catalog, configfile.NewSubscription{
 		ID: id, Source: *source, Plan: *plan, Key: *key, Options: options,
 	})
+	if errors.Is(err, configfile.ErrSubscriptionExists) {
+		fmt.Fprintf(env.stderr, "ataecina: subscriptions add: %s already exists; remove it first with `ataecina subscriptions remove %s`, or choose another id\n", id, id)
+		return exitFailure
+	}
 	if err != nil {
 		fmt.Fprintf(env.stderr, "ataecina: subscriptions add: %v\n", err)
 		return exitFailure
@@ -217,9 +222,24 @@ func addSubscription(args []string, paths xdg.Paths, env environment) int {
 		if name == "" {
 			name = id
 		}
-		fmt.Fprintf(env.stdout, "set its key with: ataecina keys set %s\n", name)
+		if sealedKeys(paths)[name] {
+			fmt.Fprintf(env.stdout, "its key %s is already sealed\n", name)
+		} else {
+			fmt.Fprintf(env.stdout, "set its key with: ataecina keys set %s\n", name)
+		}
 	}
 	return exitOK
+}
+
+// sealedKeys names the keys in keys.json, without unsealing any; none
+// when the file cannot be read.
+func sealedKeys(paths xdg.Paths) map[string]bool {
+	keys, _ := keysapp.NewListKeys(keysFiles(paths)).List()
+	sealed := make(map[string]bool, len(keys))
+	for _, key := range keys {
+		sealed[key.Name().String()] = true
+	}
+	return sealed
 }
 
 func removeSubscription(args []string, paths xdg.Paths, env environment) int {

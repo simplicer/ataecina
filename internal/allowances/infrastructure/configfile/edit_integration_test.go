@@ -70,7 +70,6 @@ func TestASecondSubscriptionOfTheSameSourceIsAdded(t *testing.T) {
 func TestAnInvalidChangeLeavesTheFileAlone(t *testing.T) {
 	path := configIn(t)
 	for name, item := range map[string]configfile.NewSubscription{
-		"duplicate id":    {ID: "zen", Source: "opencode-zen"},
 		"unknown source":  {ID: "web", Source: "chatgpt-web"},
 		"missing option":  {ID: "xai", Source: "xai-api"},
 		"foreign option":  {ID: "z", Source: "zai-api", Options: map[string]string{"team": "t"}},
@@ -82,6 +81,9 @@ func TestAnInvalidChangeLeavesTheFileAlone(t *testing.T) {
 		if err := configfile.AddSubscription(path, catalog.Standard(), item); !errors.Is(err, configfile.ErrInvalid) {
 			t.Fatalf("%s: AddSubscription = %v", name, err)
 		}
+	}
+	if err := configfile.AddSubscription(path, catalog.Standard(), configfile.NewSubscription{ID: "zen", Source: "opencode-zen"}); !errors.Is(err, configfile.ErrSubscriptionExists) {
+		t.Fatalf("duplicate id: AddSubscription = %v", err)
 	}
 	if data, _ := os.ReadFile(path); string(data) != original {
 		t.Fatalf("the file changed:\n%s", data)

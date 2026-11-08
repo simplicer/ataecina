@@ -1033,7 +1033,9 @@ layout (one subscription per line), validates the whole result exactly as
 - `ataecina subscriptions add <id> --source <source> [--plan <plan>]
   [--key <name>] [--set <option>=<value>]…` appends one (numbers and
   switches are written as such); it prints the `keys set` command when the
-  source needs a key.
+  source needs a key that is not sealed yet, or that the key is already
+  sealed. An id that already exists is refused with the `subscriptions
+  remove` command to run first.
 - `ataecina subscriptions remove <id>` drops one; its sealed key stays until
   `ataecina keys forget`.
 - `ataecina sources [--json]` lists every source: `{ "data": [ { "id",

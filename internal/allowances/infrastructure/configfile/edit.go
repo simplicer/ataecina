@@ -35,6 +35,9 @@ var (
 // ErrNoSuchSubscription is a subscription id config.json does not have.
 var ErrNoSuchSubscription = errors.New("no subscription with that id")
 
+// ErrSubscriptionExists is a subscription id config.json already has.
+var ErrSubscriptionExists = errors.New("a subscription with that id already exists")
+
 // AddSubscription appends a subscription to config.json. The file is
 // replaced only when the whole result passes the same validation as Load.
 func AddSubscription(path string, sources catalog.Catalog, item NewSubscription) error {
@@ -43,6 +46,9 @@ func AddSubscription(path string, sources catalog.Catalog, item NewSubscription)
 		return fmt.Errorf("%w: %w", ErrInvalid, err)
 	}
 	return edit(path, sources, func(subscriptions []json.RawMessage) ([]json.RawMessage, error) {
+		if slices.ContainsFunc(subscriptions, func(raw json.RawMessage) bool { return idOf(raw) == item.ID }) {
+			return nil, fmt.Errorf("%w: %q", ErrSubscriptionExists, item.ID)
+		}
 		return append(subscriptions, entry), nil
 	})
 }
@@ -53,13 +59,9 @@ func RemoveSubscription(path string, sources catalog.Catalog, id string) error {
 	return edit(path, sources, func(subscriptions []json.RawMessage) ([]json.RawMessage, error) {
 		kept := make([]json.RawMessage, 0, len(subscriptions))
 		for _, raw := range subscriptions {
-			var named struct {
-				ID string `json:"id"`
+			if idOf(raw) != id {
+				kept = append(kept, raw)
 			}
-			if err := json.Unmarshal(raw, &named); err == nil && named.ID == id {
-				continue
-			}
-			kept = append(kept, raw)
 		}
 		if len(kept) == len(subscriptions) {
 			return nil, fmt.Errorf("%w: %q", ErrNoSuchSubscription, id)
@@ -121,6 +123,15 @@ func subscriptionObject(item NewSubscription) (json.RawMessage, error) {
 
 // edit changes the subscriptions of config.json and writes the file back,
 // atomically and 0600, one subscription per line, only if it validates.
+// idOf is a subscription object's id, empty when it has none.
+func idOf(raw json.RawMessage) string {
+	var named struct {
+		ID string `json:"id"`
+	}
+	_ = json.Unmarshal(raw, &named)
+	return named.ID
+}
+
 func edit(path string, sources catalog.Catalog, change func([]json.RawMessage) ([]json.RawMessage, error)) error {
 	if err := privatefs.RequireDir(filepath.Dir(path)); err != nil {
 		return err

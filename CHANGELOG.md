@@ -8,6 +8,18 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.34.1-unstable] - 2026-11-08
+
+### Fixed
+
+- `ataecina subscriptions add` with an id that already exists said
+  "invalid configuration: subscription … appears twice"; it now says the
+  subscription already exists and how to remove it. It no longer asks
+  to set a key that is already sealed.
+- The Workers AI hint for a token without analytics access says where to
+  add the permission (Account · Account Analytics · Read) and that the
+  token's value does not change.
+
 ## [0.34.0-unstable] - 2026-11-08
 
 ### Added

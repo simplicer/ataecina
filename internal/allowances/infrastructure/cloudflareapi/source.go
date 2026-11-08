@@ -100,7 +100,7 @@ func (s Source) classify(err error) error {
 		(errors.As(err, &queryError) && strings.Contains(strings.ToLower(queryError.Message), "not authorized"))
 	if refused {
 		return domain.Failure(domain.ErrorKeyRejected,
-			s.endpoint.Host()+" refused the analytics query: the token needs Account Analytics: Read on this account", nil)
+			s.endpoint.Host()+" refused the analytics query: add Account · Account Analytics · Read for this account to the token in the Cloudflare dashboard (its value does not change)", nil)
 	}
 	return providerhttp.Unexpected(s.endpoint.Host(), err)
 }

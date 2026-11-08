@@ -16,7 +16,8 @@ func TestSubscriptionsAreAddedListedAndRemoved(t *testing.T) {
 	if code, _, stderr := w.run("subscriptions", "add", "xai", "--source", "xai-api", "--set", "team=team-1", "--key", "grok"); code != exitOK {
 		t.Fatalf("add with an option = %d %q", code, stderr)
 	}
-	if code, _, stderr := w.run("subscriptions", "add", "minimax", "--source", "minimax-api"); code != exitFailure || !strings.Contains(stderr, "appears twice") {
+	if code, _, stderr := w.run("subscriptions", "add", "minimax", "--source", "minimax-api"); code != exitFailure ||
+		!strings.Contains(stderr, "minimax already exists; remove it first with `ataecina subscriptions remove minimax`") {
 		t.Fatalf("a duplicate = %d %q", code, stderr)
 	}
 	if code, _, _ := w.run("subscriptions", "add", "--source", "minimax-api"); code != exitUsage {
@@ -68,5 +69,19 @@ func TestSourcesSayWhatEachNeeds(t *testing.T) {
 	}
 	if strings.Join(found["heimdall"], ",") != "provider" || strings.Join(found["copilot-gh"], ",") != "login,monthly_allowance" {
 		t.Fatalf("required = %v", found)
+	}
+}
+
+func TestAnAlreadySealedKeyIsNotAskedForAgain(t *testing.T) {
+	w := newWorld(t, `{"version": 1, "subscriptions": []}`)
+	const phrase = "a synthetic passphrase"
+	if code, _, stderr := w.runWithStdin("", "init", "--unlocker", "passphrase", "--passphrase-fd", passphraseFD(t, phrase)); code != exitOK {
+		t.Fatalf("init = %d %q", code, stderr)
+	}
+	if code, _, stderr := w.runWithStdin("sk-synthetic-groq\n", "keys", "set", "groq", "--passphrase-fd", passphraseFD(t, phrase)); code != exitOK {
+		t.Fatalf("keys set = %d %q", code, stderr)
+	}
+	if code, out, stderr := w.run("subscriptions", "add", "groq", "--source", "groq-api"); code != exitOK || out != "added groq\nits key groq is already sealed\n" {
+		t.Fatalf("add = %d %q %q", code, out, stderr)
 	}
 }
