@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Builds the .deb, .rpm and Arch packages of each architecture into dist/
-# with nfpm (ADR 0008). Called by `make package`, which has already built
+# with nfpm (ADR 0008), and the release archive ataecina-VERSION-linux-ARCH.tar.gz
+# (the built command and widget plus ./install, for any distribution
+# and no root). Called by `make package`, which has already built
 # var/build/package/<arch>/ataecina and the widget, and exports NFPM (the
 # pinned nfpm command) and SOURCE_DATE_EPOCH (the last commit's time, so
 # that the same commit always gives the same packages).
 #
 # Usage: bin/build-packages ARCH...      (Go architecture names: amd64 arm64)
-# PACKAGE_FORMATS chooses the formats (default "deb rpm archlinux").
+# PACKAGE_FORMATS chooses the formats (default "deb rpm archlinux tar").
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,6 +20,32 @@ export SOURCE_DATE_EPOCH
 repository=$PWD
 mkdir -p dist
 rm -f dist/ataecina[-_]* dist/SHA256SUMS
+
+# archive ARCH writes dist/ataecina-VERSION-linux-ARCH.tar.gz: the command,
+# the built widget and what bin/install-files reads, with ./install on
+# top; owners, order and times pinned so the same commit gives the same
+# bytes.
+archive() {
+	local arch=$1 name stage
+	name=ataecina-$(tr -d '[:space:]' <VERSION)-linux-$arch
+	stage=var/build/package/$arch/archive/$name
+	rm -rf "var/build/package/$arch/archive"
+	mkdir -p "$stage/bin" "$stage/infra/systemd" "$stage/share/icons/hicolor/scalable/apps" \
+		"$stage/share/applications" "$stage/etc" "$stage/widget"
+	install -m 0755 "var/build/package/$arch/ataecina" "$stage/ataecina"
+	install -m 0755 infra/packaging/tarball/install "$stage/install"
+	install -m 0755 bin/install-files "$stage/bin/install-files"
+	install -m 0644 infra/systemd/ataecina-collect.service.in infra/systemd/ataecina-collect.timer "$stage/infra/systemd/"
+	install -m 0644 share/icons/hicolor/scalable/apps/ataecina.svg "$stage/share/icons/hicolor/scalable/apps/"
+	install -m 0644 share/applications/org.simplicer.ataecina.desktop "$stage/share/applications/"
+	install -m 0644 etc/ataecina.example.json "$stage/etc/"
+	install -m 0644 README.md CHANGELOG.md LICENSE "$stage/"
+	cp -r var/build/plasmoid/org.simplicer.ataecina "$stage/widget/"
+	find "$stage/widget" -type d -exec chmod 0755 {} +
+	find "$stage/widget" -type f -exec chmod 0644 {} +
+	tar --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$SOURCE_DATE_EPOCH" \
+		-C "var/build/package/$arch/archive" -cf - "$name" | gzip -9n >"dist/$name.tar.gz"
+}
 for arch in "$@"; do
 	work=var/build/package/$arch
 	if [ -d "$work/root" ]; then
@@ -26,7 +54,11 @@ for arch in "$@"; do
 	bin/install-files --prefix /usr --destdir "$work/root" --binary "$work/ataecina" >/dev/null
 	# nfpm keeps the files' own mtimes inside a tree; pin them to the commit.
 	find "$work/root" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
-	for packager in ${PACKAGE_FORMATS:-deb rpm archlinux}; do
+	for packager in ${PACKAGE_FORMATS:-deb rpm archlinux tar}; do
+		if [ "$packager" = tar ]; then
+			archive "$arch"
+			continue
+		fi
 		version=$(bin/package-version "${packager%linux}")
 		(cd "$work/root" && ATAECINA_ARCH=$arch ATAECINA_VERSION=$version \
 			$NFPM package --config "$repository/infra/packaging/nfpm.yaml" --packager "$packager" \

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Installs Ataecina from this archive for the current user, without root
+# and without building anything: the command into ~/.local/bin, the
+# collector's systemd user units into ~/.local/share/systemd/user, the
+# Plasma widget, the icon and the tray launcher into ~/.local/share
+# (PREFIX=/other/prefix to choose another place). Units are installed,
+# never enabled.
+#
+# Usage: ./install              install or update
+#        ./install --uninstall  remove (configuration and sealed keys stay)
+set -euo pipefail
+cd "$(dirname "$0")"
+prefix=${PREFIX:-$HOME/.local}
+bin/install-files "$@" --prefix "$prefix" --systemd-user-dir "$prefix/share/systemd/user" \
+	--binary ./ataecina --widget widget/org.simplicer.ataecina
+if [ "${1:-}" != --uninstall ]; then
+	cat <<EOF
+next:
+  systemctl --user daemon-reload
+  on Plasma, to see the widget: systemctl --user restart plasma-plasmashell
+  then follow "First set-up, step by step" in README.md ($prefix/share/doc/ataecina/README.md)
+EOF
+fi

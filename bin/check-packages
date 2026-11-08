@@ -8,7 +8,10 @@
 # with tar; RPMs with rpm when it is installed, otherwise only checked
 # against SHA256SUMS.
 #
-# Usage: bin/check-packages ARCH...   (PACKAGE_FORMATS: default "deb rpm archlinux")
+# The release archive is listed and, for this machine's architecture,
+# installed into a throw-away HOME with its ./install, run and removed.
+#
+# Usage: bin/check-packages ARCH...   (PACKAGE_FORMATS: default "deb rpm archlinux tar")
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,7 +20,7 @@ fail() {
 	exit 1
 }
 [ $# -gt 0 ] || fail "usage: bin/check-packages ARCH..."
-formats=" ${PACKAGE_FORMATS:-deb rpm archlinux} "
+formats=" ${PACKAGE_FORMATS:-deb rpm archlinux tar} "
 
 version=$(tr -d '[:space:]' <VERSION)
 debian=$(bin/package-version deb)
@@ -47,6 +50,24 @@ try_install() {
 	fi
 	echo "check-packages: $deb installs, runs and purges"
 }
+
+# unpacks the archive, installs it into a throw-away HOME, runs the
+# command, checks the unit and the widget, removes it.
+try_archive() {
+	local archive=$1 name=$2 home=$work/home
+	mkdir -p "$work/unpacked" "$home"
+	tar -xzf "$archive" -C "$work/unpacked"
+	HOME=$home PREFIX= "$work/unpacked/$name/install" >/dev/null || fail "$archive: ./install fails"
+	"$home/.local/bin/ataecina" version | grep -qx "ataecina $version" || fail "$archive: the installed binary is not $version"
+	grep -qx "ExecStart=$home/.local/bin/ataecina collect" "$home/.local/share/systemd/user/ataecina-collect.service" ||
+		fail "$archive: the unit does not run the installed binary"
+	[ -f "$home/.local/share/plasma/plasmoids/org.simplicer.ataecina/metadata.json" ] || fail "$archive: the widget is not installed"
+	HOME=$home PREFIX= "$work/unpacked/$name/install" --uninstall >/dev/null || fail "$archive: ./install --uninstall fails"
+	[ ! -e "$home/.local/bin/ataecina" ] || fail "$archive: --uninstall leaves the binary"
+	echo "check-packages: $archive installs for a user, runs and uninstalls"
+}
+
+host_arch=$(go env GOHOSTARCH 2>/dev/null || true)
 
 for arch in "$@"; do
 	case $arch in
@@ -90,6 +111,20 @@ for arch in "$@"; do
 			grep -Fxf "$work/staged" "$work/rpm" | diff -u "$work/staged" - || fail "$rpm does not hold the staged files"
 		else
 			echo "check-packages: rpm not installed; $rpm only checked against SHA256SUMS"
+		fi
+	fi
+
+	if [[ $formats == *" tar "* ]]; then
+		name=ataecina-${version}-linux-${arch}
+		archive=dist/$name.tar.gz
+		[ -f "$archive" ] || fail "$archive is missing"
+		tar -tzf "$archive" >"$work/archive"
+		for member in install ataecina bin/install-files infra/systemd/ataecina-collect.service.in \
+			widget/org.simplicer.ataecina/metadata.json README.md LICENSE; do
+			grep -qx "$name/$member" "$work/archive" || fail "$archive lacks $member"
+		done
+		if [ "$host_arch" = "$arch" ]; then
+			try_archive "$archive" "$name"
 		fi
 	fi
 done

@@ -8,6 +8,22 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.35.0-unstable] - 2026-11-08
+
+### Added
+
+- Downloads: every version can be published with its `.deb`, `.rpm` and
+  Arch packages for amd64 and arm64, a release archive
+  (`ataecina-<version>-linux-<arch>.tar.gz`) whose `./install` puts
+  everything into `~/.local` without root, and `SHA256SUMS`, on Codeberg
+  and GitHub (`bin/publish-release`). The README starts with the
+  download for each system.
+
+### Changed
+
+- `make install-deb` asks for the password through the desktop's dialog
+  (`pkexec`) when it runs without a terminal.
+
 ## [0.34.2-unstable] - 2026-11-08
 
 ### Fixed

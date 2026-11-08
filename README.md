@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.34.2-unstable` — early development: everything below
+**Current version:** `0.35.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -220,9 +220,30 @@ The rules are in [SECURITY.md](SECURITY.md) and the decisions behind them in
 
 ## Install
 
-No binary packages are published yet: you build the one for your
-distribution from the source, which takes a minute. Packages are
-reproducible — the same commit always gives byte-identical files.
+**Download the package for your system** from the releases page — on
+[Codeberg](https://codeberg.org/simplicer/ataecina/releases) or its
+[GitHub mirror](https://github.com/simplicer/ataecina/releases) — and install
+it. Nothing has to be built. Versions 0.x are published as pre-releases:
+they work, and may still change.
+
+| System | File (`amd64`; `arm64`/`aarch64` for ARM) | Install |
+|---|---|---|
+| Debian, Ubuntu, KDE neon, Kubuntu | `ataecina_<version>_amd64.deb` | `sudo apt install ./ataecina_*.deb`, or open it with Discover |
+| Fedora, openSUSE | `ataecina-<version>.x86_64.rpm` | `sudo dnf install ./ataecina-*.rpm` (`sudo zypper install` on openSUSE) |
+| Arch, Manjaro, EndeavourOS | `ataecina-<version>-x86_64.pkg.tar.zst` | `sudo pacman -U ataecina-*.pkg.tar.zst` |
+| Any other Linux, or without root | `ataecina-<version>-linux-amd64.tar.gz` | `tar xf ataecina-*.tar.gz`, then `ataecina-*/install` (into `~/.local`; `--uninstall` removes it) |
+
+`SHA256SUMS` beside them checks a download:
+`sha256sum --check --ignore-missing SHA256SUMS`. Then reload the shell on
+Plasma (step 3 below) and follow [First set-up, step by
+step](#first-set-up-step-by-step).
+
+### Build it yourself
+
+You can also build the package for your distribution from the source,
+which takes a minute. Packages are reproducible — the same commit always
+gives byte-identical files, so you can check that a download is the code
+you read.
 
 **1. Get the tools and the source.** Go (1.21 or newer: it fetches the
 exact toolchain the project pins by itself), `make`, `git` and gettext (for
@@ -241,7 +262,7 @@ cd ataecina
 
 | Distribution | Build | Install |
 |---|---|---|
-| Debian, Ubuntu, KDE neon, Kubuntu | `make deb` | `make install-deb` (runs `sudo apt install` on the package it built) |
+| Debian, Ubuntu, KDE neon, Kubuntu | `make deb` | `make install-deb` (runs `sudo apt install` on the package it built; without a terminal it asks through the desktop's password dialog) |
 | Fedora, openSUSE | `make package` | `sudo dnf install ./dist/ataecina-*.x86_64.rpm` |
 | Arch, Manjaro, EndeavourOS | `make package`, or the `PKGBUILD` in `infra/packaging/arch/` | `sudo pacman -U dist/ataecina-*.pkg.tar.zst` |
 | Anything else, or no root | `make install-user` | installs into `~/.local`, then `systemctl --user daemon-reload`; `make uninstall-user` removes it |

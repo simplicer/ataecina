@@ -12,7 +12,7 @@ GOVULNCHECK := golang.org/x/vuln/cmd/govulncheck@v1.9.0
 NFPM := $(GO) run github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.48.0
 
 PACKAGE_ARCHES := amd64 arm64
-PACKAGE_FORMATS := deb rpm archlinux
+PACKAGE_FORMATS := deb rpm archlinux tar
 # This machine's architecture, for `make deb`.
 HOST_ARCH := $(shell $(GO) env GOARCH)
 DEB_FILE = dist/ataecina_$(shell bin/package-version deb)-1_$(HOST_ARCH).deb
@@ -129,7 +129,8 @@ fuzz:
 		$(GO) test -run '^$$' -fuzz "^$$name$$" -fuzztime $(FUZZ_TIME) $$package; \
 	done
 
-# .deb, .rpm and Arch packages of each architecture in dist/ (ADR 0008).
+# .deb, .rpm and Arch packages and the release archive of each
+# architecture in dist/ (ADR 0008).
 package: widget
 	@set -e; for arch in $(PACKAGE_ARCHES); do \
 		echo "go build GOARCH=$$arch"; \
@@ -145,8 +146,11 @@ deb:
 	@echo "deb: $(DEB_FILE)"
 
 # Installs (or reinstalls) that .deb system-wide with apt; asks for sudo.
+# Without a terminal (from an IDE or an assistant) it asks through the
+# desktop's authentication dialog (pkexec) instead of sudo.
 install-deb: deb
-	sudo apt install --reinstall ./$(DEB_FILE)
+	@if [ -t 0 ]; then sudo apt install --reinstall ./$(DEB_FILE); \
+	else pkexec apt install --reinstall $(CURDIR)/$(DEB_FILE); fi
 	@echo "next, as yourself: ataecina init, then see README \"First set-up, step by step\" (subscriptions, keys, timer, widget or tray)"
 
 uninstall-deb:

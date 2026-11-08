@@ -5,6 +5,7 @@
 #
 # Usage: bin/install-files [--uninstall] --prefix PREFIX [--destdir DIR]
 #                          [--systemd-user-dir DIR] [--binary FILE]
+#                          [--widget DIR]
 #
 #   PREFIX/bin/ataecina
 #   SYSTEMD_USER_DIR/ataecina-collect.{service,timer}   (default PREFIX/lib/systemd/user)
@@ -14,7 +15,8 @@
 #   PREFIX/share/doc/ataecina/{README.md,CHANGELOG.md,ataecina.example.json,LICENSE}
 #
 # It expects `make build widget` to have run (var/build/ataecina and
-# var/build/plasmoid). Nothing outside DESTDIR+PREFIX and the units
+# var/build/plasmoid), or --binary and --widget naming the built files
+# (the release archive's ./install). Nothing outside DESTDIR+PREFIX and the units
 # directory is touched; units are installed, never enabled.
 set -euo pipefail
 umask 022
@@ -25,6 +27,7 @@ prefix=
 destdir=
 units=
 binary=var/build/ataecina
+widget=
 while [ $# -gt 0 ]; do
 	case $1 in
 	--uninstall) uninstall=true ;;
@@ -32,6 +35,7 @@ while [ $# -gt 0 ]; do
 	--destdir) destdir=${2:?--destdir needs a directory}; shift ;;
 	--systemd-user-dir) units=${2:?--systemd-user-dir needs a directory}; shift ;;
 	--binary) binary=${2:?--binary needs a file}; shift ;;
+	--widget) widget=${2:?--widget needs a directory}; shift ;;
 	*) echo "install-files: unknown argument $1" >&2; exit 2 ;;
 	esac
 	shift
@@ -43,7 +47,7 @@ esac
 units=${units:-$prefix/lib/systemd/user}
 
 plasmoid=org.simplicer.ataecina
-widget=var/build/plasmoid/$plasmoid
+widget=${widget:-var/build/plasmoid/$plasmoid}
 bindir=$prefix/bin
 plasmoids=$prefix/share/plasma/plasmoids
 icons=$prefix/share/icons/hicolor/scalable/apps

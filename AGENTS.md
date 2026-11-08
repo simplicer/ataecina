@@ -302,7 +302,9 @@ further. `govulncheck` runs in `make check`.
 - `bin/check-version` (run by `make check`) fails on drift.
 - Trunk-based: all work on `main`, linear history (rebase/squash), releases
   frozen on `release/X.Y.Z` branches. `-unstable` is never published as a
-  stable package.
+  stable package; when the maintainer asks, `bin/publish-release`
+  publishes it as a marked pre-release on Codeberg and GitHub, so that
+  anyone can download it (ADR 0021).
 
 ## Commits and authorship
 
@@ -343,7 +345,9 @@ further. `govulncheck` runs in `make check`.
   coverage of the application packages, integration, acceptance,
   bench-smoke, widget-lint — `qmllint` when installed, `msgfmt --check` —,
   govulncheck, build, widget, check-version), `make e2e`, `make fuzz`,
-  `make package` (deb, rpm, Arch, verified by `bin/check-packages`),
+  `make package` (deb, rpm, Arch and the release archive with `./install`,
+  verified by `bin/check-packages`), `bin/publish-release` (tag and
+  publish the downloads),
   `make deb` / `make install-deb` (the host's `.deb`, test-installed in a
   fake root, then installed with apt), `make` alone (build and widget),
   `make install-user` (binary, units, widget into `~/.local`). The installed

@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# Publishes the version in VERSION so that anyone can download it: builds
+# every package (make package: .deb, .rpm, Arch and the release archive for
+# amd64 and arm64, with SHA256SUMS), tags the commit vVERSION (annotated),
+# pushes the tag, and creates the release with every file of dist/ on
+# Codeberg and on the GitHub mirror. A version with a suffix (-unstable,
+# -rc.N) is published as a pre-release, never as a stable one.
+#
+# Needs a clean `main` that origin already has, the Codeberg token in
+# CODEBERG_TOKEN_FILE (default ~/.config/codeberg/token; it is read into a
+# 0600 header file for curl, never printed nor put on a command line) and
+# `gh` logged in to GitHub. The release notes are the version's CHANGELOG
+# section.
+#
+# Usage: bin/publish-release [--dry-run]
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+fail() {
+	echo "publish-release: $*" >&2
+	exit 1
+}
+dry_run=false
+case ${1:-} in
+--dry-run) dry_run=true ;;
+"") ;;
+*) fail "usage: bin/publish-release [--dry-run]" ;;
+esac
+
+version=$(tr -d '[:space:]' <VERSION)
+tag=v$version
+repository=simplicer/ataecina
+codeberg=https://codeberg.org/api/v1/repos/$repository
+prerelease=false
+[[ $version == *-* ]] && prerelease=true
+
+[ "$(git branch --show-current)" = main ] || fail "publish from main"
+git diff --quiet && git diff --cached --quiet || fail "the working tree is not clean"
+git fetch --quiet origin main
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || fail "origin does not have this commit yet: git push origin main"
+bin/check-version >/dev/null || fail "VERSION does not match the history"
+! git rev-parse --quiet --verify "refs/tags/$tag" >/dev/null || fail "$tag already exists"
+[ -z "$(git ls-remote --tags origin "refs/tags/$tag")" ] || fail "$tag already exists on origin"
+for tool in curl jq gh; do
+	command -v "$tool" >/dev/null || fail "$tool is needed"
+done
+token_file=${CODEBERG_TOKEN_FILE:-$HOME/.config/codeberg/token}
+[ -r "$token_file" ] || fail "no Codeberg token in $token_file (set CODEBERG_TOKEN_FILE)"
+gh auth status >/dev/null 2>&1 || fail "gh is not logged in"
+
+notes=$(mktemp)
+headers=$(mktemp)
+trap 'rm -f "$notes" "$headers"' EXIT
+{
+	echo "Download the file for your system and install it:"
+	echo
+	echo "| System | File | Install |"
+	echo "|---|---|---|"
+	echo "| Debian, Ubuntu, KDE neon, Kubuntu | \`ataecina_*_amd64.deb\` (\`arm64\` for ARM) | \`sudo apt install ./ataecina_*.deb\` |"
+	echo "| Fedora, openSUSE | \`ataecina-*.x86_64.rpm\` (\`aarch64\` for ARM) | \`sudo dnf install ./ataecina-*.rpm\` |"
+	echo "| Arch, Manjaro, EndeavourOS | \`ataecina-*-x86_64.pkg.tar.zst\` | \`sudo pacman -U ataecina-*.pkg.tar.zst\` |"
+	echo "| Any other, or without root | \`ataecina-*-linux-amd64.tar.gz\` | \`tar xf ataecina-*.tar.gz && ataecina-*/install\` |"
+	echo
+	echo "Check a download with \`sha256sum --check --ignore-missing SHA256SUMS\`. Then follow \"First set-up, step by step\" in the README."
+	if $prerelease; then
+		echo
+		echo "Versions 0.x are pre-releases: they work, and may still change."
+	fi
+	echo
+	awk -v heading="## [$version]" 'index($0, heading) == 1 { found = 1; next } found && /^## \[/ { exit } found' CHANGELOG.md
+} >"$notes"
+grep -q . "$notes" || fail "no CHANGELOG section for $version"
+
+echo "publish-release: building the packages of $version"
+make package >/dev/null
+(cd dist && sha256sum --quiet --check SHA256SUMS) || fail "dist/SHA256SUMS does not match"
+mapfile -t files < <(cd dist && ls ataecina[-_]* SHA256SUMS)
+echo "publish-release: ${#files[@]} files: ${files[*]}"
+if $dry_run; then
+	echo "publish-release: dry run; would tag $tag (pre-release: $prerelease) and publish on Codeberg and GitHub"
+	cat "$notes"
+	exit 0
+fi
+
+git tag --annotate "$tag" --message "Ataecina $version"
+git push --quiet origin "refs/tags/$tag"
+
+# The token goes to curl through a header file, never through argv.
+(umask 077 && printf 'Authorization: token %s\n' "$(tr -d '[:space:]' <"$token_file")" >"$headers")
+release=$(jq -n --arg tag "$tag" --arg name "Ataecina $version" --rawfile body "$notes" --argjson pre "$prerelease" \
+	'{tag_name: $tag, name: $name, body: $body, prerelease: $pre, draft: false}' |
+	curl --silent --show-error --fail-with-body -H @"$headers" -H 'Content-Type: application/json' \
+		--data-binary @- "$codeberg/releases" | jq -r '.id')
+[[ $release =~ ^[0-9]+$ ]] || fail "Codeberg did not create the release"
+for file in "${files[@]}"; do
+	curl --silent --show-error --fail-with-body -H @"$headers" -F "attachment=@dist/$file" \
+		"$codeberg/releases/$release/assets?name=$file" >/dev/null
+done
+echo "publish-release: https://codeberg.org/$repository/releases/tag/$tag"
+
+github_flags=(--repo "$repository" --title "Ataecina $version" --notes-file "$notes" --verify-tag)
+$prerelease && github_flags+=(--prerelease)
+(cd dist && gh release create "$tag" "${files[@]}" "${github_flags[@]}" >/dev/null)
+echo "publish-release: https://github.com/$repository/releases/tag/$tag"

@@ -1159,7 +1159,12 @@ Nothing is enabled or started by an installation.
 Packages: `ataecina_X.Y.Z~unstable-1_<arch>.deb`,
 `ataecina-X.Y.Z~unstable-1.<arch>.rpm` and
 `ataecina-X.Y.Zunstable-1-<arch>.pkg.tar.zst` for `amd64`/`x86_64` and
-`arm64`/`aarch64`; they depend only on `systemd`. A pre-release suffix sorts
+`arm64`/`aarch64`; they depend only on `systemd`. Beside them, the release
+archive `ataecina-X.Y.Z-unstable-linux-<arch>.tar.gz` holds the command,
+the built widget, the unit template, `bin/install-files` and `./install`,
+which installs everything for the user into `~/.local` (units in
+`~/.local/share/systemd/user`) without root, and removes it with
+`--uninstall`. A pre-release suffix sorts
 before its release in every format (`~unstable`, `~rc.N` for Debian and
 RPM; `unstable`, `rcN` for pacman); an LTS release ships as plain `X.Y.Z`.
 The same commit always gives byte-identical packages (file times are the
@@ -1168,7 +1173,19 @@ maintainer signs it for a release. `make deb` builds only the host's `.deb`;
 `bin/check-packages` installs every `.deb` of the host's architecture into a
 throw-away root with `fakeroot dpkg`, runs the installed binary, purges it,
 and asks `apt-get --simulate` whether its dependencies resolve on the
-machine; `make install-deb` then installs it with `apt`.
+machine; `make install-deb` then installs it with `apt` (through `pkexec`
+when there is no terminal). It also unpacks the release archive of the
+host's architecture, installs it into a throw-away `HOME`, runs it and
+removes it.
+
+`bin/publish-release` publishes the version in `VERSION` when the
+maintainer asks (ADR 0021): from a clean `main` that origin has, it builds
+every package, tags the commit `vX.Y.Z[-suffix]` (annotated), pushes the
+tag, and creates the release with every file of `dist/` and the
+version's CHANGELOG section on Codeberg (through its API, with the
+maintainer's token from `CODEBERG_TOKEN_FILE`, never on a command line)
+and on the GitHub mirror (`gh`). A version with a suffix is a
+pre-release.
 
 ## 10. Constraints
 
