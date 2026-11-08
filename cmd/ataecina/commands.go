@@ -67,6 +67,9 @@ Commands:
   subscriptions [--json] | add <id> --source <source> [--plan <p>] [--key <name>] [--set <option>=<value>]… | remove <id>
                     list, add or remove the subscriptions of config.json (validated)
   sources [--json]  list the sources Ataecina reads and the options each needs
+  update            refresh now the model catalogue and, with the artificial-analysis key, the intelligence index
+  models [--json] [--all] [<subscription>]
+                    list each subscription's models, best first, and which can be used with what is left
   doctor            check permissions, configuration, keys, the keyring and sources
   tray              show the snapshot in the system tray (StatusNotifierItem) until Quit
   version           print the version
@@ -109,6 +112,10 @@ func run(ctx context.Context, args []string, env environment) int {
 		return doctor(rest, env)
 	case "sources":
 		return sourcesCommand(rest, env)
+	case "update":
+		return update(ctx, rest, env)
+	case "models":
+		return models(rest, env)
 	case "subscriptions":
 		return subscriptionsCommand(rest, env)
 	case "tray":

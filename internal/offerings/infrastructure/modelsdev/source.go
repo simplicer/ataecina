@@ -13,9 +13,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 	"time"
-	"unicode"
 
 	"codeberg.org/simplicer/ataecina/internal/offerings/domain"
 	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
@@ -32,7 +30,6 @@ const (
 	// Timeout bounds the whole download.
 	Timeout = 25 * time.Second
 
-	maxText   = 120
 	maxPrice  = 1e6
 	maxModels = 5000
 )
@@ -149,25 +146,10 @@ func decodeModel(key string, model modelDocument) (domain.Offering, bool, error)
 // plain is a catalogue text made safe to show as plain text, or the
 // fallback made safe when nothing is left of it.
 func plain(text, fallback string) string {
-	if cleaned := sanitized(text); cleaned != "" {
+	if cleaned := domain.PlainName(text); cleaned != "" {
 		return cleaned
 	}
-	return sanitized(fallback)
-}
-
-// sanitized drops control characters and markup characters and keeps at
-// most 120 characters.
-func sanitized(text string) string {
-	cleaned := strings.Map(func(r rune) rune {
-		if unicode.IsControl(r) || r == '<' || r == '>' || r == '&' {
-			return -1
-		}
-		return r
-	}, strings.TrimSpace(text))
-	if runes := []rune(cleaned); len(runes) > maxText {
-		cleaned = string(runes[:maxText])
-	}
-	return cleaned
+	return domain.PlainName(fallback)
 }
 
 // releaseDay reads "2026-04-27" or "2026-04"; anything else is unknown.

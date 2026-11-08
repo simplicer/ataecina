@@ -149,7 +149,8 @@ feature (ADRs 0003–0006).
   write a signal file; none of them unseals a key or opens a socket other
   than the session D-Bus. The widget's settings page only starts
   `ataecina keys set` or `balance declare` as separate processes when the
-  owner asks (ADR 0014).
+  owner asks (ADR 0014), and `ataecina update` when the owner clicks
+  "Update models" (ADR 0016).
 - **Snapshot** holds only non-secret figures (percentages, amounts, dates,
   states) in `$XDG_RUNTIME_DIR/ataecina/snapshot.json` (`0600`, tmpfs).
 - **Outbound network** (ADR 0006): each adapter has a fixed HTTPS host
@@ -169,7 +170,9 @@ feature (ADRs 0003–0006).
 - **No telemetry, no update checks, no analytics.** The only hosts contacted
   are the ones listed in `docs/SPECS.md` §3, and only for enabled
   subscriptions, plus the public model catalogue `models.dev` (§11), at
-  most once a day and without any key.
+  most once a day and without any key, and `artificialanalysis.ai`
+  (intelligence index, owner's key) only through `ataecina update`
+  (ADR 0016).
 - When a provider says stop (rate limit, invalid key, policy), Ataecina
   stops asking until the time it announces.
 

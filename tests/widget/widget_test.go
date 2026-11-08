@@ -337,12 +337,15 @@ var platformMembers = []string{
 	"arc", "reset", "stroke", "slice", "visible", "small", "policy",
 }
 
-// cliMembers are the properties of the other JSON documents the settings
-// read: `ataecina sources --json` and `ataecina subscriptions --json`
-// (SPECS §8.5).
+// cliMembers are the properties of the other JSON documents the widget
+// reads: `ataecina sources --json`, `ataecina subscriptions --json` and
+// `ataecina models --json` (SPECS §8.5, §11).
 var cliMembers = []string{
 	"id", "label", "provider", "fidelity", "needs_key", "options", "required",
 	"takes_declarations", "source", "plan", "key",
+	"subscription", "catalogue", "something_left", "free", "input_price",
+	"output_price", "released_on", "intelligence", "available",
+	"intelligence_index_version", "intelligence_refreshed_at", "catalogue_refreshed_at",
 }
 
 func TestTheWidgetReadsOnlyTheStatusContract(t *testing.T) {

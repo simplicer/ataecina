@@ -1,0 +1,12 @@
+{
+  "tier": "free",
+  "intelligence_index_version": 5.0,
+  "pagination": { "page": 2, "page_size": 200, "total_pages": 2, "has_more": false },
+  "data": [
+    {
+      "id": "00000000-0000-0000-0000-000000000003", "name": "Kimi K3 <b>", "slug": "kimi-k3",
+      "release_date": "2026-09-30", "model_creator": { "id": "00000000-0000-0000-0000-0000000000bb", "name": "Moonshot" },
+      "evaluations": { "artificial_analysis_intelligence_index": 58 }
+    }
+  ]
+}

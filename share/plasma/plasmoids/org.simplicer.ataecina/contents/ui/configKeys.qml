@@ -237,6 +237,37 @@ KCM.SimpleKCM {
             }
         }
 
+        Kirigami.Heading {
+            text: i18n("Intelligence index")
+            level: 3
+        }
+        QQC2.Label {
+            text: i18n("A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it.")
+            wrapMode: Text.Wrap
+            opacity: 0.7
+            Layout.fillWidth: true
+        }
+        RowLayout {
+            Layout.fillWidth: true
+
+            QQC2.Label {
+                text: "artificial-analysis"
+                font.weight: Font.DemiBold
+                Layout.fillWidth: true
+            }
+            QQC2.Button {
+                icon.name: "internet-web-browser"
+                text: i18n("Get a key")
+                onClicked: Qt.openUrlExternally("https://artificialanalysis.ai/")
+            }
+            QQC2.Button {
+                enabled: page.dialogs
+                icon.name: "dialog-password"
+                text: i18n("Set key…")
+                onClicked: page.setKey({ id: "artificial-analysis" })
+            }
+        }
+
         QQC2.Label {
             visible: text !== ""
             text: page.message

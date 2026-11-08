@@ -17,6 +17,7 @@ ColumnLayout {
     readonly property bool lively: snapshot.lively(subscription)
     readonly property color moneyColor: figureColor(snapshot.moneyUsedPercent(subscription))
     property bool unfolded: false
+    property bool showModels: false
 
     objectName: "row-" + subscription.id
     spacing: Kirigami.Units.smallSpacing
@@ -236,6 +237,108 @@ ColumnLayout {
             opacity: 0.8
             Layout.fillWidth: true
             wrapMode: Text.Wrap
+        }
+        PlasmaComponents3.ToolButton {
+            visible: !!row.subscription.offerings
+            icon.name: row.showModels ? "go-up" : "go-down"
+            text: row.showModels ? i18n("Hide models") : i18n("Models you can use")
+            onClicked: {
+                row.showModels = !row.showModels;
+                if (row.showModels) {
+                    root.loadModels(row.subscription.id);
+                }
+            }
+        }
+        // Every model the subscription can use with what is left, best
+        // ranked first: name, intelligence index, price per 1M tokens.
+        GridLayout {
+            visible: row.showModels
+            columns: 3
+            columnSpacing: Kirigami.Units.largeSpacing
+            rowSpacing: 0
+            Layout.fillWidth: true
+
+            Repeater {
+                model: row.showModels ? snapshot.availableModels(row.subscription.id) : []
+
+                delegate: PlasmaComponents3.Label {
+                    required property var modelData
+                    required property int index
+                    text: modelData.name
+                    textFormat: Text.PlainText
+                    elide: Text.ElideRight
+                    font: Kirigami.Theme.smallFont
+                    Layout.row: index
+                    Layout.column: 0
+                    Layout.fillWidth: true
+                }
+            }
+            Repeater {
+                model: row.showModels ? snapshot.availableModels(row.subscription.id) : []
+
+                delegate: PlasmaComponents3.Label {
+                    required property var modelData
+                    required property int index
+                    text: snapshot.intelligenceText(modelData)
+                    font: Kirigami.Theme.smallFont
+                    horizontalAlignment: Text.AlignRight
+                    Layout.row: index
+                    Layout.column: 1
+                }
+            }
+            Repeater {
+                model: row.showModels ? snapshot.availableModels(row.subscription.id) : []
+
+                delegate: PlasmaComponents3.Label {
+                    required property var modelData
+                    required property int index
+                    text: snapshot.priceText(modelData)
+                    font: Kirigami.Theme.smallFont
+                    opacity: 0.7
+                    Layout.row: index
+                    Layout.column: 2
+                }
+            }
+        }
+        PlasmaComponents3.Label {
+            visible: row.showModels && snapshot.moreModels(row.subscription.id) > 0
+            text: i18np("%1 more", "%1 more", snapshot.moreModels(row.subscription.id))
+            font: Kirigami.Theme.smallFont
+            opacity: 0.6
+        }
+        RowLayout {
+            visible: row.showModels
+            Layout.fillWidth: true
+
+            PlasmaComponents3.Label {
+                // Attribution the Artificial Analysis API asks for.
+                text: snapshot.modelsMeta.intelligence_index_version
+                      ? i18n("Intelligence: Artificial Analysis Intelligence Index v%1", snapshot.modelsMeta.intelligence_index_version)
+                      : i18n("No intelligence index yet: set an Artificial Analysis key in the settings and update.")
+                font: Kirigami.Theme.smallFont
+                opacity: 0.6
+                wrapMode: Text.Wrap
+                Layout.fillWidth: true
+            }
+            PlasmaComponents3.ToolButton {
+                icon.name: "internet-web-browser"
+                display: PlasmaComponents3.AbstractButton.IconOnly
+                text: "artificialanalysis.ai"
+                onClicked: Qt.openUrlExternally("https://artificialanalysis.ai/")
+            }
+            PlasmaComponents3.ToolButton {
+                enabled: !root.updating
+                icon.name: "view-refresh"
+                text: root.updating ? i18n("Updating…") : i18n("Update models")
+                onClicked: root.updateModels()
+            }
+        }
+        PlasmaComponents3.Label {
+            visible: row.showModels && root.updateProblem !== ""
+            text: root.updateProblem
+            font: Kirigami.Theme.smallFont
+            wrapMode: Text.Wrap
+            Layout.fillWidth: true
         }
         PlasmaComponents3.Label {
             visible: text !== ""

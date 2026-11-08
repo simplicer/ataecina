@@ -16,11 +16,18 @@ type RefreshOfferings struct {
 	source     domain.OfferingsSource
 	catalogues domain.Catalogues
 	clock      domain.Clock
+	always     bool
 }
 
 // NewRefreshOfferings prepares the refresh of one collection.
 func NewRefreshOfferings(source domain.OfferingsSource, catalogues domain.Catalogues, clock domain.Clock) RefreshOfferings {
 	return RefreshOfferings{source: source, catalogues: catalogues, clock: clock}
+}
+
+// NewRefreshOfferingsNow asks the source even when the kept catalogue is
+// not due: the owner asked for it (`ataecina update`).
+func NewRefreshOfferingsNow(source domain.OfferingsSource, catalogues domain.Catalogues, clock domain.Clock) RefreshOfferings {
+	return RefreshOfferings{source: source, catalogues: catalogues, clock: clock, always: true}
 }
 
 // Refresh checks the catalogue for the subscriptions' providers and
@@ -37,7 +44,7 @@ func (r RefreshOfferings) Refresh(ctx context.Context, interests []domain.Intere
 		kept = domain.Catalogue{}
 	}
 	now := r.clock.Now()
-	if !kept.DueAt(now, interests) {
+	if !r.always && !kept.DueAt(now, interests) {
 		if next := kept.For(interests); !slices.Equal(next.Interests, kept.Interests) {
 			return false, r.keep(next)
 		}

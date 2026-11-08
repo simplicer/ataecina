@@ -8,6 +8,21 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.28.0-unstable] - 2026-11-08
+
+### Added
+
+- "Models you can use" in each unfolded row: every model the
+  subscription can use with what is left (only the free ones once a
+  window or the money runs out), best first by the Artificial Analysis
+  Intelligence Index, with its price per million tokens.
+  `ataecina models [--json] [<subscription>]` lists the same in a
+  terminal.
+- `ataecina update` (and "Update models" in the widget) refreshes the
+  model catalogue at once and, with a free Artificial Analysis key
+  (`ataecina keys set artificial-analysis`, or the Keys page), the
+  intelligence index, which is kept until the next update (ADR 0016).
+
 ## [0.27.0-unstable] - 2026-11-08
 
 ### Added

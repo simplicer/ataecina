@@ -9,7 +9,9 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 	"time"
+	"unicode"
 )
 
 // ErrNoCatalogue is a catalogue that was never fetched.
@@ -23,6 +25,24 @@ const (
 	// newFor is how long a released model counts as new.
 	newFor = 30 * 24 * time.Hour
 )
+
+// maxName is the longest name shown.
+const maxName = 120
+
+// PlainName keeps a catalogue text displayable as plain text only: no
+// control or markup characters, at most 120 characters.
+func PlainName(text string) string {
+	cleaned := strings.Map(func(r rune) rune {
+		if unicode.IsControl(r) || r == '<' || r == '>' || r == '&' {
+			return -1
+		}
+		return r
+	}, strings.TrimSpace(text))
+	if runes := []rune(cleaned); len(runes) > maxName {
+		cleaned = string(runes[:maxName])
+	}
+	return cleaned
+}
 
 // Offering is one model of a provider: its id, its display name, its list
 // price in USD per million tokens (Priced is false when the catalogue

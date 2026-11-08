@@ -46,7 +46,9 @@ pricing comparisons (models.dev may be added later as an explicit feature).
 Each source is one adapter. Only the hosts below are ever contacted, and only
 for subscriptions the owner enabled; the one other host is the public model
 catalogue `https://models.dev`, asked at most once a day without any key
-(§11). **Undocumented** sources must be
+(§11), and, only when the owner runs `ataecina update` with its key, the
+Artificial Analysis Intelligence Index at `https://artificialanalysis.ai`
+(§11.1). **Undocumented** sources must be
 re-verified with a live, manual call (owner's key) before an adapter is
 merged, and again whenever they report `CONTRACT_CHANGED`. Fields listed are
 the only ones read.
@@ -1138,3 +1140,36 @@ The bounded context `offerings` keeps that, apart from the quotas.
   (§8.2). The widget's unfolded row says "7 models included" when every
   model is free (a plan), else "374 models · 16 free", then a few free
   models by name and the newest ones, always as plain text.
+
+### 11.1 Models you can use and their intelligence (ADR 0016)
+
+- `ataecina update` refreshes the catalogue at once and, with the sealed
+  key `artificial-analysis` (a free key from https://artificialanalysis.ai,
+  `ataecina keys set artificial-analysis`), the Artificial Analysis
+  Intelligence Index: `GET
+  https://artificialanalysis.ai/api/v2/language/models/free?page=<n>`,
+  header `x-api-key`, read: `intelligence_index_version`,
+  `pagination.has_more`, `data[].name`,
+  `data[].evaluations.artificial_analysis_intelligence_index` (null when not
+  measured; such models are skipped). At most ten pages; 401/403 is a
+  rejected key. Kept in `$XDG_STATE_HOME/ataecina/intelligence.json`
+  (`0600`) until the next update. Free tier: 100 requests a day.
+- A model gets the index of the ranking entry with the same key: lower case,
+  no vendor prefix (`z-ai/`), no `:free`/`-free`, no variant in parentheses
+  (`(Max)`), punctuation as dashes (`glm-5-3`); the id is tried first, then
+  the name; several variants keep the best index.
+- `ataecina models [--json] [--all] [<subscription>]` (display path, no
+  network) lists each subscription's models, best ranked first, then by
+  name: `{ "data": [ { "subscription", "catalogue", "name",
+  "something_left", "models": [ { "id", "name", "free", "input_price",
+  "output_price" (USD per 1M tokens or null), "released_on", "intelligence"
+  (or null), "available" } ] } ], "meta": { "catalogue_refreshed_at",
+  "intelligence_refreshed_at", "intelligence_index_version",
+  "intelligence_source", "intelligence_url" } }`. A model is available when
+  it is free or the subscription has something left: its reading has
+  figures, no window at 100 % or more and no money left at zero or below.
+- The widget's unfolded row has "Models you can use": the available models
+  (at most 40, then "N more"), each with its index (or "–") and its price
+  per 1M tokens or "free", credited to the Artificial Analysis Intelligence
+  Index with a link to artificialanalysis.ai, and "Update models", which
+  runs `ataecina update`. The Keys page sets the `artificial-analysis` key.

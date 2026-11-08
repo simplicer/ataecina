@@ -28,6 +28,10 @@ QtObject {
     property date now: new Date()
     // Comma-separated subscription ids, in order; empty shows all.
     property string wanted: ""
+    // The models of each subscription whose list was unfolded, by id
+    // (`ataecina models --json <id>`), and that document's meta.
+    property var models: ({})
+    property var modelsMeta: ({})
 
     readonly property var sourceNames: ({
             "CLAUDE_STATUSLINE": "Claude",
@@ -404,6 +408,47 @@ QtObject {
     }
 
     // ----- model catalogue -----
+
+    function readModels(stdout) {
+        let document;
+        try {
+            document = JSON.parse(stdout);
+        } catch (error) {
+            return;
+        }
+        const next = Object.assign({}, models);
+        for (const item of document.data) {
+            next[item.subscription] = item;
+        }
+        models = next;
+        modelsMeta = document.meta;
+    }
+
+    // The models that can be used with what is left, best first; at most 40.
+    function availableModels(id) {
+        const listed = models[id];
+        return listed ? listed.models.filter(m => m.available).slice(0, 40) : [];
+    }
+
+    function moreModels(id) {
+        const listed = models[id];
+        return listed ? Math.max(0, listed.models.filter(m => m.available).length - 40) : 0;
+    }
+
+    function intelligenceText(model) {
+        return typeof model.intelligence === "number" ? Math.round(model.intelligence).toString() : "–";
+    }
+
+    // "free", or input / output price per million tokens.
+    function priceText(model) {
+        if (model.free) {
+            return i18n("free");
+        }
+        if (typeof model.input_price !== "number") {
+            return "";
+        }
+        return amountText(model.input_price, "USD") + " / " + amountText(model.output_price, "USD");
+    }
 
     // How many models the subscription's provider lists and how many are
     // free; a plan whose every model costs nothing includes them all.

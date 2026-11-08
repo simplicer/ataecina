@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.27.0-unstable` — early development: everything below
+**Current version:** `0.28.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -61,6 +61,11 @@ first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
   offers, which are free ("374 models · 16 free", or "7 models included"
   for a coding plan) and which came out in the last 30 days, from the
   public [models.dev](https://models.dev) catalogue, refreshed once a day.
+  "Models you can use" lists every model you can use with what is left
+  (only the free ones once a window or the money runs out), best first
+  by the [Artificial Analysis](https://artificialanalysis.ai/)
+  Intelligence Index, with its price per million tokens; "Update models"
+  (or `ataecina update`) refreshes both.
 - **Alerts** — a desktop notification when a window crosses 90 % and 95 %
   (once per window), and once when a source starts failing.
 - **Freshness and fidelity** — every figure knows when it was read and
@@ -188,12 +193,14 @@ was checked, is documented in [docs/SPECS.md](docs/SPECS.md) §3.
   host, follows no redirect, caps every answer at 64 KiB, makes one attempt
   and honours `Retry-After`. The only other host is the public model
   catalogue `models.dev`, asked at most once a day, revalidated with its
-  ETag and never sent a key. No telemetry, no analytics, no update checks.
+  ETag and never sent a key, and Artificial Analysis, only when you run
+  `ataecina update` with your own free key. No telemetry, no analytics, no
+  update checks.
 - **Strict files.** Ataecina refuses to run if its configuration or key file
   is readable by anyone else, like ssh.
 
 The rules are in [SECURITY.md](SECURITY.md) and the decisions behind them in
-[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014, 0015).
+[docs/adrs/](docs/adrs/) (0003 to 0006, 0012, 0014 to 0016).
 
 ## Install
 
@@ -257,6 +264,13 @@ terminal or, on Plasma, use the widget's settings (right-click the widget,
 ```sh
 ataecina keys set zai          # paste the key; it is read without echo and sealed
 ```
+
+**Models and their intelligence.** `ataecina models` lists each
+subscription's models; for the intelligence index, get a free key at
+[artificialanalysis.ai](https://artificialanalysis.ai/), seal it with
+`ataecina keys set artificial-analysis` (or the widget's **Keys** page) and
+run `ataecina update` (or "Update models" in the widget). Intelligence data:
+Artificial Analysis Intelligence Index.
 
 **Claude Code.** Claude Code hands its rate limits to your status line
 command; add one line to your status line script, right after it reads its
