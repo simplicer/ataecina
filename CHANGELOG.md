@@ -8,6 +8,18 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.32.2-unstable] - 2026-11-08
+
+### Fixed
+
+- `alibaba-cli` and `alibaba-coding-cli` failed under the collector's
+  systemd service: `bl` (Node.js) lists the network interfaces when it
+  starts, which needs a netlink socket. The unit now allows
+  `AF_NETLINK` too (read-only for an unprivileged process).
+- When `bl` finds no plan of the kind a source reads, the hint names
+  the other source: a Token Plan is read by `alibaba-cli`, a Coding Plan
+  by `alibaba-coding-cli`.
+
 ## [0.32.1-unstable] - 2026-11-08
 
 ### Changed

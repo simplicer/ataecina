@@ -16,7 +16,7 @@ the keys. Merging them gives the most exposed code the most privileges.
   user service (`NoNewPrivileges`, `ProtectSystem=strict`,
   `ProtectHome=read-only` with write access only to Ataecina's runtime and
   state directories, `PrivateTmp`, `RestrictAddressFamilies=AF_UNIX AF_INET
-  AF_INET6`, `SystemCallFilter=@system-service`, `MemoryDenyWriteExecute`,
+  AF_INET6 AF_NETLINK`, `SystemCallFilter=@system-service`, `MemoryDenyWriteExecute`,
   `UMask=0077`). It is the only code that unseals keys or opens sockets to
   providers.
 - **Snapshot**: `$XDG_RUNTIME_DIR/ataecina/snapshot.json`, figures only,
@@ -50,9 +50,12 @@ the keys. Merging them gives the most exposed code the most privileges.
 - `MemoryDenyWriteExecute=` is **not** set: `opencode` runs on a JIT and
   would crash. `ProtectHome=read-only`, `ProtectSystem=strict`,
   `PrivateTmp`, `PrivateDevices`, the kernel and clock protections,
-  `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6`,
+  `RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK`,
   `SystemCallFilter=@system-service`, `NoNewPrivileges`, an empty
-  capability set and `UMask=0077` are.
+  capability set and `UMask=0077` are. `AF_NETLINK` is there because
+  Node.js CLIs (`bl`) list the network interfaces when they start and
+  die without it (2026-11-08, bl 2.8.4); an unprivileged netlink socket
+  only reads them.
 - `PATH` is set to `~/.local/bin`, `~/.local/share/pnpm`,
   `~/.local/share/pnpm/bin` (where recent pnpm versions put global CLIs;
   added 2026-11-07 after `opencode` was not found under the timer) and the

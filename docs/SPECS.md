@@ -69,7 +69,7 @@ documentation) or `third-party` (issues or write-ups of other clients);
 | `codex-app-server` | ChatGPT / Codex | official CLI (opt-in fallback) | `codex app-server` over stdio JSON-RPC, methods `initialize` and `account/rateLimits/read` only (§3.2) | none for Ataecina (Codex uses its own login) | `rateLimitsByLimitId`, `rateLimitResetCredits.availableCount` | experimental protocol, schema published by `codex app-server generate-json-schema` | REPORTED | local 2026-11-06; live to verify |
 | `zai-api` | Z.ai GLM Coding Plan | provider API | `https://api.z.ai/api/monitor/usage/quota/limit` (§3.5) | API key (`Bearer`, to verify) | `data.limits[]` of type `TOKENS_LIMIT`/`CREDIT_LIMIT`: `unit`, `number`, `percentage`, `nextResetTime`; `data.level` | no | REPORTED | third-party 2026-11-06; live to verify |
 | `minimax-api` | MiniMax Token Plan | provider API | `https://api.minimax.io/v1/token_plan/remains` (§3.5) | Token Plan key (`Bearer`) | `model_remains[]`: interval and weekly totals, counts (remaining), `*_remaining_percent`, start/end times; `base_resp.status_code` | no | REPORTED | third-party 2026-11-06; live to verify |
-| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) (§3.3) | `bl`'s own console login (`bl auth login --console`) | every `per<N><Hour|Day|Week|Month>Percentage` (used fraction 0–1) and `…ResetTime` (epoch ms), `hasQuotaData` | yes (Model Studio docs; field names in bl's source) | REPORTED | docs and bl source 2026-11-08; `bl` not installed, to verify |
+| `alibaba-cli` | Alibaba Model Studio Token Plan | official CLI | `bl usage token-plan --output json` (executed with a fixed argv, no shell) (§3.3) | `bl`'s own console login (`bl auth login --console`) | every `per<N><Hour|Day|Week|Month>Percentage` (used fraction 0–1) and `…ResetTime` (epoch ms), `hasQuotaData` | yes (Model Studio docs; field names in bl's source) | REPORTED | docs and bl source 2026-11-08; local 2026-11-08 (bl 2.8.4, personal Token Plan) |
 | `alibaba-coding-cli` | Alibaba Model Studio Coding Plan | official CLI | `bl usage coding-plan --output json` (fixed argv, no shell) (§3.3) | `bl`'s own console login | `instanceType`; `per5Hour`, `perWeek`, `perBillMonth`: `usedQuota`, `totalQuota`, `percentage` (used fraction), `resetTime` (epoch ms) | yes (Model Studio docs; field names in bl's source) | REPORTED | docs and bl source 2026-11-08; to verify |
 | `commandcode-api` | Command Code | provider API | `https://api.commandcode.ai` `/alpha/billing/credits`, `/alpha/usage/summary`, `/alpha/billing/subscriptions` (§3.5) | API key (`Bearer`) | `credits.{monthly,purchased,free}Credits`, `windowLimits.{fiveHour,weekly}.{used,cap,resetAt}`, `totalCost`, `data.{planId,currentPeriodEnd}` | no (used by the official CLI) | REPORTED | third-party 2026-11-06; live to verify |
 | `openrouter-api` | OpenRouter | provider API | `https://openrouter.ai/api/v1/key`, `/api/v1/credits` (§3.5) | API key (`Bearer`; `/credits` may need a management key) | `data.{usage,limit,limit_remaining,free_model_daily_requests}`, `data.{total_credits,total_usage}` | yes | REPORTED | docs 2026-11-06 |
@@ -314,11 +314,16 @@ verify, so AI-credit plans may read as an empty month.
 **`alibaba-cli` and `alibaba-coding-cli` (Alibaba Model Studio).** Model
 Studio has no quota API for the plan's API key (`sk-sp-…` keys only serve
 inference on `coding-intl.dashscope.aliyuncs.com`); the official Bailian
-CLI `bl` (Apache-2.0, checked against bl 2.8.0) reads the quota through
-the Model Studio console with its own console login (`bl auth login
---console`, once, in a browser). Ataecina runs `bl` with a fixed argv, no
-shell, `NO_COLOR=1`, a 15 s timeout and 64 KiB of output at most, and never
-calls the console gateway itself nor reads bl's configuration.
+CLI `bl` (Apache-2.0, checked against bl 2.8.0, verified live with bl 2.8.4
+on 2026-11-08) reads the quota through the Model Studio console with its
+own console login (`bl auth login --console`, once, in a browser; add
+`--console-site international` for an international account). Ataecina
+runs `bl` with a fixed argv, no shell, `NO_COLOR=1`, a 15 s timeout and
+64 KiB of output at most, and never calls the console gateway itself nor
+reads bl's configuration. `bl` is a Node.js program: it lists the network
+interfaces when it starts, so the collector's service allows netlink
+sockets (ADR 0005). `npm install -g bailian-cli` puts it in npm's prefix,
+which the service's `PATH` may not hold; a link in `~/.local/bin` does.
 
 - **Token Plan** (`bl usage token-plan --output json`): one flat object
   whose windows depend on the plan and the bl version; Ataecina reads every
@@ -326,8 +331,10 @@ calls the console gateway itself nor reads bl's configuration.
   `…ResetTime` (epoch ms), as bl itself does: hours, days and weeks by
   length (5 hours → `FIVE_HOURS`, 1 day → `DAILY`, 1 week → `WEEKLY`,
   others `OTHER`), `per1Month…` → `MONTHLY`; longer calendar spans are
-  skipped. `hasQuotaData: false` is `UNAVAILABLE`; no window at all is
-  `CONTRACT_CHANGED`.
+  skipped. `hasQuotaData: false` is `UNAVAILABLE` (the hint names
+  `alibaba-coding-cli`); no window at all is `CONTRACT_CHANGED`. Verified
+  live: a personal Token Plan answers `per1MonthPercentage`,
+  `per1MonthResetTime` and `hasQuotaData`.
 - **Coding Plan** (`bl usage coding-plan --output json`): `instanceType`
   (the plan: `lite`, `pro`) and `per5Hour`, `perWeek`, `perBillMonth`, each
   `{ "usedQuota", "totalQuota", "percentage", "resetTime" }` in requests;
@@ -336,7 +343,10 @@ calls the console gateway itself nor reads bl's configuration.
   $50 a month, 6 000 requests per 5 hours (rolling), 45 000 per week
   (Monday 00:00 UTC+8) and 90 000 per month (renewal day, 00:00 UTC+8); Lite
   closed to new subscribers. An empty answer `{}` (no valid subscription)
-  is `UNAVAILABLE`.
+  is `UNAVAILABLE`, with the hint that a Token Plan is read by
+  `alibaba-cli`: bl asks for the commodity `sfm_codingplan_public_intl`
+  (`…_cn` on the domestic site) and answers `{}` for an account whose plan
+  is a Token Plan.
 
 Team accounts that need `--region`/`--site` flags are not handled yet.
 

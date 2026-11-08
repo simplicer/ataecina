@@ -95,6 +95,9 @@ func TestBlFailuresAreClassified(t *testing.T) {
 	expectClass(t, "bl fails", failing, domain.ErrorUnavailable)
 	empty, _ := fakeBl(t, `{"hasQuotaData": false}`, false)
 	expectClass(t, "no quota data", empty, domain.ErrorUnavailable)
+	if _, err := empty.Read(context.Background(), subscription); err == nil || !strings.Contains(err.Error(), "alibaba-coding-cli") {
+		t.Fatalf("no Token Plan = %v, want the hint to the Coding Plan source", err)
+	}
 	changed, _ := fakeBl(t, `{"quota": "moved"}`, false)
 	expectClass(t, "a changed answer", changed, domain.ErrorContractChanged)
 }

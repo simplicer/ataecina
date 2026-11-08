@@ -48,13 +48,21 @@ type Usage struct {
 type plan struct {
 	args   []string
 	decode func([]byte) (Usage, error)
+	// none is the hint when bl finds no such plan on the account.
+	none string
 }
 
 func (p plan) command() string { return "bl " + strings.Join(p.args[:2], " ") }
 
 var (
-	tokenPlan  = plan{args: []string{"usage", "token-plan", "--output", "json"}, decode: DecodeUsage}
-	codingPlan = plan{args: []string{"usage", "coding-plan", "--output", "json"}, decode: DecodeCodingPlan}
+	tokenPlan = plan{
+		args: []string{"usage", "token-plan", "--output", "json"}, decode: DecodeUsage,
+		none: "bl finds no Token Plan quota on this account; a Coding Plan is read by the alibaba-coding-cli source",
+	}
+	codingPlan = plan{
+		args: []string{"usage", "coding-plan", "--output", "json"}, decode: DecodeCodingPlan,
+		none: "bl finds no active Coding Plan on this account; a Token Plan is read by the alibaba-cli source",
+	}
 )
 
 // Arguments is the fixed argv of the Token Plan.
@@ -98,7 +106,7 @@ func (s Source) Read(ctx context.Context, subscription domain.Subscription) (dom
 	}
 	usage, err := s.plan.decode(output)
 	if errors.Is(err, ErrNoQuota) {
-		return domain.Reading{}, domain.Failure(domain.ErrorUnavailable, ErrNoQuota.Error(), nil)
+		return domain.Reading{}, domain.Failure(domain.ErrorUnavailable, s.plan.none, nil)
 	}
 	if err != nil {
 		return domain.Reading{}, domain.Failure(domain.ErrorContractChanged, "unexpected "+name+" output", err)

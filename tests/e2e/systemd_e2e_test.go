@@ -50,7 +50,7 @@ func TestTheSystemdUnitsAreValid(t *testing.T) {
 	if !strings.Contains(unit, ":%h/.local/share/pnpm/bin:") {
 		t.Fatal("the service's PATH misses pnpm's bin directory, where opencode lives")
 	}
-	for _, hardening := range []string{"NoNewPrivileges=yes", "ProtectSystem=strict", "ProtectHome=read-only", "PrivateTmp=yes", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6", "SystemCallFilter=@system-service", "UMask=0077", "StateDirectoryMode=0700", "RuntimeDirectoryPreserve=yes"} {
+	for _, hardening := range []string{"NoNewPrivileges=yes", "ProtectSystem=strict", "ProtectHome=read-only", "PrivateTmp=yes", "RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK", "SystemCallFilter=@system-service", "UMask=0077", "StateDirectoryMode=0700", "RuntimeDirectoryPreserve=yes"} {
 		if !strings.Contains(unit, hardening) {
 			t.Fatalf("the service lacks %s", hardening)
 		}
