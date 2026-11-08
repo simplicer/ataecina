@@ -18,6 +18,9 @@ QtObject {
     readonly property var growth: ["#2e8b74", "#4caf50", "#9ccc65"]
     readonly property color lowColor: "#e0a13a"
     readonly property color criticalColor: "#e2604a"
+    // Whether the language writes the percent sign before the number
+    // (Basque: "% 76"), read from the translation of "%1%".
+    readonly property bool percentSignFirst: i18n("%1%", "0").trim().startsWith("%")
 
     property var subscriptions: []
     property var meta: ({})
@@ -477,7 +480,7 @@ QtObject {
         if (worst === null) {
             return shown.length === 0 ? i18n("No snapshot yet") : i18n("No windows to show");
         }
-        const parts = [name(worst.subscription), windowLabel(worst.meter) + " " + i18n("%1 % left", Math.round(leftOf(worst.meter)))];
+        const parts = [name(worst.subscription), windowLabel(worst.meter) + " " + i18n("%1% left", Math.round(leftOf(worst.meter)))];
         if (worst.meter.resets_at) {
             parts.push(countdown(worst.meter.resets_at));
         }

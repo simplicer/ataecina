@@ -114,6 +114,8 @@ ColumnLayout {
                             }
                             RowLayout {
                                 spacing: 0
+                                // Basque writes the sign first ("% 76").
+                                layoutDirection: snapshot.percentSignFirst ? Qt.RightToLeft : Qt.LeftToRight
 
                                 PlasmaComponents3.Label {
                                     text: snapshot.leftText(modelData)
@@ -189,7 +191,7 @@ ColumnLayout {
                     }
                 }
                 PlasmaComponents3.Label {
-                    text: i18n("%1 % left", snapshot.leftText(modelData))
+                    text: i18n("%1% left", snapshot.leftText(modelData))
                     color: row.figureColor(modelData.used_percent)
                     horizontalAlignment: Text.AlignRight
                     // Translations can be longer than "100 % left".

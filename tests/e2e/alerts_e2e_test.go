@@ -24,7 +24,7 @@ func TestTheCollectorNotifiesTheDesktop(t *testing.T) {
 		}
 	}
 	shown := desktop.Shown()
-	if len(shown) != 1 || shown[0].Summary != "claude · five hours at 96 %" || !strings.Contains(shown[0].Body, "Reborn in") || shown[0].Icon != "ataecina" {
+	if len(shown) != 1 || shown[0].Summary != "claude · 5 hours at 96%" || !strings.Contains(shown[0].Body, "Reborn in") || shown[0].Icon != "ataecina" {
 		t.Fatalf("shown = %+v", shown)
 	}
 }

@@ -8,6 +8,16 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.26.0-unstable] - 2026-11-08
+
+### Added
+
+- The widget, its settings and the desktop notifications speak Catalan,
+  Basque and Galician besides Spanish and English, following the
+  desktop's language. Percentages are written each language's way
+  (`63%` in English, `63 %` in Spanish, Catalan and Galician, `%63` in
+  Basque); money follows the locale.
+
 ## [0.25.1-unstable] - 2026-11-08
 
 ### Fixed

@@ -1,0 +1,355 @@
+# Basque translation of the Ataecina widget.
+# This file is distributed under the same license as Ataecina (GPL-3.0-or-later).
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
+"POT-Creation-Date: 2026-11-08 11:18+0100\n"
+"PO-Revision-Date: 2026-11-08 12:00+0100\n"
+"Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
+"Language-Team: Basque <https://codeberg.org/simplicer/ataecina>\n"
+"Language: eu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: contents/ui/CompactRepresentation.qml:58
+msgid "%1%"
+msgstr "% %1"
+
+#: contents/ui/FullRepresentation.qml:36
+msgid "Checked %1"
+msgstr "Egiaztatua: %1"
+
+#: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
+#: contents/ui/main.qml:37
+msgid "Refresh now"
+msgstr "Freskatu orain"
+
+#: contents/ui/FullRepresentation.qml:52 contents/ui/FullRepresentation.qml:55
+msgid "Configure Ataecina…"
+msgstr "Konfiguratu Ataecina…"
+
+#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:478
+msgid "No snapshot yet"
+msgstr "Oraindik ez dago argazkirik"
+
+#: contents/ui/FullRepresentation.qml:133
+msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
+msgstr "Exekutatu `ataecina collect` edo gaitu ataecina-collect.timer."
+
+#: contents/ui/Snapshot.qml:80
+msgid "ataecina status failed: %1"
+msgstr "ataecina status-ek huts egin du: %1"
+
+#: contents/ui/Snapshot.qml:89
+msgid "ataecina status gave something the widget cannot read"
+msgstr "ataecina status-ek trepetak irakurri ezin duen zerbait itzuli du"
+
+#: contents/ui/Snapshot.qml:241 contents/ui/Snapshot.qml:395
+msgid "%1 spent"
+msgstr "%1 gastatuta"
+
+#: contents/ui/Snapshot.qml:249
+msgid "%1 of %2"
+msgstr "%1 / %2"
+
+#: contents/ui/Snapshot.qml:251 contents/ui/Snapshot.qml:392
+#: contents/ui/configKeys.qml:79
+msgid "%1 left"
+msgstr "%1 geratzen da"
+
+#: contents/ui/Snapshot.qml:278
+msgid "5 h"
+msgstr "5 h"
+
+#: contents/ui/Snapshot.qml:280
+msgid "day"
+msgstr "eguna"
+
+#: contents/ui/Snapshot.qml:282
+msgid "week"
+msgstr "astea"
+
+#: contents/ui/Snapshot.qml:284
+msgid "month"
+msgstr "hilabetea"
+
+#: contents/ui/Snapshot.qml:286
+msgid "cycle"
+msgstr "zikloa"
+
+#: contents/ui/Snapshot.qml:290
+msgid "%1 d"
+msgstr "%1 e"
+
+#: contents/ui/Snapshot.qml:293
+msgid "%1 h"
+msgstr "%1 h"
+
+#: contents/ui/Snapshot.qml:295
+msgid "%1 min"
+msgstr "%1 min"
+
+#: contents/ui/Snapshot.qml:314
+msgid "reborn"
+msgstr "berpiztua"
+
+#: contents/ui/Snapshot.qml:322
+msgid "%1 d %2 h"
+msgstr "%1 e %2 h"
+
+#: contents/ui/Snapshot.qml:325
+msgid "%1 h %2 m"
+msgstr "%1 h %2 m"
+
+#: contents/ui/Snapshot.qml:327
+msgid "%1 m"
+msgstr "%1 m"
+
+#: contents/ui/Snapshot.qml:340
+msgid "just now"
+msgstr "oraintxe"
+
+#: contents/ui/Snapshot.qml:343
+msgid "%1 min ago"
+msgid_plural "%1 min ago"
+msgstr[0] "duela %1 min"
+msgstr[1] "duela %1 min"
+
+#: contents/ui/Snapshot.qml:346
+msgid "%1 hour ago"
+msgid_plural "%1 hours ago"
+msgstr[0] "duela ordu %1"
+msgstr[1] "duela %1 ordu"
+
+#: contents/ui/Snapshot.qml:348
+msgid "%1 day ago"
+msgid_plural "%1 days ago"
+msgstr[0] "duela egun %1"
+msgstr[1] "duela %1 egun"
+
+#: contents/ui/Snapshot.qml:362
+msgid "Updates when you use Claude Code"
+msgstr "Claude Code erabiltzean eguneratzen da"
+
+#: contents/ui/Snapshot.qml:365
+msgid "Updates when you use Codex"
+msgstr "Codex erabiltzean eguneratzen da"
+
+#: contents/ui/Snapshot.qml:368
+msgid "Stale, observed %1"
+msgstr "Zaharkitua, %1 behatua"
+
+#: contents/ui/Snapshot.qml:372
+msgid "Declare its balance in the settings to see what is left"
+msgstr "Adierazi saldoa ezarpenetan geratzen dena ikusteko"
+
+#: contents/ui/Snapshot.qml:375
+msgid "%1 banked reset"
+msgid_plural "%1 banked resets"
+msgstr[0] "berrabiarazte %1 gordeta"
+msgstr[1] "%1 berrabiarazte gordeta"
+
+#: contents/ui/Snapshot.qml:398
+msgid "unlimited credits"
+msgstr "kreditu mugagabeak"
+
+#: contents/ui/Snapshot.qml:398
+msgid "%1 credits"
+msgstr "%1 kreditu"
+
+#: contents/ui/Snapshot.qml:413
+msgid "%1 model included"
+msgid_plural "%1 models included"
+msgstr[0] "eredu %1 barne"
+msgstr[1] "%1 eredu barne"
+
+#: contents/ui/Snapshot.qml:415
+msgid "%1 model"
+msgid_plural "%1 models"
+msgstr[0] "eredu %1"
+msgstr[1] "%1 eredu"
+
+#: contents/ui/Snapshot.qml:416
+msgid "%1 free"
+msgid_plural "%1 free"
+msgstr[0] "%1 doan"
+msgstr[1] "%1 doan"
+
+#: contents/ui/Snapshot.qml:428
+msgid "%1 more"
+msgid_plural "%1 more"
+msgstr[0] "%1 gehiago"
+msgstr[1] "%1 gehiago"
+
+#: contents/ui/Snapshot.qml:430
+msgid "Free: %1"
+msgstr "Doakoak: %1"
+
+#: contents/ui/Snapshot.qml:439
+msgid "New: %1"
+msgstr "Berriak: %1"
+
+#: contents/ui/Snapshot.qml:445 contents/ui/configKeys.qml:46
+msgid "key rejected"
+msgstr "gakoa baztertuta"
+
+#: contents/ui/Snapshot.qml:449
+msgid "partial"
+msgstr "partziala"
+
+#: contents/ui/Snapshot.qml:451
+msgid "broken"
+msgstr "hautsita"
+
+#: contents/ui/Snapshot.qml:453
+msgid "unavailable"
+msgstr "ez dago erabilgarri"
+
+#: contents/ui/Snapshot.qml:455
+msgid "key missing"
+msgstr "gakoa falta da"
+
+#: contents/ui/Snapshot.qml:457
+msgid "locked"
+msgstr "blokeatuta"
+
+#: contents/ui/Snapshot.qml:459
+msgid "unsupported"
+msgstr "onartu gabea"
+
+#: contents/ui/Snapshot.qml:467
+msgid "derived"
+msgstr "eratorria"
+
+#: contents/ui/Snapshot.qml:469
+msgid "observed"
+msgstr "behatua"
+
+#: contents/ui/Snapshot.qml:471
+msgid "declared"
+msgstr "adierazia"
+
+#: contents/ui/Snapshot.qml:478
+msgid "No windows to show"
+msgstr "Ez dago erakusteko leihorik"
+
+#: contents/ui/Snapshot.qml:480 contents/ui/SubscriptionRow.qml:192
+msgid "%1% left"
+msgstr "% %1 geratzen da"
+
+#: contents/ui/SubscriptionRow.qml:254
+msgid "observed %1"
+msgstr "%1 behatua"
+
+#: contents/ui/Warnings.qml:37
+msgid "%1 warning"
+msgid_plural "%1 warnings"
+msgstr[0] "abisu %1"
+msgstr[1] "%1 abisu"
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr "Komandoa:"
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr "Irakurri argazkia (segundotan):"
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show what is left in the panel"
+msgstr "Erakutsi geratzen dena panelean"
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr "Erakutsi beharreko harpidetzak:"
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr "guztiak, konfigurazioaren ordenan"
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr "Komaz bereizitako identifikatzaileak, erakutsiko diren ordenan."
+
+#: contents/ui/configKeys.qml:49
+msgid "no key"
+msgstr "gakorik ez"
+
+#: contents/ui/configKeys.qml:52
+msgid "works"
+msgstr "badabil"
+
+#: contents/ui/configKeys.qml:55
+msgid "key accepted, answer not understood"
+msgstr "gakoa onartuta, erantzuna ulertu gabe"
+
+#: contents/ui/configKeys.qml:57
+msgid "not read yet"
+msgstr "oraindik irakurri gabe"
+
+#: contents/ui/configKeys.qml:77
+msgid "no balance declared"
+msgstr "saldorik adierazi gabe"
+
+#: contents/ui/configKeys.qml:86
+msgid "API key for %1. It is sealed at once and never shown."
+msgstr "%1 zerbitzuaren API gakoa. Berehala zigilatzen da eta ez da inoiz erakusten."
+
+#: contents/ui/configKeys.qml:94
+msgid "Current balance of %1, in US dollars:"
+msgstr "%1 zerbitzuaren uneko saldoa, AEBetako dolarretan:"
+
+#: contents/ui/configKeys.qml:129
+msgid "Saved. Reading the subscriptions again…"
+msgstr "Gordeta. Harpidetzak berriro irakurtzen…"
+
+#: contents/ui/configKeys.qml:153
+msgid "API keys"
+msgstr "API gakoak"
+
+#: contents/ui/configKeys.qml:157
+msgid "Keys go from a masked dialog straight to `ataecina keys set`."
+msgstr "Gakoak elkarrizketa-koadro ezkutu batetik zuzenean doaz `ataecina keys set`-era."
+
+#: contents/ui/configKeys.qml:157
+msgid "The widget never sees them."
+msgstr "Trepetak ez ditu inoiz ikusten."
+
+#: contents/ui/configKeys.qml:164
+msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
+msgstr "kdialog gabe, ezarri gakoak terminal batean: `ataecina keys set <izena>`."
+
+#: contents/ui/configKeys.qml:170
+msgid "No subscription needs a key."
+msgstr "Ez dago gakoa behar duen harpidetzarik."
+
+#: contents/ui/configKeys.qml:194
+msgid "Replace key…"
+msgstr "Aldatu gakoa…"
+
+#: contents/ui/configKeys.qml:194
+msgid "Set key…"
+msgstr "Ezarri gakoa…"
+
+#: contents/ui/configKeys.qml:202
+msgid "Balances"
+msgstr "Saldoak"
+
+#: contents/ui/configKeys.qml:224
+msgid "Declare balance…"
+msgstr "Adierazi saldoa…"
+
+#: contents/ui/main.qml:27
+msgid "Ataecina"
+msgstr "Ataecina"
+
+#: contents/config/config.qml:6
+msgid "General"
+msgstr "Orokorra"
+
+#: contents/config/config.qml:11
+msgid "Keys"
+msgstr "Gakoak"

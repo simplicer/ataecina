@@ -1,12 +1,13 @@
-# Spanish translation of the Ataecina Plasma widget.
+# Spanish translation of the Ataecina widget.
+# This file is distributed under the same license as Ataecina (GPL-3.0-or-later).
 msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 10:59+0100\n"
-"PO-Revision-Date: 2026-11-06 00:00+0000\n"
-"Last-Translator: Antonio Villamarín\n"
-"Language-Team: Spanish\n"
+"POT-Creation-Date: 2026-11-08 11:18+0100\n"
+"PO-Revision-Date: 2026-11-08 12:00+0100\n"
+"Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
+"Language-Team: Spanish <https://codeberg.org/simplicer/ataecina>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,111 +15,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: contents/ui/CompactRepresentation.qml:58
-msgid "%1 %"
+msgid "%1%"
 msgstr "%1 %"
-
-#: contents/ui/configGeneral.qml:15
-msgid "Command:"
-msgstr "Orden:"
-
-#: contents/ui/configGeneral.qml:20
-msgid "Read the snapshot every (seconds):"
-msgstr "Leer la instantánea cada (segundos):"
-
-#: contents/ui/configGeneral.qml:26
-msgid "Show what is left in the panel"
-msgstr "Mostrar lo que queda en el panel"
-
-#: contents/ui/configGeneral.qml:30
-msgid "Subscriptions to show:"
-msgstr "Suscripciones que mostrar:"
-
-#: contents/ui/configGeneral.qml:31
-msgid "all, in configuration order"
-msgstr "todas, en el orden de la configuración"
-
-#: contents/ui/configGeneral.qml:34
-msgid "Comma-separated ids, in the order to show them."
-msgstr "Identificadores separados por comas, en el orden en que se muestran."
-
-#: contents/ui/configKeys.qml:46 contents/ui/Snapshot.qml:445
-msgid "key rejected"
-msgstr "clave rechazada"
-
-#: contents/ui/configKeys.qml:49
-msgid "no key"
-msgstr "sin clave"
-
-#: contents/ui/configKeys.qml:52
-msgid "works"
-msgstr "funciona"
-
-#: contents/ui/configKeys.qml:55
-msgid "key accepted, answer not understood"
-msgstr "clave aceptada, respuesta no entendida"
-
-#: contents/ui/configKeys.qml:57
-msgid "not read yet"
-msgstr "aún sin leer"
-
-#: contents/ui/configKeys.qml:77
-msgid "no balance declared"
-msgstr "sin saldo declarado"
-
-#: contents/ui/configKeys.qml:79 contents/ui/Snapshot.qml:251
-#: contents/ui/Snapshot.qml:392
-msgid "%1 left"
-msgstr "quedan %1"
-
-#: contents/ui/configKeys.qml:86
-msgid "API key for %1. It is sealed at once and never shown."
-msgstr "Clave API de %1. Se sella al momento y nunca se muestra."
-
-#: contents/ui/configKeys.qml:94
-msgid "Current balance of %1, in US dollars:"
-msgstr "Saldo actual de %1, en dólares estadounidenses:"
-
-#: contents/ui/configKeys.qml:129
-msgid "Saved. Reading the subscriptions again…"
-msgstr "Guardado. Leyendo de nuevo las suscripciones…"
-
-#: contents/ui/configKeys.qml:153
-msgid "API keys"
-msgstr "Claves API"
-
-#: contents/ui/configKeys.qml:157
-msgid "Keys go from a masked dialog straight to `ataecina keys set`."
-msgstr ""
-"Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
-
-#: contents/ui/configKeys.qml:157
-msgid "The widget never sees them."
-msgstr "El widget nunca las ve."
-
-#: contents/ui/configKeys.qml:164
-msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
-msgstr ""
-"Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
-
-#: contents/ui/configKeys.qml:170
-msgid "No subscription needs a key."
-msgstr "Ninguna suscripción necesita clave."
-
-#: contents/ui/configKeys.qml:194
-msgid "Replace key…"
-msgstr "Cambiar clave…"
-
-#: contents/ui/configKeys.qml:194
-msgid "Set key…"
-msgstr "Poner clave…"
-
-#: contents/ui/configKeys.qml:202
-msgid "Balances"
-msgstr "Saldos"
-
-#: contents/ui/configKeys.qml:224
-msgid "Declare balance…"
-msgstr "Declarar saldo…"
 
 #: contents/ui/FullRepresentation.qml:36
 msgid "Checked %1"
@@ -141,10 +39,6 @@ msgstr "Aún no hay instantánea"
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr "Ejecuta `ataecina collect` o activa ataecina-collect.timer."
 
-#: contents/ui/main.qml:27
-msgid "Ataecina"
-msgstr "Ataecina"
-
 #: contents/ui/Snapshot.qml:80
 msgid "ataecina status failed: %1"
 msgstr "ataecina status ha fallado: %1"
@@ -160,6 +54,11 @@ msgstr "%1 gastados"
 #: contents/ui/Snapshot.qml:249
 msgid "%1 of %2"
 msgstr "%1 de %2"
+
+#: contents/ui/Snapshot.qml:251 contents/ui/Snapshot.qml:392
+#: contents/ui/configKeys.qml:79
+msgid "%1 left"
+msgstr "quedan %1"
 
 #: contents/ui/Snapshot.qml:278
 msgid "5 h"
@@ -293,6 +192,10 @@ msgstr "Gratis: %1"
 msgid "New: %1"
 msgstr "Nuevos: %1"
 
+#: contents/ui/Snapshot.qml:445 contents/ui/configKeys.qml:46
+msgid "key rejected"
+msgstr "clave rechazada"
+
 #: contents/ui/Snapshot.qml:449
 msgid "partial"
 msgstr "parcial"
@@ -334,7 +237,7 @@ msgid "No windows to show"
 msgstr "No hay ventanas que mostrar"
 
 #: contents/ui/Snapshot.qml:480 contents/ui/SubscriptionRow.qml:192
-msgid "%1 % left"
+msgid "%1% left"
 msgstr "quedan %1 %"
 
 #: contents/ui/SubscriptionRow.qml:254
@@ -346,6 +249,102 @@ msgid "%1 warning"
 msgid_plural "%1 warnings"
 msgstr[0] "%1 aviso"
 msgstr[1] "%1 avisos"
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr "Orden:"
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr "Leer la instantánea cada (segundos):"
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show what is left in the panel"
+msgstr "Mostrar lo que queda en el panel"
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr "Suscripciones que mostrar:"
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr "todas, en el orden de la configuración"
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr "Identificadores separados por comas, en el orden en que se muestran."
+
+#: contents/ui/configKeys.qml:49
+msgid "no key"
+msgstr "sin clave"
+
+#: contents/ui/configKeys.qml:52
+msgid "works"
+msgstr "funciona"
+
+#: contents/ui/configKeys.qml:55
+msgid "key accepted, answer not understood"
+msgstr "clave aceptada, respuesta no entendida"
+
+#: contents/ui/configKeys.qml:57
+msgid "not read yet"
+msgstr "aún sin leer"
+
+#: contents/ui/configKeys.qml:77
+msgid "no balance declared"
+msgstr "sin saldo declarado"
+
+#: contents/ui/configKeys.qml:86
+msgid "API key for %1. It is sealed at once and never shown."
+msgstr "Clave API de %1. Se sella al momento y nunca se muestra."
+
+#: contents/ui/configKeys.qml:94
+msgid "Current balance of %1, in US dollars:"
+msgstr "Saldo actual de %1, en dólares estadounidenses:"
+
+#: contents/ui/configKeys.qml:129
+msgid "Saved. Reading the subscriptions again…"
+msgstr "Guardado. Leyendo de nuevo las suscripciones…"
+
+#: contents/ui/configKeys.qml:153
+msgid "API keys"
+msgstr "Claves API"
+
+#: contents/ui/configKeys.qml:157
+msgid "Keys go from a masked dialog straight to `ataecina keys set`."
+msgstr "Las claves van de un diálogo enmascarado directas a `ataecina keys set`."
+
+#: contents/ui/configKeys.qml:157
+msgid "The widget never sees them."
+msgstr "El widget nunca las ve."
+
+#: contents/ui/configKeys.qml:164
+msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
+msgstr "Sin kdialog, pon las claves en una terminal: `ataecina keys set <nombre>`."
+
+#: contents/ui/configKeys.qml:170
+msgid "No subscription needs a key."
+msgstr "Ninguna suscripción necesita clave."
+
+#: contents/ui/configKeys.qml:194
+msgid "Replace key…"
+msgstr "Cambiar clave…"
+
+#: contents/ui/configKeys.qml:194
+msgid "Set key…"
+msgstr "Poner clave…"
+
+#: contents/ui/configKeys.qml:202
+msgid "Balances"
+msgstr "Saldos"
+
+#: contents/ui/configKeys.qml:224
+msgid "Declare balance…"
+msgstr "Declarar saldo…"
+
+#: contents/ui/main.qml:27
+msgid "Ataecina"
+msgstr "Ataecina"
 
 #: contents/config/config.qml:6
 msgid "General"

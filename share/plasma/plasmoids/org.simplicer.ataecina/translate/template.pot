@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 10:59+0100\n"
+"POT-Creation-Date: 2026-11-08 11:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,108 +19,8 @@ msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: contents/ui/CompactRepresentation.qml:58
-msgid "%1 %"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:15
-msgid "Command:"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:20
-msgid "Read the snapshot every (seconds):"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:26
-msgid "Show what is left in the panel"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:30
-msgid "Subscriptions to show:"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:31
-msgid "all, in configuration order"
-msgstr ""
-
-#: contents/ui/configGeneral.qml:34
-msgid "Comma-separated ids, in the order to show them."
-msgstr ""
-
-#: contents/ui/configKeys.qml:46 contents/ui/Snapshot.qml:445
-msgid "key rejected"
-msgstr ""
-
-#: contents/ui/configKeys.qml:49
-msgid "no key"
-msgstr ""
-
-#: contents/ui/configKeys.qml:52
-msgid "works"
-msgstr ""
-
-#: contents/ui/configKeys.qml:55
-msgid "key accepted, answer not understood"
-msgstr ""
-
-#: contents/ui/configKeys.qml:57
-msgid "not read yet"
-msgstr ""
-
-#: contents/ui/configKeys.qml:77
-msgid "no balance declared"
-msgstr ""
-
-#: contents/ui/configKeys.qml:79 contents/ui/Snapshot.qml:251
-#: contents/ui/Snapshot.qml:392
-msgid "%1 left"
-msgstr ""
-
-#: contents/ui/configKeys.qml:86
-msgid "API key for %1. It is sealed at once and never shown."
-msgstr ""
-
-#: contents/ui/configKeys.qml:94
-msgid "Current balance of %1, in US dollars:"
-msgstr ""
-
-#: contents/ui/configKeys.qml:129
-msgid "Saved. Reading the subscriptions again…"
-msgstr ""
-
-#: contents/ui/configKeys.qml:153
-msgid "API keys"
-msgstr ""
-
-#: contents/ui/configKeys.qml:157
-msgid "Keys go from a masked dialog straight to `ataecina keys set`."
-msgstr ""
-
-#: contents/ui/configKeys.qml:157
-msgid "The widget never sees them."
-msgstr ""
-
-#: contents/ui/configKeys.qml:164
-msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
-msgstr ""
-
-#: contents/ui/configKeys.qml:170
-msgid "No subscription needs a key."
-msgstr ""
-
-#: contents/ui/configKeys.qml:194
-msgid "Replace key…"
-msgstr ""
-
-#: contents/ui/configKeys.qml:194
-msgid "Set key…"
-msgstr ""
-
-#: contents/ui/configKeys.qml:202
-msgid "Balances"
-msgstr ""
-
-#: contents/ui/configKeys.qml:224
-msgid "Declare balance…"
+#, javascript-format
+msgid "%1%"
 msgstr ""
 
 #: contents/ui/FullRepresentation.qml:36
@@ -144,10 +44,6 @@ msgstr ""
 msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
 msgstr ""
 
-#: contents/ui/main.qml:27
-msgid "Ataecina"
-msgstr ""
-
 #: contents/ui/Snapshot.qml:80
 msgid "ataecina status failed: %1"
 msgstr ""
@@ -162,6 +58,11 @@ msgstr ""
 
 #: contents/ui/Snapshot.qml:249
 msgid "%1 of %2"
+msgstr ""
+
+#: contents/ui/Snapshot.qml:251 contents/ui/Snapshot.qml:392
+#: contents/ui/configKeys.qml:79
+msgid "%1 left"
 msgstr ""
 
 #: contents/ui/Snapshot.qml:278
@@ -296,6 +197,10 @@ msgstr ""
 msgid "New: %1"
 msgstr ""
 
+#: contents/ui/Snapshot.qml:445 contents/ui/configKeys.qml:46
+msgid "key rejected"
+msgstr ""
+
 #: contents/ui/Snapshot.qml:449
 msgid "partial"
 msgstr ""
@@ -337,7 +242,8 @@ msgid "No windows to show"
 msgstr ""
 
 #: contents/ui/Snapshot.qml:480 contents/ui/SubscriptionRow.qml:192
-msgid "%1 % left"
+#, javascript-format
+msgid "%1% left"
 msgstr ""
 
 #: contents/ui/SubscriptionRow.qml:254
@@ -349,6 +255,102 @@ msgid "%1 warning"
 msgid_plural "%1 warnings"
 msgstr[0] ""
 msgstr[1] ""
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show what is left in the panel"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr ""
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr ""
+
+#: contents/ui/configKeys.qml:49
+msgid "no key"
+msgstr ""
+
+#: contents/ui/configKeys.qml:52
+msgid "works"
+msgstr ""
+
+#: contents/ui/configKeys.qml:55
+msgid "key accepted, answer not understood"
+msgstr ""
+
+#: contents/ui/configKeys.qml:57
+msgid "not read yet"
+msgstr ""
+
+#: contents/ui/configKeys.qml:77
+msgid "no balance declared"
+msgstr ""
+
+#: contents/ui/configKeys.qml:86
+msgid "API key for %1. It is sealed at once and never shown."
+msgstr ""
+
+#: contents/ui/configKeys.qml:94
+msgid "Current balance of %1, in US dollars:"
+msgstr ""
+
+#: contents/ui/configKeys.qml:129
+msgid "Saved. Reading the subscriptions again…"
+msgstr ""
+
+#: contents/ui/configKeys.qml:153
+msgid "API keys"
+msgstr ""
+
+#: contents/ui/configKeys.qml:157
+msgid "Keys go from a masked dialog straight to `ataecina keys set`."
+msgstr ""
+
+#: contents/ui/configKeys.qml:157
+msgid "The widget never sees them."
+msgstr ""
+
+#: contents/ui/configKeys.qml:164
+msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
+msgstr ""
+
+#: contents/ui/configKeys.qml:170
+msgid "No subscription needs a key."
+msgstr ""
+
+#: contents/ui/configKeys.qml:194
+msgid "Replace key…"
+msgstr ""
+
+#: contents/ui/configKeys.qml:194
+msgid "Set key…"
+msgstr ""
+
+#: contents/ui/configKeys.qml:202
+msgid "Balances"
+msgstr ""
+
+#: contents/ui/configKeys.qml:224
+msgid "Declare balance…"
+msgstr ""
+
+#: contents/ui/main.qml:27
+msgid "Ataecina"
+msgstr ""
 
 #: contents/config/config.qml:6
 msgid "General"

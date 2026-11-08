@@ -55,7 +55,7 @@ MouseArea {
 
         PlasmaComponents3.Label {
             visible: !compact.inTray && Plasmoid.configuration.showPercentage && compact.used >= 0
-            text: i18n("%1 %", Math.round(compact.leftPercent))
+            text: i18n("%1%", Math.round(compact.leftPercent))
             color: snapshot.dimmed ? Kirigami.Theme.disabledTextColor : snapshot.toneColor(compact.used, Kirigami.Theme.textColor)
             Layout.fillHeight: true
             verticalAlignment: Text.AlignVCenter

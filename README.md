@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.25.1-unstable` — early development: everything below
+**Current version:** `0.26.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -90,10 +90,13 @@ The screenshots show the Spanish interface and made-up figures.
   </tr>
 </table>
 
-**Languages.** For now the only translation is Spanish: the Plasma widget
-and its settings follow your desktop's language, Spanish or English (the
-language of the source). The terminal, the desktop notifications and the
-hints the collector writes are in English. Translations are welcome
+**Languages.** The Plasma widget, its settings and the desktop
+notifications speak Spanish (the main language), Catalan, Basque,
+Galician and English, following your desktop's language; any other
+language falls back to English. Numbers, money and percentages follow
+each language's customs (`$6.80` and `63%` in English, `6,80 $` and
+`63 %` in Spanish, Catalan and Galician, `%63` in Basque). The terminal
+and the hints the sources write are in English. Translations are welcome
 ([CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ## Supported subscriptions
@@ -385,7 +388,7 @@ make deb        # only this machine's .deb; make install-deb installs it with ap
 ```
 
 After changing a string of the widget, regenerate its template and update
-the Spanish translation:
+every translation (`es`, `ca`, `eu`, `gl`):
 
 ```sh
 cd share/plasma/plasmoids/org.simplicer.ataecina
@@ -394,7 +397,7 @@ xgettext --from-code=UTF-8 --language=JavaScript --kde \
   --package-name=plasma_applet_org.simplicer.ataecina \
   --msgid-bugs-address=https://codeberg.org/simplicer/ataecina \
   -o translate/template.pot contents/ui/*.qml contents/config/*.qml
-msgmerge --update translate/es.po translate/template.pot
+for po in translate/*.po; do msgmerge --update --no-fuzzy-matching "$po" translate/template.pot; done
 ```
 
 Releases sign `dist/SHA256SUMS` (`gpg --armor --detach-sign`); the AUR

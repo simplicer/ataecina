@@ -14,6 +14,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/alerts/infrastructure/desktopnotify"
 	"codeberg.org/simplicer/ataecina/internal/alerts/infrastructure/desktopnotify/notifytest"
 	"codeberg.org/simplicer/ataecina/internal/platform/dbustest"
+	"codeberg.org/simplicer/ataecina/internal/platform/locale"
 )
 
 var now = time.Date(2026, 11, 6, 19, 40, 0, 0, time.UTC)
@@ -21,7 +22,7 @@ var now = time.Date(2026, 11, 6, 19, 40, 0, 0, time.UTC)
 func TestAlertsReachTheDesktop(t *testing.T) {
 	address := dbustest.Start(t)
 	server := notifytest.Start(t, address)
-	notifier := desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, func() time.Time { return now })
+	notifier := desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, func() time.Time { return now }, locale.English)
 	alert := domain.Alert{
 		Instance:    domain.WindowInstance{Subscription: "zai", Window: "FIVE_HOURS", ResetsAt: now.Add(130 * time.Minute)},
 		Threshold:   95,
@@ -31,12 +32,12 @@ func TestAlertsReachTheDesktop(t *testing.T) {
 		t.Fatal(err)
 	}
 	shown := server.Shown()
-	if len(shown) != 1 || shown[0].App != "Ataecina" || shown[0].Summary != "zai · five hours at 96 %" || shown[0].Body != "Above 95 % of this window. Reborn in 2h10m0s." || shown[0].Urgency != 2 {
+	if len(shown) != 1 || shown[0].App != "Ataecina" || shown[0].Summary != "zai · 5 hours at 96%" || shown[0].Body != "Above 95% of this window. Reborn in 2 h 10 min." || shown[0].Urgency != 2 {
 		t.Fatalf("shown = %+v", shown)
 	}
 	alert.Threshold, alert.Instance.Bucket = 90, "premium"
 	_ = notifier.Notify(context.Background(), alert)
-	if last := server.Shown()[1]; last.Urgency != 1 || last.Summary != "zai · premium five hours at 96 %" {
+	if last := server.Shown()[1]; last.Urgency != 1 || last.Summary != "zai · premium 5 hours at 96%" {
 		t.Fatalf("second = %+v", last)
 	}
 }
@@ -44,7 +45,7 @@ func TestAlertsReachTheDesktop(t *testing.T) {
 func TestFailingSourcesReachTheDesktop(t *testing.T) {
 	address := dbustest.Start(t)
 	server := notifytest.Start(t, address)
-	notifier := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return dbus.Connect(address) })
+	notifier := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return dbus.Connect(address) }, locale.English)
 	alert := domain.SourceAlert{Subscription: "workers-ai", Failure: "KEY_MISSING", Hint: "the token needs Account Analytics: Read"}
 	if err := notifier.NotifySourceFailure(context.Background(), alert); err != nil {
 		t.Fatal(err)
@@ -53,10 +54,10 @@ func TestFailingSourcesReachTheDesktop(t *testing.T) {
 	if len(shown) != 1 || shown[0].Summary != "workers-ai · key missing" || shown[0].Body != "the token needs Account Analytics: Read" || shown[0].Urgency != 1 {
 		t.Fatalf("shown = %+v", shown)
 	}
-	if _, body := desktopnotify.FailureText(domain.SourceAlert{Subscription: "zai", Failure: "BROKEN"}); body != "Ataecina cannot read this subscription until it is fixed." {
+	if _, body := desktopnotify.FailureText(domain.SourceAlert{Subscription: "zai", Failure: "BROKEN"}, locale.English); body != "Ataecina cannot read this subscription until it is fixed." {
 		t.Fatalf("no hint = %q", body)
 	}
-	broken := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return nil, errors.New("no bus") })
+	broken := desktopnotify.NewFailureNotifier(func() (*dbus.Conn, error) { return nil, errors.New("no bus") }, locale.English)
 	if err := broken.NotifySourceFailure(context.Background(), alert); err == nil {
 		t.Fatal("no bus must fail")
 	}
@@ -64,15 +65,15 @@ func TestFailingSourcesReachTheDesktop(t *testing.T) {
 
 func TestWithoutADesktopTheNotificationFails(t *testing.T) {
 	address := dbustest.Start(t)
-	notifier := desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, time.Now)
+	notifier := desktopnotify.New(func() (*dbus.Conn, error) { return dbus.Connect(address) }, time.Now, locale.English)
 	if err := notifier.Notify(context.Background(), domain.Alert{}); err == nil {
 		t.Fatal("no notification service must fail")
 	}
-	broken := desktopnotify.New(func() (*dbus.Conn, error) { return nil, errors.New("no bus") }, time.Now)
+	broken := desktopnotify.New(func() (*dbus.Conn, error) { return nil, errors.New("no bus") }, time.Now, locale.English)
 	if err := broken.Notify(context.Background(), domain.Alert{}); err == nil {
 		t.Fatal("no bus must fail")
 	}
-	if _, body := desktopnotify.Text(domain.Alert{Threshold: 90}, now); body != "Above 90 % of this window." {
+	if _, body := desktopnotify.Text(domain.Alert{Threshold: 90}, now, locale.English); body != "Above 90% of this window." {
 		t.Fatalf("no reset = %q", body)
 	}
 }

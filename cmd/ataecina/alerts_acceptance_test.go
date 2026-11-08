@@ -25,7 +25,7 @@ func TestAThresholdIsAnnouncedOncePerWindow(t *testing.T) {
 	w.clock.advance(5 * time.Minute)
 	w.source.set(fiveHours(93, 2*time.Hour-5*time.Minute))
 	w.collect()
-	if shown := desktop.Shown(); len(shown) != 1 || !strings.HasPrefix(shown[0].Summary, "acme · five hours at 91") {
+	if shown := desktop.Shown(); len(shown) != 1 || !strings.HasPrefix(shown[0].Summary, "acme · 5 hours at 91") {
 		t.Fatalf("shown = %+v", shown)
 	}
 	w.clock.advance(5 * time.Minute)

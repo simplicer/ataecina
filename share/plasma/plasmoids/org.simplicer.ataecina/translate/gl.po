@@ -1,0 +1,355 @@
+# Galician translation of the Ataecina widget.
+# This file is distributed under the same license as Ataecina (GPL-3.0-or-later).
+msgid ""
+msgstr ""
+"Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
+"POT-Creation-Date: 2026-11-08 11:18+0100\n"
+"PO-Revision-Date: 2026-11-08 12:00+0100\n"
+"Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
+"Language-Team: Galician <https://codeberg.org/simplicer/ataecina>\n"
+"Language: gl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: contents/ui/CompactRepresentation.qml:58
+msgid "%1%"
+msgstr "%1 %"
+
+#: contents/ui/FullRepresentation.qml:36
+msgid "Checked %1"
+msgstr "Comprobado ás %1"
+
+#: contents/ui/FullRepresentation.qml:43 contents/ui/FullRepresentation.qml:46
+#: contents/ui/main.qml:37
+msgid "Refresh now"
+msgstr "Actualizar agora"
+
+#: contents/ui/FullRepresentation.qml:52 contents/ui/FullRepresentation.qml:55
+msgid "Configure Ataecina…"
+msgstr "Configurar Ataecina…"
+
+#: contents/ui/FullRepresentation.qml:132 contents/ui/Snapshot.qml:478
+msgid "No snapshot yet"
+msgstr "Aínda non hai instantánea"
+
+#: contents/ui/FullRepresentation.qml:133
+msgid "Run `ataecina collect`, or enable ataecina-collect.timer."
+msgstr "Executa `ataecina collect` ou activa ataecina-collect.timer."
+
+#: contents/ui/Snapshot.qml:80
+msgid "ataecina status failed: %1"
+msgstr "ataecina status fallou: %1"
+
+#: contents/ui/Snapshot.qml:89
+msgid "ataecina status gave something the widget cannot read"
+msgstr "ataecina status devolveu algo que o trebello non sabe ler"
+
+#: contents/ui/Snapshot.qml:241 contents/ui/Snapshot.qml:395
+msgid "%1 spent"
+msgstr "%1 gastados"
+
+#: contents/ui/Snapshot.qml:249
+msgid "%1 of %2"
+msgstr "%1 de %2"
+
+#: contents/ui/Snapshot.qml:251 contents/ui/Snapshot.qml:392
+#: contents/ui/configKeys.qml:79
+msgid "%1 left"
+msgstr "quedan %1"
+
+#: contents/ui/Snapshot.qml:278
+msgid "5 h"
+msgstr "5 h"
+
+#: contents/ui/Snapshot.qml:280
+msgid "day"
+msgstr "día"
+
+#: contents/ui/Snapshot.qml:282
+msgid "week"
+msgstr "semana"
+
+#: contents/ui/Snapshot.qml:284
+msgid "month"
+msgstr "mes"
+
+#: contents/ui/Snapshot.qml:286
+msgid "cycle"
+msgstr "ciclo"
+
+#: contents/ui/Snapshot.qml:290
+msgid "%1 d"
+msgstr "%1 d"
+
+#: contents/ui/Snapshot.qml:293
+msgid "%1 h"
+msgstr "%1 h"
+
+#: contents/ui/Snapshot.qml:295
+msgid "%1 min"
+msgstr "%1 min"
+
+#: contents/ui/Snapshot.qml:314
+msgid "reborn"
+msgstr "renacida"
+
+#: contents/ui/Snapshot.qml:322
+msgid "%1 d %2 h"
+msgstr "%1 d %2 h"
+
+#: contents/ui/Snapshot.qml:325
+msgid "%1 h %2 m"
+msgstr "%1 h %2 m"
+
+#: contents/ui/Snapshot.qml:327
+msgid "%1 m"
+msgstr "%1 m"
+
+#: contents/ui/Snapshot.qml:340
+msgid "just now"
+msgstr "agora mesmo"
+
+#: contents/ui/Snapshot.qml:343
+msgid "%1 min ago"
+msgid_plural "%1 min ago"
+msgstr[0] "hai %1 min"
+msgstr[1] "hai %1 min"
+
+#: contents/ui/Snapshot.qml:346
+msgid "%1 hour ago"
+msgid_plural "%1 hours ago"
+msgstr[0] "hai %1 hora"
+msgstr[1] "hai %1 horas"
+
+#: contents/ui/Snapshot.qml:348
+msgid "%1 day ago"
+msgid_plural "%1 days ago"
+msgstr[0] "hai %1 día"
+msgstr[1] "hai %1 días"
+
+#: contents/ui/Snapshot.qml:362
+msgid "Updates when you use Claude Code"
+msgstr "Actualízase ao usar Claude Code"
+
+#: contents/ui/Snapshot.qml:365
+msgid "Updates when you use Codex"
+msgstr "Actualízase ao usar Codex"
+
+#: contents/ui/Snapshot.qml:368
+msgid "Stale, observed %1"
+msgstr "Desactualizado, observado %1"
+
+#: contents/ui/Snapshot.qml:372
+msgid "Declare its balance in the settings to see what is left"
+msgstr "Declara o seu saldo na configuración para ver o que queda"
+
+#: contents/ui/Snapshot.qml:375
+msgid "%1 banked reset"
+msgid_plural "%1 banked resets"
+msgstr[0] "%1 reinicio gardado"
+msgstr[1] "%1 reinicios gardados"
+
+#: contents/ui/Snapshot.qml:398
+msgid "unlimited credits"
+msgstr "créditos ilimitados"
+
+#: contents/ui/Snapshot.qml:398
+msgid "%1 credits"
+msgstr "%1 créditos"
+
+#: contents/ui/Snapshot.qml:413
+msgid "%1 model included"
+msgid_plural "%1 models included"
+msgstr[0] "%1 modelo incluído"
+msgstr[1] "%1 modelos incluídos"
+
+#: contents/ui/Snapshot.qml:415
+msgid "%1 model"
+msgid_plural "%1 models"
+msgstr[0] "%1 modelo"
+msgstr[1] "%1 modelos"
+
+#: contents/ui/Snapshot.qml:416
+msgid "%1 free"
+msgid_plural "%1 free"
+msgstr[0] "%1 gratuíto"
+msgstr[1] "%1 gratuítos"
+
+#: contents/ui/Snapshot.qml:428
+msgid "%1 more"
+msgid_plural "%1 more"
+msgstr[0] "%1 máis"
+msgstr[1] "%1 máis"
+
+#: contents/ui/Snapshot.qml:430
+msgid "Free: %1"
+msgstr "Gratuítos: %1"
+
+#: contents/ui/Snapshot.qml:439
+msgid "New: %1"
+msgstr "Novos: %1"
+
+#: contents/ui/Snapshot.qml:445 contents/ui/configKeys.qml:46
+msgid "key rejected"
+msgstr "chave rexeitada"
+
+#: contents/ui/Snapshot.qml:449
+msgid "partial"
+msgstr "parcial"
+
+#: contents/ui/Snapshot.qml:451
+msgid "broken"
+msgstr "roto"
+
+#: contents/ui/Snapshot.qml:453
+msgid "unavailable"
+msgstr "non dispoñible"
+
+#: contents/ui/Snapshot.qml:455
+msgid "key missing"
+msgstr "falta a chave"
+
+#: contents/ui/Snapshot.qml:457
+msgid "locked"
+msgstr "bloqueado"
+
+#: contents/ui/Snapshot.qml:459
+msgid "unsupported"
+msgstr "non compatible"
+
+#: contents/ui/Snapshot.qml:467
+msgid "derived"
+msgstr "derivado"
+
+#: contents/ui/Snapshot.qml:469
+msgid "observed"
+msgstr "observado"
+
+#: contents/ui/Snapshot.qml:471
+msgid "declared"
+msgstr "declarado"
+
+#: contents/ui/Snapshot.qml:478
+msgid "No windows to show"
+msgstr "Non hai ventás que amosar"
+
+#: contents/ui/Snapshot.qml:480 contents/ui/SubscriptionRow.qml:192
+msgid "%1% left"
+msgstr "queda un %1 %"
+
+#: contents/ui/SubscriptionRow.qml:254
+msgid "observed %1"
+msgstr "observado %1"
+
+#: contents/ui/Warnings.qml:37
+msgid "%1 warning"
+msgid_plural "%1 warnings"
+msgstr[0] "%1 aviso"
+msgstr[1] "%1 avisos"
+
+#: contents/ui/configGeneral.qml:15
+msgid "Command:"
+msgstr "Orde:"
+
+#: contents/ui/configGeneral.qml:20
+msgid "Read the snapshot every (seconds):"
+msgstr "Ler a instantánea cada (segundos):"
+
+#: contents/ui/configGeneral.qml:26
+msgid "Show what is left in the panel"
+msgstr "Amosar o que queda no panel"
+
+#: contents/ui/configGeneral.qml:30
+msgid "Subscriptions to show:"
+msgstr "Subscricións que amosar:"
+
+#: contents/ui/configGeneral.qml:31
+msgid "all, in configuration order"
+msgstr "todas, na orde da configuración"
+
+#: contents/ui/configGeneral.qml:34
+msgid "Comma-separated ids, in the order to show them."
+msgstr "Identificadores separados por comas, na orde en que se amosan."
+
+#: contents/ui/configKeys.qml:49
+msgid "no key"
+msgstr "sen chave"
+
+#: contents/ui/configKeys.qml:52
+msgid "works"
+msgstr "funciona"
+
+#: contents/ui/configKeys.qml:55
+msgid "key accepted, answer not understood"
+msgstr "chave aceptada, resposta non entendida"
+
+#: contents/ui/configKeys.qml:57
+msgid "not read yet"
+msgstr "aínda sen ler"
+
+#: contents/ui/configKeys.qml:77
+msgid "no balance declared"
+msgstr "sen saldo declarado"
+
+#: contents/ui/configKeys.qml:86
+msgid "API key for %1. It is sealed at once and never shown."
+msgstr "Chave API de %1. Séllase ao momento e nunca se amosa."
+
+#: contents/ui/configKeys.qml:94
+msgid "Current balance of %1, in US dollars:"
+msgstr "Saldo actual de %1, en dólares estadounidenses:"
+
+#: contents/ui/configKeys.qml:129
+msgid "Saved. Reading the subscriptions again…"
+msgstr "Gardado. Lendo de novo as subscricións…"
+
+#: contents/ui/configKeys.qml:153
+msgid "API keys"
+msgstr "Chaves API"
+
+#: contents/ui/configKeys.qml:157
+msgid "Keys go from a masked dialog straight to `ataecina keys set`."
+msgstr "As chaves van dun diálogo enmascarado directamente a `ataecina keys set`."
+
+#: contents/ui/configKeys.qml:157
+msgid "The widget never sees them."
+msgstr "O trebello nunca as ve."
+
+#: contents/ui/configKeys.qml:164
+msgid "Without kdialog, set keys in a terminal: `ataecina keys set <name>`."
+msgstr "Sen kdialog, pon as chaves nun terminal: `ataecina keys set <nome>`."
+
+#: contents/ui/configKeys.qml:170
+msgid "No subscription needs a key."
+msgstr "Ningunha subscrición precisa chave."
+
+#: contents/ui/configKeys.qml:194
+msgid "Replace key…"
+msgstr "Cambiar a chave…"
+
+#: contents/ui/configKeys.qml:194
+msgid "Set key…"
+msgstr "Poñer a chave…"
+
+#: contents/ui/configKeys.qml:202
+msgid "Balances"
+msgstr "Saldos"
+
+#: contents/ui/configKeys.qml:224
+msgid "Declare balance…"
+msgstr "Declarar o saldo…"
+
+#: contents/ui/main.qml:27
+msgid "Ataecina"
+msgstr "Ataecina"
+
+#: contents/config/config.qml:6
+msgid "General"
+msgstr "Xeral"
+
+#: contents/config/config.qml:11
+msgid "Keys"
+msgstr "Chaves"

@@ -13,7 +13,7 @@
         "License": "GPL-3.0-or-later",
         "Id": "org.simplicer.ataecina",
         "Name": "Ataecina",
-        "Version": "0.25.1-unstable",
+        "Version": "0.26.0-unstable",
         "Website": "https://codeberg.org/simplicer/ataecina"
     },
     "X-Plasma-API-Minimum-Version": "6.0",

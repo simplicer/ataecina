@@ -912,9 +912,15 @@ schemes and the accent colour like the battery or network widgets.
   unlocker, which needs a terminal) show on the page. Without `kdialog` the
   buttons are disabled and the terminal command is shown.
 - Translatable through KDE i18n (domain `plasma_applet_org.simplicer.ataecina`):
-  English source strings in `translate/template.pot`, Spanish in
-  `translate/es.po`; `make widget` compiles them into `contents/locale/` of the
-  staged package. Symbols (`↻`, `·`, `≈`) stay outside the translated strings.
+  English source strings in `translate/template.pot`; Spanish (the main
+  language), Catalan, Basque and Galician in `translate/{es,ca,eu,gl}.po`;
+  `make widget` compiles them into `contents/locale/` of the staged package.
+  Symbols (`↻`, `·`, `≈`) stay outside the translated strings. Percentages
+  are translated (`%1%`: `63%` in English, `63 %` in Spanish, Catalan and
+  Galician, `% 63`/`%63` in Basque, where the big figures also put the sign
+  first); money and dates follow Qt's locale. Desktop notifications use the
+  same five languages, chosen from `LC_ALL`, `LC_MESSAGES`, `LANG` and
+  `LANGUAGE` like gettext, English otherwise.
 - Checks: `tests/widget` (run by `go test`) keeps `metadata.json` at
   `VERSION`, the settings schema in step with the QML, every string in the
   template and translated, and every field the QML reads inside this

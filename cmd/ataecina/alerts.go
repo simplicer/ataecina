@@ -14,6 +14,7 @@ import (
 	"codeberg.org/simplicer/ataecina/internal/alerts/infrastructure/desktopnotify"
 	"codeberg.org/simplicer/ataecina/internal/allowances/domain"
 	"codeberg.org/simplicer/ataecina/internal/allowances/infrastructure/configfile"
+	"codeberg.org/simplicer/ataecina/internal/platform/locale"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
 )
 
@@ -24,8 +25,9 @@ func raiseAlerts(ctx context.Context, snapshot domain.Snapshot, settings configf
 	failureNotifier := alertsdomain.SourceNotifier(noDesktop{})
 	if address := sessionBusAddress(env); address != "" {
 		connect := func() (*dbus.Conn, error) { return dbus.Connect(address) }
-		notifier = desktopnotify.New(connect, env.clock.Now)
-		failureNotifier = desktopnotify.NewFailureNotifier(connect)
+		language := locale.FromEnvironment(env.getenv)
+		notifier = desktopnotify.New(connect, env.clock.Now, language)
+		failureNotifier = desktopnotify.NewFailureNotifier(connect, language)
 	}
 	store := alertfile.NewStore(paths.StateDir())
 	raise := alertsapp.NewRaiseThresholdAlerts(store, notifier, env.clock)
