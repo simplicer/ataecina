@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -16,9 +17,11 @@ import (
 	keysapp "codeberg.org/simplicer/ataecina/internal/keys/application"
 	"codeberg.org/simplicer/ataecina/internal/keys/infrastructure/aesgcm"
 	offeringsapp "codeberg.org/simplicer/ataecina/internal/offerings/application"
+	offeringsdomain "codeberg.org/simplicer/ataecina/internal/offerings/domain"
 	"codeberg.org/simplicer/ataecina/internal/offerings/infrastructure/artificialanalysis"
 	"codeberg.org/simplicer/ataecina/internal/offerings/infrastructure/modelsdev"
 	"codeberg.org/simplicer/ataecina/internal/offerings/infrastructure/offeringsfile"
+	"codeberg.org/simplicer/ataecina/internal/offerings/infrastructure/openrouterbenchmarks"
 	"codeberg.org/simplicer/ataecina/internal/platform/httpclient"
 	"codeberg.org/simplicer/ataecina/internal/platform/secret"
 	"codeberg.org/simplicer/ataecina/internal/platform/xdg"
@@ -52,7 +55,7 @@ func update(ctx context.Context, args []string, env environment) int {
 		fmt.Fprintf(env.stderr, "ataecina: update: %v\n", err)
 		code = exitFailure
 	}
-	updateRanking(ctx, paths, env, client, *fd)
+	updateRanking(ctx, settings, paths, env, client, *fd)
 	if settings.Offers {
 		updateOffers(ctx, paths, env, client)
 	}
@@ -73,27 +76,75 @@ func updateCatalogue(ctx context.Context, settings configfile.Settings, paths xd
 	return nil
 }
 
-// updateRanking refreshes the intelligence index when its key is sealed;
-// without it the catalogue alone is updated.
-func updateRanking(ctx context.Context, paths xdg.Paths, env environment, client httpclient.Client, fd int) {
-	endpoint, err := client.For(providerOrigin(env, artificialanalysis.Origin))
-	if err != nil {
-		fmt.Fprintf(env.stderr, "ataecina: update: %v\n", err)
-		return
-	}
+// updateRanking refreshes the intelligence index: from Artificial
+// Analysis with its own key when sealed, else as OpenRouter passes it on,
+// with the key of the first openrouter-api subscription (ADR 0016).
+func updateRanking(ctx context.Context, settings configfile.Settings, paths xdg.Paths, env environment, client httpclient.Client, fd int) {
 	ring, err := openKeyring(env, fd, false)
 	if err != nil {
 		fmt.Fprintf(env.stderr, "ataecina: update: %v\n", err)
 		return
 	}
 	keys := sealedkeys.New(keysapp.NewUnsealKey(ring.files, aesgcm.Cipher{}, ring.unlockers))
-	key := func(ctx context.Context) (secret.Key, error) { return keys.KeyFor(ctx, rankingKey) }
-	ranking, err := offeringsapp.NewRefreshRanking(artificialanalysis.New(endpoint, key), offeringsfile.NewRankingStore(paths.StateDir()), env.clock).Refresh(ctx)
+	keyNamed := func(name string) func(context.Context) (secret.Key, error) {
+		return func(ctx context.Context) (secret.Key, error) { return keys.KeyFor(ctx, domain.KeyName(name)) }
+	}
+	var sources firstRanking
+	if endpoint, err := client.For(providerOrigin(env, artificialanalysis.Origin)); err == nil {
+		sources = append(sources, artificialanalysis.New(endpoint, keyNamed(rankingKey)))
+	}
+	if name := openRouterKey(settings); name != "" {
+		if endpoint, err := client.For(providerOrigin(env, openrouterbenchmarks.Origin)); err == nil {
+			sources = append(sources, openrouterbenchmarks.New(endpoint, keyNamed(name)))
+		}
+	}
+	ranking, err := offeringsapp.NewRefreshRanking(sources, offeringsfile.NewRankingStore(paths.StateDir()), env.clock).Refresh(ctx)
 	if err != nil {
-		fmt.Fprintf(env.stdout, "intelligence index: not updated (%v); a free key from https://artificialanalysis.ai goes in with `ataecina keys set %s`\n", err, rankingKey)
+		fmt.Fprintf(env.stdout, "intelligence index: not updated (%v); a free key from https://artificialanalysis.ai goes in with `ataecina keys set %s`, or an OpenRouter subscription with its key is used\n", err, rankingKey)
 		return
 	}
-	fmt.Fprintf(env.stdout, "intelligence index: %d models, Artificial Analysis Intelligence Index v%s\n", len(ranking.Scores), ranking.Version)
+	source := "Artificial Analysis Intelligence Index"
+	if ranking.Version != "" {
+		source += " v" + ranking.Version
+	}
+	if ranking.Via != "" {
+		source += ", via " + ranking.Via
+	}
+	count := len(ranking.Indexer())
+	noun := "models"
+	if count == 1 {
+		noun = "model"
+	}
+	fmt.Fprintf(env.stdout, "intelligence index: %d %s, %s\n", count, noun, source)
+}
+
+// openRouterKey is the sealed key name of the first openrouter-api
+// subscription, or empty.
+func openRouterKey(settings configfile.Settings) string {
+	for _, item := range settings.Subscriptions {
+		if item.Subscription.Source() == "openrouter-api" {
+			return item.Key
+		}
+	}
+	return ""
+}
+
+// firstRanking asks each ranking source in turn and keeps the first answer.
+type firstRanking []offeringsdomain.RankingSource
+
+func (f firstRanking) Fetch(ctx context.Context) (offeringsdomain.Ranking, error) {
+	if len(f) == 0 {
+		return offeringsdomain.Ranking{}, errors.New("no source of the intelligence index")
+	}
+	var failures []error
+	for _, source := range f {
+		ranking, err := source.Fetch(ctx)
+		if err == nil {
+			return ranking, nil
+		}
+		failures = append(failures, err)
+	}
+	return offeringsdomain.Ranking{}, errors.Join(failures...)
 }
 
 // modelDocument is one model of `ataecina models --json`.
@@ -145,6 +196,7 @@ func models(args []string, env environment) int {
 			"catalogue_refreshed_at":     instantOrNil(listing.CatalogueRefreshedAt),
 			"intelligence_refreshed_at":  instantOrNil(listing.RankingRefreshedAt),
 			"intelligence_index_version": stringOrNil(listing.RankingVersion),
+			"intelligence_via":           stringOrNil(listing.RankingVia),
 			"intelligence_source":        "Artificial Analysis Intelligence Index",
 			"intelligence_url":           "https://artificialanalysis.ai/",
 		}})

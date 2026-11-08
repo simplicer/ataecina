@@ -346,7 +346,7 @@ var cliMembers = []string{
 	"takes_declarations", "source", "plan", "key",
 	"subscription", "catalogue", "something_left", "free", "input_price",
 	"output_price", "released_on", "intelligence", "available",
-	"intelligence_index_version", "intelligence_refreshed_at", "catalogue_refreshed_at",
+	"intelligence_index_version", "intelligence_refreshed_at", "catalogue_refreshed_at", "intelligence_via",
 	"title", "price", "currency", "period", "url", "sponsored", "ends", "refreshed_at",
 }
 

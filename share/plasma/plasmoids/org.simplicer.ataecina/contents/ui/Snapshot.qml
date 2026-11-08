@@ -456,6 +456,17 @@ QtObject {
         return listed ? Math.max(0, listed.models.filter(m => m.available).length - 40) : 0;
     }
 
+    // Who the intelligence index comes from, as Artificial Analysis asks;
+    // or how to get one.
+    function intelligenceCredit() {
+        if (!modelsMeta.intelligence_refreshed_at) {
+            return i18n("No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models.");
+        }
+        const version = modelsMeta.intelligence_index_version;
+        const credit = i18n("Intelligence: Artificial Analysis Intelligence Index") + (version ? " v" + version : "");
+        return modelsMeta.intelligence_via ? i18n("%1, via %2", credit, modelsMeta.intelligence_via) : credit;
+    }
+
     function intelligenceText(model) {
         return typeof model.intelligence === "number" ? Math.round(model.intelligence).toString() : "–";
     }

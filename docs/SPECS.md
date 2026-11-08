@@ -1153,10 +1153,18 @@ The bounded context `offerings` keeps that, apart from the quotas.
   `pagination.has_more`, `data[].name`,
   `data[].evaluations.artificial_analysis_intelligence_index` (null when not
   measured; such models are skipped). At most ten pages; 401/403 is a
-  rejected key. Kept in `$XDG_STATE_HOME/ataecina/intelligence.json`
+  rejected key. Without that key, or when it fails, the same index comes
+  through OpenRouter: `GET
+  https://openrouter.ai/api/v1/benchmarks?source=artificial-analysis`
+  with the key of the first `openrouter-api` subscription (`Bearer`);
+  rows with `source` `artificial-analysis` and a numeric
+  `intelligence_index` count, each under its `display_name` and its
+  `model_permaslug`; no index version; credited "via OpenRouter". Kept in
+  `$XDG_STATE_HOME/ataecina/intelligence.json`
   (`0600`) until the next update. Free tier: 100 requests a day.
 - A model gets the index of the ranking entry with the same key: lower case,
-  no vendor prefix (`z-ai/`), no `:free`/`-free`, no variant in parentheses
+  no vendor prefix (`z-ai/`), no `:free`/`-free`, no release date
+  (`-20260816`), no variant in parentheses
   (`(Max)`), punctuation as dashes (`glm-5-3`); the id is tried first, then
   the name; several variants keep the best index.
 - `ataecina models [--json] [--all] [<subscription>]` (display path, no
@@ -1166,7 +1174,8 @@ The bounded context `offerings` keeps that, apart from the quotas.
   "output_price" (USD per 1M tokens or null), "released_on", "intelligence"
   (or null), "available" } ] } ], "meta": { "catalogue_refreshed_at",
   "intelligence_refreshed_at", "intelligence_index_version",
-  "intelligence_source", "intelligence_url" } }`. A model is available when
+  "intelligence_via" (null or `OpenRouter`), "intelligence_source",
+  "intelligence_url" } }`. A model is available when
   it is free or the subscription has something left: its reading has
   figures, no window at 100 % or more and no money left at zero or below.
 - The widget's unfolded row has "Models you can use": the available models

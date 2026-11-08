@@ -1,0 +1,13 @@
+{
+  "data": [
+    {"source": "artificial-analysis", "model_permaslug": "example/coder-max-20260816", "display_name": "Coder Max (High)",
+     "intelligence_index": 55.5, "coding_index": null, "agentic_index": null, "pricing": {"prompt": "0.00000125", "completion": "0.000005"}},
+    {"source": "artificial-analysis", "model_permaslug": "example/unmeasured-20260901", "display_name": "Unmeasured",
+     "intelligence_index": null, "coding_index": 40.1, "agentic_index": null},
+    {"source": "design-arena", "model_permaslug": "example/coder-max-20260816", "display_name": "Coder Max",
+     "arena": "web", "category": "web", "elo": 1210, "win_rate": 0.55}
+  ],
+  "meta": {"as_of": "2026-11-06T12:00:00Z", "version": "v1", "source": "artificial-analysis",
+    "source_url": "https://artificialanalysis.ai",
+    "citation": "Source: Artificial Analysis (artificialanalysis.ai) via OpenRouter (openrouter.ai/rankings).", "model_count": 2}
+}

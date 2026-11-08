@@ -8,6 +8,15 @@ following the Simplicer policy (`AGENTS.md`, "Versioning").
 
 ## [Unreleased]
 
+## [0.30.0-unstable] - 2026-11-08
+
+### Added
+
+- Without an Artificial Analysis key, `ataecina update` takes the same
+  intelligence index as OpenRouter passes it on, with the key of your
+  OpenRouter subscription; it covers fewer models and is credited "via
+  OpenRouter". OpenRouter's dated model ids now match the catalogue.
+
 ## [0.29.0-unstable] - 2026-11-08
 
 ### Added

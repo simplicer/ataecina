@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 11:56+0100\n"
+"POT-Creation-Date: 2026-11-08 12:37+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Catalan <https://codeberg.org/simplicer/ataecina>\n"
@@ -31,7 +31,7 @@ msgstr "Actualitza ara"
 msgid "Configure Ataecina…"
 msgstr "Configura Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:547
+#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:558
 msgid "No snapshot yet"
 msgstr "Encara no hi ha instantània"
 
@@ -178,87 +178,99 @@ msgstr "any"
 msgid "first month"
 msgstr "primer mes"
 
+#: contents/ui/Snapshot.qml:463
+msgid "No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models."
+msgstr "Encara sense índex d'intel·ligència: poseu una clau d'Artificial Analysis o d'OpenRouter i actualitzeu els models."
+
 #: contents/ui/Snapshot.qml:466
+msgid "Intelligence: Artificial Analysis Intelligence Index"
+msgstr "Intel·ligència: Artificial Analysis Intelligence Index"
+
+#: contents/ui/Snapshot.qml:467
+msgid "%1, via %2"
+msgstr "%1, via %2"
+
+#: contents/ui/Snapshot.qml:477
 msgid "free"
 msgstr "gratuït"
 
-#: contents/ui/Snapshot.qml:482
+#: contents/ui/Snapshot.qml:493
 msgid "%1 model included"
 msgid_plural "%1 models included"
 msgstr[0] "%1 model inclòs"
 msgstr[1] "%1 models inclosos"
 
-#: contents/ui/Snapshot.qml:484
+#: contents/ui/Snapshot.qml:495
 msgid "%1 model"
 msgid_plural "%1 models"
 msgstr[0] "%1 model"
 msgstr[1] "%1 models"
 
-#: contents/ui/Snapshot.qml:485
+#: contents/ui/Snapshot.qml:496
 msgid "%1 free"
 msgid_plural "%1 free"
 msgstr[0] "%1 gratuït"
 msgstr[1] "%1 gratuïts"
 
-#: contents/ui/Snapshot.qml:497 contents/ui/SubscriptionRow.qml:305
+#: contents/ui/Snapshot.qml:508 contents/ui/SubscriptionRow.qml:305
 msgid "%1 more"
 msgid_plural "%1 more"
 msgstr[0] "%1 més"
 msgstr[1] "%1 més"
 
-#: contents/ui/Snapshot.qml:499
+#: contents/ui/Snapshot.qml:510
 msgid "Free: %1"
 msgstr "Gratuïts: %1"
 
-#: contents/ui/Snapshot.qml:508
+#: contents/ui/Snapshot.qml:519
 msgid "New: %1"
 msgstr "Nous: %1"
 
-#: contents/ui/Snapshot.qml:514 contents/ui/configKeys.qml:47
+#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:47
 msgid "key rejected"
 msgstr "clau rebutjada"
 
-#: contents/ui/Snapshot.qml:518
+#: contents/ui/Snapshot.qml:529
 msgid "partial"
 msgstr "parcial"
 
-#: contents/ui/Snapshot.qml:520
+#: contents/ui/Snapshot.qml:531
 msgid "broken"
 msgstr "trencat"
 
-#: contents/ui/Snapshot.qml:522
+#: contents/ui/Snapshot.qml:533
 msgid "unavailable"
 msgstr "no disponible"
 
-#: contents/ui/Snapshot.qml:524
+#: contents/ui/Snapshot.qml:535
 msgid "key missing"
 msgstr "falta la clau"
 
-#: contents/ui/Snapshot.qml:526
+#: contents/ui/Snapshot.qml:537
 msgid "locked"
 msgstr "bloquejat"
 
-#: contents/ui/Snapshot.qml:528
+#: contents/ui/Snapshot.qml:539
 msgid "unsupported"
 msgstr "no compatible"
 
-#: contents/ui/Snapshot.qml:536
+#: contents/ui/Snapshot.qml:547
 msgid "derived"
 msgstr "derivat"
 
-#: contents/ui/Snapshot.qml:538
+#: contents/ui/Snapshot.qml:549
 msgid "observed"
 msgstr "observat"
 
-#: contents/ui/Snapshot.qml:540
+#: contents/ui/Snapshot.qml:551
 msgid "declared"
 msgstr "declarat"
 
-#: contents/ui/Snapshot.qml:547
+#: contents/ui/Snapshot.qml:558
 msgid "No windows to show"
 msgstr "No hi ha finestres per mostrar"
 
-#: contents/ui/Snapshot.qml:549 contents/ui/SubscriptionRow.qml:195
+#: contents/ui/Snapshot.qml:560 contents/ui/SubscriptionRow.qml:195
 msgid "%1% left"
 msgstr "resta un %1 %"
 
@@ -270,23 +282,15 @@ msgstr "Amaga els models"
 msgid "Models you can use"
 msgstr "Models que podeu fer servir"
 
-#: contents/ui/SubscriptionRow.qml:316
-msgid "Intelligence: Artificial Analysis Intelligence Index v%1"
-msgstr "Intel·ligència: Artificial Analysis Intelligence Index v%1"
-
-#: contents/ui/SubscriptionRow.qml:317
-msgid "No intelligence index yet: set an Artificial Analysis key in the settings and update."
-msgstr "Encara sense índex d'intel·ligència: poseu una clau d'Artificial Analysis a la configuració i actualitzeu."
-
-#: contents/ui/SubscriptionRow.qml:332
+#: contents/ui/SubscriptionRow.qml:330
 msgid "Updating…"
 msgstr "S'està actualitzant…"
 
-#: contents/ui/SubscriptionRow.qml:332
+#: contents/ui/SubscriptionRow.qml:330
 msgid "Update models"
 msgstr "Actualitza els models"
 
-#: contents/ui/SubscriptionRow.qml:359
+#: contents/ui/SubscriptionRow.qml:357
 msgid "observed %1"
 msgstr "observat %1"
 
@@ -393,8 +397,8 @@ msgid "Intelligence index"
 msgstr "Índex d'intel·ligència"
 
 #: contents/ui/configKeys.qml:245
-msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it."
-msgstr "Una clau gratuïta d'Artificial Analysis ordena els models de cada subscripció. Només la fa servir `ataecina update`."
+msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key."
+msgstr "Una clau gratuïta d'Artificial Analysis ordena els models de cada subscripció. Només la fa servir `ataecina update`. Sense ella, l'índex arriba a través d'OpenRouter si teniu clau d'OpenRouter."
 
 #: contents/ui/configKeys.qml:260
 msgid "Get a key"

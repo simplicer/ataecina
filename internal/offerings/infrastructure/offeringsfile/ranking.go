@@ -17,6 +17,7 @@ const rankingMaxBytes = 4 << 20
 type rankingDocument struct {
 	Format      int             `json:"format"`
 	Version     string          `json:"index_version"`
+	Via         string          `json:"via,omitempty"`
 	RefreshedAt time.Time       `json:"refreshed_at"`
 	Scores      []scoreDocument `json:"scores"`
 }
@@ -53,7 +54,7 @@ func (s RankingStore) Load() (domain.Ranking, error) {
 	if stored.Format != formatVersion {
 		return domain.Ranking{}, fmt.Errorf("%s: unknown format %d", s.path(), stored.Format)
 	}
-	ranking := domain.Ranking{Version: stored.Version, RefreshedAt: stored.RefreshedAt}
+	ranking := domain.Ranking{Version: stored.Version, Via: stored.Via, RefreshedAt: stored.RefreshedAt}
 	for _, score := range stored.Scores {
 		ranking.Scores = append(ranking.Scores, domain.Score(score))
 	}
@@ -62,7 +63,7 @@ func (s RankingStore) Load() (domain.Ranking, error) {
 
 // Save replaces the kept ranking atomically.
 func (s RankingStore) Save(ranking domain.Ranking) error {
-	stored := rankingDocument{Format: formatVersion, Version: ranking.Version, RefreshedAt: ranking.RefreshedAt.UTC(), Scores: []scoreDocument{}}
+	stored := rankingDocument{Format: formatVersion, Version: ranking.Version, Via: ranking.Via, RefreshedAt: ranking.RefreshedAt.UTC(), Scores: []scoreDocument{}}
 	for _, score := range ranking.Scores {
 		stored.Scores = append(stored.Scores, scoreDocument(score))
 	}

@@ -24,6 +24,15 @@ network access and key unsealing in the collector only.
   `x-api-key`, every page, at most ten). Like `collect`, it opens network
   connections and unseals that one key; unlike `collect`, it never runs on
   a timer and never touches the readings.
+- Without that key (or when it fails), the same index is read as
+  OpenRouter passes it on: `GET
+  https://openrouter.ai/api/v1/benchmarks?source=artificial-analysis` with
+  the key of the first `openrouter-api` subscription (`Bearer`), rows
+  with an `intelligence_index`, by `display_name` and `model_permaslug`.
+  It covers fewer models (about sixty on 2026-11-08) and gives no index
+  version; it is credited "via OpenRouter", as OpenRouter's citation
+  asks. Release dates in OpenRouter slugs (`-20260816`) are ignored when
+  matching.
 - The ranking is kept in `$XDG_STATE_HOME/ataecina/intelligence.json`
   (`0600`) until the next update. Models are matched to it by a normalised
   key (lower case, no vendor prefix, no free suffix, no variant in
@@ -52,8 +61,10 @@ network access and key unsealing in the collector only.
 
 ## Alternatives
 
-- Scraping the Artificial Analysis web pages: against their terms and
-  fragile. Rejected.
+- Scraping the Artificial Analysis web pages: their terms of use forbid
+  automated scripts that scrape or mine the site, and it is fragile.
+  Rejected; the free API, or OpenRouter's licensed copy, give the same
+  index.
 - Refreshing the index on every collection: wastes the daily quota and
   adds a third-party call to every run. Rejected.
 - Bundling an index in the binary: stale with every model release.

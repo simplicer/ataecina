@@ -242,7 +242,7 @@ KCM.SimpleKCM {
             level: 3
         }
         QQC2.Label {
-            text: i18n("A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it.")
+            text: i18n("A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key.")
             wrapMode: Text.Wrap
             opacity: 0.7
             Layout.fillWidth: true

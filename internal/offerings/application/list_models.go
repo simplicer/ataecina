@@ -30,6 +30,7 @@ type Listing struct {
 	Subscriptions        []SubscriptionModels
 	CatalogueRefreshedAt time.Time
 	RankingVersion       string
+	RankingVia           string
 	RankingRefreshedAt   time.Time
 }
 
@@ -57,7 +58,10 @@ func (l ListModels) List() Listing {
 		ranking = domain.Ranking{}
 	}
 	indexer := ranking.Indexer()
-	listing := Listing{CatalogueRefreshedAt: catalogue.RefreshedAt, RankingVersion: ranking.Version, RankingRefreshedAt: ranking.RefreshedAt}
+	listing := Listing{
+		CatalogueRefreshedAt: catalogue.RefreshedAt, RankingVersion: ranking.Version, RankingVia: ranking.Via,
+		RankingRefreshedAt: ranking.RefreshedAt,
+	}
 	for _, interest := range catalogue.Interests {
 		offerings, ok := catalogue.Provider(interest.Provider)
 		if !ok {

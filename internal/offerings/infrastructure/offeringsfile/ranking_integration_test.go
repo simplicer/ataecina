@@ -20,14 +20,14 @@ func TestTheRankingIsKeptPrivately(t *testing.T) {
 		t.Fatalf("Load before any save = %v", err)
 	}
 	at := time.Date(2026, 11, 8, 9, 0, 0, 0, time.UTC)
-	if err := store.Save(domain.Ranking{Version: "5", RefreshedAt: at, Scores: []domain.Score{{Name: "GLM-5.3 (Max)", Index: 61.2}}}); err != nil {
+	if err := store.Save(domain.Ranking{Version: "5", Via: "OpenRouter", RefreshedAt: at, Scores: []domain.Score{{Name: "GLM-5.3 (Max)", Index: 61.2}}}); err != nil {
 		t.Fatal(err)
 	}
 	if info, err := os.Stat(filepath.Join(dir, "intelligence.json")); err != nil || info.Mode().Perm() != 0o600 {
 		t.Fatalf("intelligence.json = %v, %v", info, err)
 	}
 	loaded, err := store.Load()
-	if err != nil || loaded.Version != "5" || !loaded.RefreshedAt.Equal(at) || loaded.Scores[0].Index != 61.2 {
+	if err != nil || loaded.Version != "5" || loaded.Via != "OpenRouter" || !loaded.RefreshedAt.Equal(at) || loaded.Scores[0].Index != 61.2 {
 		t.Fatalf("loaded = %+v, %v", loaded, err)
 	}
 	if err := os.WriteFile(filepath.Join(dir, "intelligence.json"), []byte(`{"format": 9}`), 0o600); err != nil {

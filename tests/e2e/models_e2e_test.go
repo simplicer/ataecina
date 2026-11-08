@@ -57,7 +57,7 @@ func TestUpdateBringsTheModelsAndTheirIntelligence(t *testing.T) {
 		t.Fatalf("keys set = %d %s", code, stderr)
 	}
 	code, out, stderr := tr.runWithPassphrase(bin, "", phrase, "update")
-	if code != 0 || !strings.Contains(out, "model catalogue: up to date for 1 subscriptions") || !strings.Contains(out, "intelligence index: 2 models") || !strings.Contains(out, "offers: 2 current") {
+	if code != 0 || !strings.Contains(out, "model catalogue: up to date for 1 subscriptions") || !strings.Contains(out, "intelligence index: 1 model, Artificial Analysis Intelligence Index v5") || !strings.Contains(out, "offers: 2 current") {
 		t.Fatalf("update = %d %q %q", code, out, stderr)
 	}
 	mu.Lock()
@@ -134,5 +134,49 @@ func TestOffersAreShownAndCanBeTurnedOff(t *testing.T) {
 	_, out, _ = off.run(bin, "update")
 	if asked != before || strings.Contains(out, "offers:") {
 		t.Fatalf("offers fetched although turned off: %q", out)
+	}
+}
+
+// OpenRouter's benchmarks: the Artificial Analysis row of "Coder Max".
+const fakeBenchmarks = `{"data": [
+  {"source": "artificial-analysis", "model_permaslug": "example/coder-max-20260816", "display_name": "Coder Max (High)", "intelligence_index": 52.5},
+  {"source": "design-arena", "model_permaslug": "example/coder-max-20260816", "display_name": "Coder Max", "elo": 1200}
+], "meta": {"version": "v1", "source": "artificial-analysis"}}`
+
+func TestWithoutItsKeyTheIndexComesThroughOpenRouter(t *testing.T) {
+	bin := binary(t, "ATAECINA_E2E_BINARY")
+	tr := newTree(t, `{"version": 1, "subscriptions": [{"id": "openrouter", "source": "openrouter-api"}]}`, nil)
+	catalogue := fixture(t, "../../offerings/infrastructure/modelsdev/testdata/api.json")
+	var authorization string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api.json":
+			w.Write([]byte(catalogue))
+		case "/api/v1/benchmarks":
+			authorization = r.Header.Get("Authorization")
+			w.Write([]byte(fakeBenchmarks))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	tr.setenv("ATAECINA_E2E_PROVIDER_ORIGIN", server.URL)
+	const phrase = "a synthetic passphrase"
+	if code, _, stderr := tr.runWithPassphrase(bin, "", phrase, "init", "--unlocker", "passphrase"); code != 0 {
+		t.Fatalf("init = %d %s", code, stderr)
+	}
+	if code, _, stderr := tr.runWithPassphrase(bin, "sk-or-synthetic\n", phrase, "keys", "set", "openrouter"); code != 0 {
+		t.Fatalf("keys set = %d %s", code, stderr)
+	}
+	code, out, stderr := tr.runWithPassphrase(bin, "", phrase, "update")
+	if code != 0 || !strings.Contains(out, "intelligence index: 1 model, Artificial Analysis Intelligence Index, via OpenRouter") {
+		t.Fatalf("update = %d %q %q", code, out, stderr)
+	}
+	if authorization != "Bearer sk-or-synthetic" {
+		t.Fatalf("OpenRouter received %q", authorization)
+	}
+	_, out, _ = tr.run(bin, "models", "--json", "openrouter")
+	if !strings.Contains(out, `"intelligence": 52.5`) || !strings.Contains(out, `"intelligence_via": "OpenRouter"`) {
+		t.Fatalf("models = %s", out)
 	}
 }

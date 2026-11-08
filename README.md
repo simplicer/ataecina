@@ -17,7 +17,7 @@
   <img alt="Go 1.27" src="https://img.shields.io/badge/Go-1.27-2e8b74">
 </p>
 
-**Current version:** `0.29.0-unstable` — early development: everything below
+**Current version:** `0.30.0-unstable` — early development: everything below
 works on the maintainer's desktop; packages are built from source until the
 first public release (see [docs/ROADMAP.md](docs/ROADMAP.md)).
 
@@ -276,8 +276,10 @@ ataecina keys set zai          # paste the key; it is read without echo and seal
 subscription's models; for the intelligence index, get a free key at
 [artificialanalysis.ai](https://artificialanalysis.ai/), seal it with
 `ataecina keys set artificial-analysis` (or the widget's **Keys** page) and
-run `ataecina update` (or "Update models" in the widget). Intelligence data:
-Artificial Analysis Intelligence Index.
+run `ataecina update` (or "Update models" in the widget). Without that key,
+an OpenRouter subscription is enough: the same index comes through
+OpenRouter, for fewer models. Intelligence data: Artificial Analysis
+Intelligence Index.
 
 **Claude Code.** Claude Code hands its rate limits to your status line
 command; add one line to your status line script, right after it reads its

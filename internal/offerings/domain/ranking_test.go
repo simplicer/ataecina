@@ -8,14 +8,16 @@ import (
 
 func TestAModelIsRecognisedAcrossCatalogues(t *testing.T) {
 	for text, want := range map[string]string{
-		"z-ai/glm-5.3:free":       "glm-5-3",
-		"glm-5.3":                 "glm-5-3",
-		"GLM-5.3 (Max)":           "glm-5-3",
-		"deepseek-v4-flash-free":  "deepseek-v4-flash",
-		"Kimi K3.1 Pro":           "kimi-k3-1-pro",
-		"  ":                      "",
-		"openai/gpt-6.1-terra":    "gpt-6-1-terra",
-		"MiniMax-M3.1-Flash Free": "minimax-m3-1-flash",
+		"z-ai/glm-5.3:free":        "glm-5-3",
+		"glm-5.3":                  "glm-5-3",
+		"GLM-5.3 (Max)":            "glm-5-3",
+		"deepseek-v4-flash-free":   "deepseek-v4-flash",
+		"Kimi K3.1 Pro":            "kimi-k3-1-pro",
+		"  ":                       "",
+		"openai/gpt-6.1-terra":     "gpt-6-1-terra",
+		"MiniMax-M3.1-Flash Free":  "minimax-m3-1-flash",
+		"z-ai/glm-5.3-20260816":    "glm-5-3",
+		"deepseek-v4.1-flash-1017": "deepseek-v4-1-flash-1017",
 	} {
 		if got := domain.ModelKey(text); got != want {
 			t.Fatalf("ModelKey(%q) = %q, want %q", text, got, want)

@@ -312,9 +312,7 @@ ColumnLayout {
 
             PlasmaComponents3.Label {
                 // Attribution the Artificial Analysis API asks for.
-                text: snapshot.modelsMeta.intelligence_index_version
-                      ? i18n("Intelligence: Artificial Analysis Intelligence Index v%1", snapshot.modelsMeta.intelligence_index_version)
-                      : i18n("No intelligence index yet: set an Artificial Analysis key in the settings and update.")
+                text: snapshot.intelligenceCredit()
                 font: Kirigami.Theme.smallFont
                 opacity: 0.6
                 wrapMode: Text.Wrap

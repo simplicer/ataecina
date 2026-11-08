@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: plasma_applet_org.simplicer.ataecina\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/simplicer/ataecina\n"
-"POT-Creation-Date: 2026-11-08 11:56+0100\n"
+"POT-Creation-Date: 2026-11-08 12:37+0100\n"
 "PO-Revision-Date: 2026-11-08 12:00+0100\n"
 "Last-Translator: Antonio Villamarín <anvius@noreply.codeberg.org>\n"
 "Language-Team: Basque <https://codeberg.org/simplicer/ataecina>\n"
@@ -31,7 +31,7 @@ msgstr "Freskatu orain"
 msgid "Configure Ataecina…"
 msgstr "Konfiguratu Ataecina…"
 
-#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:547
+#: contents/ui/FullRepresentation.qml:145 contents/ui/Snapshot.qml:558
 msgid "No snapshot yet"
 msgstr "Oraindik ez dago argazkirik"
 
@@ -178,87 +178,99 @@ msgstr "urtea"
 msgid "first month"
 msgstr "lehen hilabetea"
 
+#: contents/ui/Snapshot.qml:463
+msgid "No intelligence index yet: set an Artificial Analysis or OpenRouter key and update the models."
+msgstr "Oraindik ez dago adimen-indizerik: ezarri Artificial Analysis edo OpenRouter gako bat eta eguneratu ereduak."
+
 #: contents/ui/Snapshot.qml:466
+msgid "Intelligence: Artificial Analysis Intelligence Index"
+msgstr "Adimena: Artificial Analysis Intelligence Index"
+
+#: contents/ui/Snapshot.qml:467
+msgid "%1, via %2"
+msgstr "%1, %2 bidez"
+
+#: contents/ui/Snapshot.qml:477
 msgid "free"
 msgstr "doan"
 
-#: contents/ui/Snapshot.qml:482
+#: contents/ui/Snapshot.qml:493
 msgid "%1 model included"
 msgid_plural "%1 models included"
 msgstr[0] "eredu %1 barne"
 msgstr[1] "%1 eredu barne"
 
-#: contents/ui/Snapshot.qml:484
+#: contents/ui/Snapshot.qml:495
 msgid "%1 model"
 msgid_plural "%1 models"
 msgstr[0] "eredu %1"
 msgstr[1] "%1 eredu"
 
-#: contents/ui/Snapshot.qml:485
+#: contents/ui/Snapshot.qml:496
 msgid "%1 free"
 msgid_plural "%1 free"
 msgstr[0] "%1 doan"
 msgstr[1] "%1 doan"
 
-#: contents/ui/Snapshot.qml:497 contents/ui/SubscriptionRow.qml:305
+#: contents/ui/Snapshot.qml:508 contents/ui/SubscriptionRow.qml:305
 msgid "%1 more"
 msgid_plural "%1 more"
 msgstr[0] "%1 gehiago"
 msgstr[1] "%1 gehiago"
 
-#: contents/ui/Snapshot.qml:499
+#: contents/ui/Snapshot.qml:510
 msgid "Free: %1"
 msgstr "Doakoak: %1"
 
-#: contents/ui/Snapshot.qml:508
+#: contents/ui/Snapshot.qml:519
 msgid "New: %1"
 msgstr "Berriak: %1"
 
-#: contents/ui/Snapshot.qml:514 contents/ui/configKeys.qml:47
+#: contents/ui/Snapshot.qml:525 contents/ui/configKeys.qml:47
 msgid "key rejected"
 msgstr "gakoa baztertuta"
 
-#: contents/ui/Snapshot.qml:518
+#: contents/ui/Snapshot.qml:529
 msgid "partial"
 msgstr "partziala"
 
-#: contents/ui/Snapshot.qml:520
+#: contents/ui/Snapshot.qml:531
 msgid "broken"
 msgstr "hautsita"
 
-#: contents/ui/Snapshot.qml:522
+#: contents/ui/Snapshot.qml:533
 msgid "unavailable"
 msgstr "ez dago erabilgarri"
 
-#: contents/ui/Snapshot.qml:524
+#: contents/ui/Snapshot.qml:535
 msgid "key missing"
 msgstr "gakoa falta da"
 
-#: contents/ui/Snapshot.qml:526
+#: contents/ui/Snapshot.qml:537
 msgid "locked"
 msgstr "blokeatuta"
 
-#: contents/ui/Snapshot.qml:528
+#: contents/ui/Snapshot.qml:539
 msgid "unsupported"
 msgstr "onartu gabea"
 
-#: contents/ui/Snapshot.qml:536
+#: contents/ui/Snapshot.qml:547
 msgid "derived"
 msgstr "eratorria"
 
-#: contents/ui/Snapshot.qml:538
+#: contents/ui/Snapshot.qml:549
 msgid "observed"
 msgstr "behatua"
 
-#: contents/ui/Snapshot.qml:540
+#: contents/ui/Snapshot.qml:551
 msgid "declared"
 msgstr "adierazia"
 
-#: contents/ui/Snapshot.qml:547
+#: contents/ui/Snapshot.qml:558
 msgid "No windows to show"
 msgstr "Ez dago erakusteko leihorik"
 
-#: contents/ui/Snapshot.qml:549 contents/ui/SubscriptionRow.qml:195
+#: contents/ui/Snapshot.qml:560 contents/ui/SubscriptionRow.qml:195
 msgid "%1% left"
 msgstr "% %1 geratzen da"
 
@@ -270,23 +282,15 @@ msgstr "Ezkutatu ereduak"
 msgid "Models you can use"
 msgstr "Erabil ditzakezun ereduak"
 
-#: contents/ui/SubscriptionRow.qml:316
-msgid "Intelligence: Artificial Analysis Intelligence Index v%1"
-msgstr "Adimena: Artificial Analysis Intelligence Index v%1"
-
-#: contents/ui/SubscriptionRow.qml:317
-msgid "No intelligence index yet: set an Artificial Analysis key in the settings and update."
-msgstr "Oraindik ez dago adimen-indizerik: ezarri Artificial Analysis gako bat ezarpenetan eta eguneratu."
-
-#: contents/ui/SubscriptionRow.qml:332
+#: contents/ui/SubscriptionRow.qml:330
 msgid "Updating…"
 msgstr "Eguneratzen…"
 
-#: contents/ui/SubscriptionRow.qml:332
+#: contents/ui/SubscriptionRow.qml:330
 msgid "Update models"
 msgstr "Eguneratu ereduak"
 
-#: contents/ui/SubscriptionRow.qml:359
+#: contents/ui/SubscriptionRow.qml:357
 msgid "observed %1"
 msgstr "%1 behatua"
 
@@ -393,8 +397,8 @@ msgid "Intelligence index"
 msgstr "Adimen-indizea"
 
 #: contents/ui/configKeys.qml:245
-msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it."
-msgstr "Artificial Analysis-en doako gako batek harpidetza bakoitzaren ereduak ordenatzen ditu. `ataecina update`-ek bakarrik erabiltzen du."
+msgid "A free Artificial Analysis key ranks the models of each subscription. Only `ataecina update` uses it. Without it, the index comes through OpenRouter when you have an OpenRouter key."
+msgstr "Artificial Analysis-en doako gako batek harpidetza bakoitzaren ereduak ordenatzen ditu. `ataecina update`-ek bakarrik erabiltzen du. Gabe, indizea OpenRouter bidez iristen da OpenRouter gakoa baduzu."
 
 #: contents/ui/configKeys.qml:260
 msgid "Get a key"
